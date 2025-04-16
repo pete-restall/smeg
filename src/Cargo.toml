@@ -1,0 +1,13 @@
+[workspace]
+members = [
+	"crates/boards/*/*",
+	"crates/drivers/*",
+	"crates/kernel",
+	"crates/drivers/*",
+	"crates/mcus/*/*",
+	"crates/os"]
+
+resolver = "3"
+
+[profile.release]
+debug = true

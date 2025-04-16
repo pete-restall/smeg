@@ -1,0 +1,9 @@
+[package]
+name = "smeg-board-st-nucleo_l432kc"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dependencies]
+smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-st-stm32l432kc = { path = "../../../mcus/st/stm32l432kc" }

@@ -1,0 +1,84 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "cortex-debug.liveWatchRefreshRate": 500,
+        "cortex-debug.openocdPath": "/usr/bin/openocd",
+        "cortex-debug.armToolchainPath": "/opt/arm/local/cortex-m4f/bin",
+        "cortex-debug.armToolchainPrefix": "arm-none-eabi",
+        "cortex-debug.enableTelemetry": false,
+        "files.exclude": {
+            "src/target": true
+        },
+        "rust-analyzer.linkedProjects": [
+            "src/Cargo.toml"
+        ],
+        "rust-analyzer.cargo.features": [
+            "smeg-board-st-nucleo_l432kc-default"
+        ],
+        "rust-analyzer.cargo.target": "${workspaceRoot}/src/mcus/st/stm32l432kc/rust-target.json",
+        "rust-analyzer.cargo.extraEnv": {
+            "SMEG_SOURCE_LINKER_SCRIPT": "${workspaceRoot}/src/mcus/st/stm32l432kc/linker-script.lld",
+            "SMEG_TARGET_LINKER_SCRIPT": "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/linker-script.lld"
+        }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Nucleo L432KC Debug",
+                "cwd": "${workspaceRoot}",
+                "executable": "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/smeg-os.elf",
+                "device": "STM32L432KC",
+                "request": "launch",
+                "type": "cortex-debug",
+                "runToEntryPoint": "_reset_handler",
+                "servertype": "openocd",
+                "configFiles": [
+                    "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/openocd.cfg"
+                ]
+            },
+            {
+                "name": "Black Magic Probe",
+                "cwd": "${workspaceRoot}",
+                "executable": "${workspaceRoot}/src/target/pete_restall-msf_owl_clock-default/debug/smeg-os.elf",
+                "device": "PIC32CX1025SG41100",
+                "request": "launch",
+                "type": "cortex-debug",
+                "runToEntryPoint": "_reset_handler",
+                "servertype": "bmp",
+                "BMPGDBSerialPort": "/dev/ttyACM0"
+            }
+        ],
+        "compounds": []
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build (Nucleo L432KC)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh st-nucleo_l432kc",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": "absolute"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            }
+        ]
+    }
+}

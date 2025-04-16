@@ -1,0 +1,10 @@
+[package]
+name = "smeg-mcu-st-stm32l432kc"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dependencies]
+smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-arm-cortex_m4 = { path = "../../arm/cortex_m4"}
+smeg-mcu-st-stm32_family = { path = "../stm32_family"}
