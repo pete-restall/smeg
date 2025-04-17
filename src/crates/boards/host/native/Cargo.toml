@@ -1,0 +1,9 @@
+[package]
+name = "smeg-board-host-native"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dependencies]
+smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-host-native = { path = "../../../mcus/host/native" }

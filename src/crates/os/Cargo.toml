@@ -5,8 +5,11 @@ edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
-smeg-board-st-nucleo_l432kc = { path = "../boards/st/nucleo_l432kc", optional = true}
+smeg-board-host-native = { path = "../boards/host/native", optional = true }
+smeg-board-st-nucleo_l432kc = { path = "../boards/st/nucleo_l432kc", optional = true }
 smeg-kernel = { path = "../kernel" }
 
 [features]
+smeg-board-host-native = []
+smeg-board-host-native-default = ["dep:smeg-board-host-native", "smeg-board-host-native"]
 smeg-board-st-nucleo_l432kc-default = ["dep:smeg-board-st-nucleo_l432kc"]

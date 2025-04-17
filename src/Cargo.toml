@@ -7,7 +7,13 @@ members = [
 	"crates/mcus/*/*",
 	"crates/os"]
 
+default-members = ["crates/os"]
+
 resolver = "3"
+
+[profile.dev]
+panic = "abort"
 
 [profile.release]
 debug = true
+panic = "abort"

@@ -17,13 +17,8 @@
             "src/Cargo.toml"
         ],
         "rust-analyzer.cargo.features": [
-            "smeg-board-st-nucleo_l432kc-default"
-        ],
-        "rust-analyzer.cargo.target": "${workspaceRoot}/src/mcus/st/stm32l432kc/rust-target.json",
-        "rust-analyzer.cargo.extraEnv": {
-            "SMEG_SOURCE_LINKER_SCRIPT": "${workspaceRoot}/src/mcus/st/stm32l432kc/linker-script.lld",
-            "SMEG_TARGET_LINKER_SCRIPT": "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/linker-script.lld"
-        }
+            "smeg-board-host-native-default"
+        ]
     },
     "launch": {
         "version": "0.2.0",
@@ -58,6 +53,27 @@
     "tasks": {
         "version": "2.0.0",
         "tasks": [
+            {
+                "label": "Build (Host Native)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh host-native",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": "absolute"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            },
             {
                 "label": "Build (Nucleo L432KC)",
                 "group": "build",
