@@ -17,7 +17,7 @@ pub fn main() {
 
 fn rerun_if_changed<T>(filenames: &[&Result<String, T>]) {
     for filename in filenames {
-        if let Ok(filename) = filename {
+        if let Ok(filename) = *filename {
             println!("cargo:rerun-if-changed={}", filename);
         }
     }

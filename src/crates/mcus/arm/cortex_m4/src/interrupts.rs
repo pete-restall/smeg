@@ -5,6 +5,7 @@ unsafe extern "C" {
 }
 
 unsafe extern "C" fn unhandled_isr() -> ! {
+    #[allow(clippy::empty_loop)]
     loop { }
 }
 

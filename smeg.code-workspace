@@ -18,7 +18,9 @@
         ],
         "rust-analyzer.cargo.features": [
             "smeg-board-host-native-default"
-        ]
+        ],
+        "rust-analyzer.cargo.allTargets": false,
+        "rust-analyzer.check.command": "clippy"
     },
     "launch": {
         "version": "0.2.0",

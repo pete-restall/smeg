@@ -1,11 +1,11 @@
 #![cfg_attr(not(test), no_std)]
 #![no_main]
-//#![cfg_attr(not(feature = "smeg-board-host-native"), no_main)]
 
 #[cfg(feature = "smeg-board-host-native")]
 pub use smeg_board_host_native::main;
 
 #[allow(unused_imports)]
+#[allow(clippy::single_component_path_imports)]
 use smeg_kernel;
 
 // TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
