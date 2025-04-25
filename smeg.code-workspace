@@ -20,7 +20,16 @@
             "smeg-board-host-native-default"
         ],
         "rust-analyzer.cargo.allTargets": false,
-        "rust-analyzer.check.command": "clippy"
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraEnv": {
+            "RUSTUP_TOOLCHAIN": "nightly"
+        },
+        "rust-analyzer.runnables.extraEnv": {
+            "RUSTUP_TOOLCHAIN": "nightly"
+        },
+        "rust-analyzer.server.extraEnv": {
+            "RUSTUP_TOOLCHAIN": "nightly"
+        }
     },
     "launch": {
         "version": "0.2.0",

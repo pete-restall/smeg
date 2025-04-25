@@ -1,17 +1,20 @@
 [workspace]
 members = [
-	"crates/boards/*/*",
-	"crates/drivers/*",
-	"crates/kernel",
-	"crates/drivers/*",
-	"crates/mcus/*/*",
-	"crates/os"]
+    "crates/boards/*/*",
+    "crates/config",
+    "crates/config/procmacro",
+    "crates/drivers/*",
+    "crates/kernel",
+    "crates/drivers/*",
+    "crates/mcus/*/*",
+    "crates/os"]
 
 default-members = ["crates/os"]
 
 resolver = "3"
 
 [profile.dev]
+opt-level = 1
 panic = "abort"
 
 [profile.release]

@@ -1,0 +1,7 @@
+[board-st-nucleo_l432kc]
+i-am-board-setting = { manufacturer = "ST", board = "Nucleo L432KC" }
+i-am-string-array = ["str0", "str1", "str2"]
+i-am-int-array = [0, 1, 2]
+i-am-struct-array = [{ a = "a", b = "b", c = "c" }, { a = "A", b = "B", c = "C" }]
+
+[empty-section]

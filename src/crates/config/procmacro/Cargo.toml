@@ -1,5 +1,5 @@
 [package]
-name = "smeg-kernel-procmacro"
+name = "smeg-config-procmacro"
 version = "0.1.0"
 edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
@@ -8,6 +8,10 @@ authors = ["Pete Restall <pete@restall.net>"]
 proc-macro = true
 
 [dependencies]
+glob = "0.3.1"
 proc-macro2 = "1.0"
 quote = "1.0"
+regex = "1.1"
+serde-toml-merge = "0.3.8"
 syn = { version = "1.0", features = ["full"] }
+toml = "0.8"

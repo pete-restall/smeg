@@ -1,0 +1,2 @@
+[kernel]
+i-am-kernel-setting = { hello = "world" }

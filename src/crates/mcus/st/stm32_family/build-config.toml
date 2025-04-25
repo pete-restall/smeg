@@ -1,0 +1,2 @@
+[mcu-st-stm32_family]
+i-am-stm32_family-setting = { manufacturer = "ST", family = "STM32" }

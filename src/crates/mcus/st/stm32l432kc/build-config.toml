@@ -1,0 +1,2 @@
+[mcu-st-stm32l432kc]
+i-am-stm32l432kc-setting = { manufacturer = "ST", mcu = "STM32L432KC" }

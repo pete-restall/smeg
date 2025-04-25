@@ -1,2 +1,8 @@
+[build]
+rustflags = ["-Zemit-stack-sizes"]
+
 [unstable]
 build-std = ["core"]
+
+[env]
+CARGO_WORKSPACE_DIR = { value = "", relative = true }
