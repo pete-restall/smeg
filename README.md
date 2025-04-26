@@ -58,5 +58,4 @@ TODO: how to generate a separate linker script for the application with all of t
 
 ## Potentially Useful Crates
 * goblin - ELF (and other) binary parsing and loading
-* static_assertions - compile-time assertions, similar to C++'s `static_assert`
 * serde - comprehensive serialisation, including `no_std` compatibility
