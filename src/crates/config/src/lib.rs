@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(any(test, feature = "std")), no_std)]
 
 use smeg_config_procmacro::populate_from_config;
 

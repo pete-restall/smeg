@@ -1,70 +1,70 @@
 use core::arch::asm;
 
 // TODO: these are temporary (but correct layout), purely for the blinking LED...
-#[repr(C)]
+#[repr(C, packed)]
 #[allow(non_snake_case)]
 struct RccRegisters {
-    CR: usize,
-    ICSCR: usize,
-    CFGR: usize,
-    PLLCFGR: usize,
-    PLLSAI1CFGR: usize,
-    _reserved_14: usize,
-    CIER: usize,
-    CIFR: usize,
-    CICR: usize,
-    _reserved_24: usize,
-    AHB1RSTR: usize,
-    AHB2RSTR: usize,
-    AHB3RSTR: usize,
-    _reserved_34: usize,
-    APB1RSTR1: usize,
-    APB1RSTR2: usize,
-    APB2RSTR: usize,
-    _reserved_44: usize,
-    AHB1ENR: usize,
-    AHB2ENR: usize,
-    AHB3ENR: usize,
-    _reserved_54: usize,
-    APB1ENR1: usize,
-    APB1ENR2: usize,
-    APB2ENR: usize,
-    _reserved_64: usize,
-    AHB1SMENR: usize,
-    AHB2SMENR: usize,
-    AHB3SMENR: usize,
-    _reserved_74: usize,
-    APB1SMENR1: usize,
-    APB1SMENR2: usize,
-    APB2SMENR: usize,
-    _reserved_84: usize,
-    CCIPR: usize,
-    _reserved_8c: usize,
-    BDCR: usize,
-    CSR: usize,
-    CRRCR: usize,
-    CCIPR2: usize
+    CR: u32,
+    ICSCR: u32,
+    CFGR: u32,
+    PLLCFGR: u32,
+    PLLSAI1CFGR: u32,
+    _reserved_14: u32,
+    CIER: u32,
+    CIFR: u32,
+    CICR: u32,
+    _reserved_24: u32,
+    AHB1RSTR: u32,
+    AHB2RSTR: u32,
+    AHB3RSTR: u32,
+    _reserved_34: u32,
+    APB1RSTR1: u32,
+    APB1RSTR2: u32,
+    APB2RSTR: u32,
+    _reserved_44: u32,
+    AHB1ENR: u32,
+    AHB2ENR: u32,
+    AHB3ENR: u32,
+    _reserved_54: u32,
+    APB1ENR1: u32,
+    APB1ENR2: u32,
+    APB2ENR: u32,
+    _reserved_64: u32,
+    AHB1SMENR: u32,
+    AHB2SMENR: u32,
+    AHB3SMENR: u32,
+    _reserved_74: u32,
+    APB1SMENR1: u32,
+    APB1SMENR2: u32,
+    APB2SMENR: u32,
+    _reserved_84: u32,
+    CCIPR: u32,
+    _reserved_8c: u32,
+    BDCR: u32,
+    CSR: u32,
+    CRRCR: u32,
+    CCIPR2: u32
 }
 
-const _: () = if core::mem::size_of::<RccRegisters>() != 0xa0 { panic!("RCC register bank must be 160 bytes (40 words)"); };
+const _: () = assert!(core::mem::size_of::<RccRegisters>() == 0xa0, "RCC register bank must be 160 bytes (40 words)");
 
-#[repr(C)]
+#[repr(C, packed)]
 #[allow(non_snake_case)]
 struct GpioRegisters {
-    MODER: usize,
-    OTYPER: usize,
-    OSPEEDR: usize,
-    PUPDR: usize,
-    IDR: usize,
-    ODR: usize,
-    BSRR: usize,
-    LCKR: usize,
-    AFRL: usize,
-    AFRH: usize,
-    BRR: usize
+    MODER: u32,
+    OTYPER: u32,
+    OSPEEDR: u32,
+    PUPDR: u32,
+    IDR: u32,
+    ODR: u32,
+    BSRR: u32,
+    LCKR: u32,
+    AFRL: u32,
+    AFRH: u32,
+    BRR: u32
 }
 
-const _: () = if core::mem::size_of::<GpioRegisters>() != 0x2c { panic!("GPIO register bank must be 44 bytes (11 words)"); };
+const _: () = assert!(core::mem::size_of::<GpioRegisters>() == 0x2c, "GPIO register bank must be 44 bytes (11 words)");
 
 unsafe extern "C" {
     // TODO: uppercase all of the statics as per convention...(before committing to git)
@@ -107,7 +107,7 @@ pub unsafe fn blinky_blinky() -> ! {
         // Port output register
         let gpiob_odr = &raw mut __LINKER_PERIPHERALS_AHB2_GPIOB.ODR;
 
-        let delay = if cfg!(debug_assertions) { 10000 } else { 200000 };
+        let delay = 200000; // Debug builds now include some optimisations, but if not: if cfg!(debug_assertions) { 10000 } else { 200000 };
         loop {
             let blink = core::ptr::read_volatile(gpiob_odr);
             core::ptr::write_volatile(gpiob_odr, blink ^ (1 << 3));

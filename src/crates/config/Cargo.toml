@@ -9,3 +9,6 @@ smeg-config-procmacro = { path = "procmacro" }
 
 [build-dependencies]
 smeg-config-procmacro = { path = "procmacro" }
+
+[features]
+std = []

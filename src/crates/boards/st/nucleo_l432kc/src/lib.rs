@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(any(test, feature = "std")), no_std)]
 
 // TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
 pub fn needed_to_prevent_linker_gc() {

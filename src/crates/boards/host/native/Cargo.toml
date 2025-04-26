@@ -5,5 +5,9 @@ edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
-smeg-kernel = { path = "../../../kernel" }
-smeg-mcu-host-native = { path = "../../../mcus/host/native" }
+smeg-kernel = { path = "../../../kernel", features = ["std"] }
+smeg-mcu-host-native = { path = "../../../mcus/host/native", features = ["std"] }
+
+[features]
+default = ["std"]
+std = ["smeg-kernel/std", "smeg-mcu-host-native/std"]

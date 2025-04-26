@@ -7,3 +7,6 @@ authors = ["Pete Restall <pete@restall.net>"]
 [dependencies]
 smeg-config = { path = "../config" }
 smeg-kernel-procmacro = { path = "procmacro" }
+
+[features]
+std = ["smeg-config/std"]

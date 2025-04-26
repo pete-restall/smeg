@@ -15,8 +15,6 @@ resolver = "3"
 
 [profile.dev]
 opt-level = 1
-panic = "abort"
 
 [profile.release]
 debug = true
-panic = "abort"

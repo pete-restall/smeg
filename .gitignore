@@ -1,3 +1,4 @@
 .vscode
 src/target
 **/Cargo.lock
+**/lcov.info

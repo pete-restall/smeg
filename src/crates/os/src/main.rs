@@ -1,6 +1,6 @@
-#![cfg_attr(not(test), no_std)]
-#![no_main]
+#![cfg_attr(not(any(test, feature = "std")), no_std, no_main)]
 
+#[cfg(not(test))]
 #[cfg(feature = "smeg-board-host-native")]
 pub use smeg_board_host_native::main;
 

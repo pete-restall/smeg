@@ -27,6 +27,11 @@ $ cargo +nightly install cargo-binutils
 $ rustup component add --toolchain nightly llvm-tools
 ```
 
+Requires `cargo-llvm-cov` to enable code coverage:
+```
+$ cargo +nightly install cargo-llvm-cov
+```
+
 The `dev` profile (`debug` target) includes various debug assertions with panic strings, which increases the size of the `.data` section considerably.  The `release` profile (`release` target) does not include these, so there is no impact on `.data`.
 
 ## Crate Hierarchy

@@ -6,3 +6,7 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 smeg-kernel = { path = "../../../kernel" }
+
+[features]
+default = ["std"]
+std = ["smeg-kernel/std"]

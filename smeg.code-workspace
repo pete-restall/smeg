@@ -65,7 +65,28 @@
         "version": "2.0.0",
         "tasks": [
             {
-                "label": "Build (Host Native)",
+                "label": "Test (Host Native / dev)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh host-native test",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": "absolute"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            },
+            {
+                "label": "Build (Host Native / dev)",
                 "group": "build",
                 "type": "shell",
                 "command": "./build.sh host-native",
@@ -86,10 +107,52 @@
                 }
             },
             {
-                "label": "Build (Nucleo L432KC)",
+                "label": "Build (Host Native / release)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh host-native build release",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": "absolute"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            },
+            {
+                "label": "Build (Nucleo L432KC / dev)",
                 "group": "build",
                 "type": "shell",
                 "command": "./build.sh st-nucleo_l432kc",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": "absolute"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            },
+            {
+                "label": "Build (Nucleo L432KC / release)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh st-nucleo_l432kc build release",
                 "options": {
                     "cwd": "${workspaceRoot}/src"
                 },

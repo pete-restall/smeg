@@ -7,3 +7,6 @@ authors = ["Pete Restall <pete@restall.net>"]
 [dependencies]
 smeg-kernel = { path = "../../../kernel" }
 smeg-mcu-st-stm32l432kc = { path = "../../../mcus/st/stm32l432kc" }
+
+[features]
+std = ["smeg-kernel/std", "smeg-mcu-st-stm32l432kc/std"]
