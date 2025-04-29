@@ -1,26 +1,20 @@
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::parse_macro_input;
-
-mod config_file_discovery;
-use config_file_discovery::workspace_config_filenames;
 
 mod all_config;
+mod all_config_filenames_macro;
+mod config_file_discovery;
+mod populate_from_config_macro;
+mod results;
 
-#[proc_macro_attribute]
-pub fn populate_from_config(_args: TokenStream, items: TokenStream) -> TokenStream {
-    let (default_config_filenames, override_config_filename) = workspace_config_filenames().unwrap();
-    let parsed = parse_macro_input!(items);
-    all_config::load_from(
-        &default_config_filenames,
-        &override_config_filename,
-        &parsed).unwrap().into()
-}
+mod workspace_config;
+pub(crate) type WorkspaceConfig = workspace_config::WorkspaceConfig;
 
 #[proc_macro]
-pub fn all_config_filenames(_items: TokenStream) -> TokenStream {
-    let (default_config_filenames, override_config_filename) = workspace_config_filenames().unwrap();
-    quote! {
-        [#( #default_config_filenames, )* #override_config_filename]
-    }.into()
+pub fn all_config_filenames(items: TokenStream) -> TokenStream {
+    all_config_filenames_macro::all_config_filenames(items)
+}
+
+#[proc_macro_attribute]
+pub fn populate_from_config(args: TokenStream, items: TokenStream) -> TokenStream {
+    populate_from_config_macro::populate_from_config(args, items)
 }

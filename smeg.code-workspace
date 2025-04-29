@@ -13,17 +13,24 @@
         "files.exclude": {
             "src/target": true
         },
-        "rust-analyzer.linkedProjects": [
-            "src/Cargo.toml"
-        ],
+        "rust-analyzer.cargo.allTargets": false,
+        "rust-analyzer.cargo.extraArgs": [],
         "rust-analyzer.cargo.features": [
             "smeg-board-host-native-default"
         ],
-        "rust-analyzer.cargo.allTargets": false,
         "rust-analyzer.check.command": "clippy",
         "rust-analyzer.check.extraEnv": {
             "RUSTUP_TOOLCHAIN": "nightly"
         },
+        "rust-analyzer.linkedProjects": [
+            "src/Cargo.toml"
+        ],
+        "rust-analyzer.runnables.extraArgs": [
+            "--workspace",
+            "--config", "unstable.build-std=[\"core\",\"std\"]",
+            "--target-dir", "${workspaceRoot}/src/target/host-native-default",
+            "--config", "env.SMEG_LINK_WITH_LIBC=\"true\""
+        ],
         "rust-analyzer.runnables.extraEnv": {
             "RUSTUP_TOOLCHAIN": "nightly"
         },
@@ -74,7 +81,7 @@
                 },
                 "problemMatcher": {
                     "base": "$rustc",
-                    "fileLocation": "absolute"
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
                 },
                 "presentation": {
                     "echo": true,
