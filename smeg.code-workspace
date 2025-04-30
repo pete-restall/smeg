@@ -20,7 +20,8 @@
         ],
         "rust-analyzer.check.command": "clippy",
         "rust-analyzer.check.extraEnv": {
-            "RUSTUP_TOOLCHAIN": "nightly"
+            "RUSTUP_TOOLCHAIN": "nightly",
+            "CARGO_WORKSPACE_DIR": "${workspaceRoot}/src"
         },
         "rust-analyzer.linkedProjects": [
             "src/Cargo.toml"

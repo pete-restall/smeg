@@ -1,0 +1,1 @@
+superfluous-because-not-in-correct-directory = "needs to be inside crates/{boards,drivers,kernel,mcus} to be discovered"

@@ -13,11 +13,7 @@ pub(crate) fn workspace_config_filenames_in(workspace_dir: &str) -> Result<(Vec<
     }
 
     let default_config_filenames = all_hierarchical_config_filenames_in(workspace_dir)?;
-
-    let unqualified_override_config_filename = format!("{workspace_dir}/smeg_config.toml");
-    let override_config_filename = all_filenames_matching(&unqualified_override_config_filename)?
-        .pop()
-        .ok_or_else(|| format!("There is no override config; expected_filename={unqualified_override_config_filename}"))?;
+    let override_config_filename = override_config_filename_in(workspace_dir)?;
 
     Ok((default_config_filenames, override_config_filename))
 }
@@ -37,16 +33,17 @@ fn all_hierarchical_config_filenames_in(workspace_dir: &str) -> ResultAnyError<V
     hierarchy_dirs.iter().try_for_each(|(subdir, is_family)| {
         match all_filenames_matching(
             &format!(
-                "{crates_dir}/{subdir}/**{}/build_config.toml",
+                "{crates_dir}/{subdir}/**{}/smeg_config.toml",
                 if *is_family { "/*_family/**" } else { "" })) {
 
             Ok(mut unfiltered_filenames) => {
-                unfiltered_filenames.drain(..).for_each(|filename| {
-                    if !filename.contains("/tests/") && (*is_family || !filename.contains("_family/")) {
-                        filenames.push(filename);
+                unfiltered_filenames.drain(..).try_for_each(|filename| -> ResultAnyError<()> {
+                    let unprefixed_filename = &filename[workspace_dir.len() ..];
+                    if !unprefixed_filename.contains("/tests/") && (*is_family || !unprefixed_filename.contains("_family/")) {
+                        filenames.push(absolute_path_to(&filename)?);
                     }
-                });
-                Ok(())
+                    Ok(())
+                })
             },
 
             Err(err) => Err(err)
@@ -65,7 +62,23 @@ fn all_filenames_matching(pattern: &str) -> ResultAnyError<Vec<String>> {
 
 fn all_pathbufs_matching(pattern: &str) -> ResultAnyError<Vec<PathBuf>> {
     glob(pattern)?.map(|result| match result {
-        Ok(filename) => Ok(canonicalize(filename)?),
+        Ok(filename) => Ok(filename),
         Err(err) => Err(Box::<dyn Error>::from(err))
     }).collect()
+}
+
+fn absolute_path_to(filename: &str) -> ResultAnyError<String> {
+    Ok(canonicalize(filename)?
+        .to_str()
+        .ok_or_else(|| format!("Filename cannot be canonicalised (non-UTF8 ?); filename={filename}"))?
+        .to_string())
+}
+
+fn override_config_filename_in(workspace_dir: &str) -> ResultAnyError<String> {
+    let override_config_filename = format!("{workspace_dir}/smeg_config.toml");
+    let override_config_filename = all_filenames_matching(&override_config_filename)?
+        .pop()
+        .ok_or_else(|| format!("There is no override config; expected_filename={override_config_filename}"))?;
+
+    absolute_path_to(&override_config_filename)
 }

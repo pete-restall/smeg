@@ -5,13 +5,20 @@ pub(crate) struct WorkspaceConfig {
 impl Default for WorkspaceConfig {
     fn default() -> Self {
         Self {
-            dir: sanitised_workspace_dir(env!("CARGO_WORKSPACE_DIR"))
+            dir: sanitised_workspace_dir(CARGO_WORKSPACE_DIR)
         }
     }
 }
 
+const CARGO_WORKSPACE_DIR: &str = env!("CARGO_WORKSPACE_DIR");
+
 fn sanitised_workspace_dir(dir: &str) -> String {
-    dir.trim().trim_end_matches('/').to_owned()
+    let workspace_dir = sanitised_dir(CARGO_WORKSPACE_DIR);
+    sanitised_dir(&dir.replace("${workspace_dir}", &workspace_dir))
+}
+
+fn sanitised_dir(dir: &str) -> String {
+    dir.trim().trim_end_matches('/').to_string()
 }
 
 impl WorkspaceConfig {

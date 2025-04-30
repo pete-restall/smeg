@@ -30,7 +30,21 @@ fn cargo_workspace_dir() -> &'static str {
 
 #[test]
 fn all_config_filenames__called_with_workspace_dir__expect_workspace_dir_comes_from_cargo_environment_variable() {
-    let discovered_filenames = all_config_filenames!(workspace_dir = "crates/config/procmacro/tests/fixtures/single_config");
-    let expected_filename = format!("{}/crates/config/procmacro/tests/fixtures/single_config/smeg_config.toml", cargo_workspace_dir());
+    let discovered_filenames = all_config_filenames!(workspace_dir = "${workspace_dir}/crates/config/procmacro/tests/fixtures/single_config");
+    let expected_filename = format!("{}/smeg_config.toml", fixture_dir_for("single_config"));
     expect!(&discovered_filenames).to_equal_collection(&[expected_filename]);
+}
+
+fn fixture_dir_for(fixture: &str) -> String {
+    format!("{}/crates/config/procmacro/tests/fixtures/{fixture}", cargo_workspace_dir())
+}
+
+#[test]
+fn all_config_filenames__called_when_non_smeg_config_tomls_exist__expect_only_smeg_config_files_are_included() {
+    let discovered_filenames = all_config_filenames!(workspace_dir = "${workspace_dir}/crates/config/procmacro/tests/fixtures/superfluous_config");
+    let fixture_dir = fixture_dir_for("superfluous_config");
+    expect!(&discovered_filenames).to_equal_collection(&[
+        format!("{fixture_dir}/crates/kernel/more_nesting/smeg_config.toml"),
+        format!("{fixture_dir}/smeg_config.toml")
+    ]);
 }
