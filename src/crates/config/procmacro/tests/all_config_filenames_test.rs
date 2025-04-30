@@ -48,3 +48,19 @@ fn all_config_filenames__called_when_non_smeg_config_tomls_exist__expect_only_sm
         format!("{fixture_dir}/smeg_config.toml")
     ]);
 }
+
+#[test]
+fn all_config_filenames__called_when_hierarchical_smeg_config_tomls_exist__expect_config_files_are_ordered_from_most_general_to_most_specific() {
+    let discovered_filenames = all_config_filenames!(workspace_dir = "${workspace_dir}/crates/config/procmacro/tests/fixtures/simple_hierarchical_config");
+    let fixture_dir = fixture_dir_for("simple_hierarchical_config");
+    expect!(&discovered_filenames).to_equal_collection(&[
+        format!("{fixture_dir}/crates/kernel/smeg_config.toml"),
+        format!("{fixture_dir}/crates/mcus/b_family/smeg_config.toml"),
+        format!("{fixture_dir}/crates/mcus/a/smeg_config.toml"),
+        format!("{fixture_dir}/crates/drivers/abc_family/smeg_config.toml"),
+        format!("{fixture_dir}/crates/drivers/abc/smeg_config.toml"),
+        format!("{fixture_dir}/crates/boards/123_family/smeg_config.toml"),
+        format!("{fixture_dir}/crates/boards/0/smeg_config.toml"),
+        format!("{fixture_dir}/smeg_config.toml")
+    ]);
+}
