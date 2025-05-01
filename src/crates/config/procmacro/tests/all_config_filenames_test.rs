@@ -1,9 +1,11 @@
 #![allow(non_snake_case)]
 
-use std::sync::OnceLock;
-
 use fluent_test::prelude::{AndModifier, CollectionMatchers, expect, NotModifier};
+
 use smeg_config_procmacro::all_config_filenames;
+
+mod utils;
+use utils::workspace_fixture_dir::{cargo_workspace_dir_slash, fixture_dir_for};
 
 #[test]
 fn all_config_filenames__called_without_workspace_dir__expect_workspace_dir_comes_from_cargo_environment_variable() {
@@ -18,25 +20,11 @@ fn all_config_filenames__called_without_workspace_dir__expect_workspace_dir_come
         .and().not().to_contain(false);
 }
 
-fn cargo_workspace_dir_slash() -> &'static str {
-    static CARGO_WORKSPACE_DIR_SLASH: OnceLock<String> = OnceLock::new();
-    CARGO_WORKSPACE_DIR_SLASH.get_or_init(|| format!("{}/", cargo_workspace_dir()))
-}
-
-fn cargo_workspace_dir() -> &'static str {
-    static CARGO_WORKSPACE_DIR: OnceLock<String> = OnceLock::new();
-    CARGO_WORKSPACE_DIR.get_or_init(|| env!("CARGO_WORKSPACE_DIR").trim().trim_end_matches('/').to_string())
-}
-
 #[test]
 fn all_config_filenames__called_with_workspace_dir__expect_workspace_dir_comes_from_cargo_environment_variable() {
     let discovered_filenames = all_config_filenames!(workspace_dir = "${workspace_dir}/crates/config/procmacro/tests/fixtures/single_config");
     let expected_filename = format!("{}/smeg_config.toml", fixture_dir_for("single_config"));
     expect!(&discovered_filenames).to_equal_collection(&[expected_filename]);
-}
-
-fn fixture_dir_for(fixture: &str) -> String {
-    format!("{}/crates/config/procmacro/tests/fixtures/{fixture}", cargo_workspace_dir())
 }
 
 #[test]

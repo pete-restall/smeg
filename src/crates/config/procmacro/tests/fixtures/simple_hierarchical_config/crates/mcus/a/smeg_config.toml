@@ -1,0 +1,23 @@
+# Not overridden or attempted to override in any other config:
+mcu-not-overridden="some config for an MCU"
+
+# Provide attempts for overrides by more-general configs (should not be allowed):
+mcu-not-overridden-above = "MCU"
+
+# To be overridden by more-specific configs (should be allowed):
+mcu-overridden-in-driver-family = "from MCU, to be overridden by the driver family config"
+mcu-overridden-in-driver = "from MCU, to be overridden by the driver config"
+mcu-overridden-in-board-family = "from MCU, to be overridden by the board family config"
+mcu-overridden-in-board = "from MCU, to be overridden by the board config"
+mcu-overridden-in-root = "from MCU, to be overridden by the root config"
+
+# Overrides of more-general configs (should be allowed):
+kernel-overridden-in-mcu = "MCU laying down configs"
+mcu-family-overridden-in-mcu = "something something something MCU-side"
+
+# Attempts at overriding more-specific configs (should not be allowed):
+driver-family-not-overridden-above = "MCU"
+driver-not-overridden-above = "MCU"
+board-family-not-overridden-above = "MCU"
+board-not-overridden-above = "MCU"
+root-not-overridden-anywhere = "should not happen - MCUs are more general than root"

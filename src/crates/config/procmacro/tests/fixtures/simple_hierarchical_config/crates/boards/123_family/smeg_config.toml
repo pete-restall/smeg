@@ -1,0 +1,20 @@
+# Not overridden or attempted to override in any other config:
+board-family-not-overridden = "some config for a board family"
+
+# Provide attempts for overrides by more-general configs (should not be allowed):
+board-family-not-overridden-above = "board family"
+
+# To be overridden by more-specific configs (should be allowed):
+board-family-overridden-in-board = "should be overridden"
+board-family-overridden-in-root = "should also be overridden"
+
+# Overrides of more-general configs (should be allowed):
+kernel-overridden-in-board-family = "all yours kernel configs are belong to us"
+mcu-family-overridden-in-board-family = "the board family is more specific than the MCU family"
+mcu-overridden-in-board-family = "the board family is more specific than the MCU"
+driver-family-overridden-in-board-family = "the board family is more specific than the driver family"
+driver-overridden-in-board-family = "the board family is more specific than the driver"
+
+# Attempts at overriding more-specific configs (should not be allowed):
+board-not-overridden-above = "board family"
+root-not-overridden-anywhere = "should not happen - board families are more general than root"

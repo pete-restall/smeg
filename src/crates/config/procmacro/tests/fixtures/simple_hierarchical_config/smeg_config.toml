@@ -1,0 +1,18 @@
+# Not overridden or attempted to override in any other config:
+root-not-overridden = "some config for the root"
+
+# Provide attempts for overrides by more-general configs (should not be allowed):
+root-not-overridden-anywhere = "definitely can't be overridden..."
+
+# To be overridden in more-specific configs (none for the root)
+
+# Overrides of more-general configs (should be allowed):
+kernel-overridden-in-root = "root !"
+mcu-family-overridden-in-root = "another win for root config"
+mcu-overridden-in-root = "yup, it's still root"
+driver-family-overridden-in-root = "rooty mcrootface"
+driver-overridden-in-root = "root all the way down..."
+board-family-overridden-in-root = "root"
+board-overridden-in-root = "root again"
+
+# Attempts at overriding more-specific configs (none for the root)

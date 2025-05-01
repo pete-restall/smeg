@@ -1,0 +1,24 @@
+# Not overridden or attempted to override in any other config:
+kernel-not-overridden="some config for the kernel"
+
+# Provide attempts for overrides by more-general configs (none for the kernel - it's the top of the tree)
+
+# To be overridden by more-specific configs (should be allowed):
+kernel-overridden-in-mcu-family = "from kernel, to be overridden by the MCU family config"
+kernel-overridden-in-mcu = "from kernel, to be overridden by the MCU config"
+kernel-overridden-in-driver-family = "from kernel, to be overridden by the driver family config"
+kernel-overridden-in-driver = "from kernel, to be overridden by the driver config"
+kernel-overridden-in-board-family = "from kernel, to be overridden by the board family config"
+kernel-overridden-in-board = "from kernel, to be overridden by the board config"
+kernel-overridden-in-root = "kernel setting...but needs to be overridden by the root"
+
+# Overrides of more-general configs (none for the kernel - it's the top of the tree)
+
+# Attempts at overriding more-specific configs (should not be allowed):
+mcu-family-not-overridden-above = "kernel"
+mcu-not-overridden-above = "kernel"
+driver-family-not-overridden-above = "kernel"
+driver-not-overridden-above = "kernel"
+board-family-not-overridden-above = "kernel"
+board-not-overridden-above = "kernel"
+root-not-overridden-anywhere = "should not happen - kernel config is _much_ more general than root"

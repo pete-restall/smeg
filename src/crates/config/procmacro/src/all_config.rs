@@ -1,10 +1,10 @@
 use std::{fs::read_to_string, sync::OnceLock};
 
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use regex::{Captures, Regex};
 use serde_toml_merge::merge;
-use syn::{DeriveInput, Ident, Visibility};
+use syn::{token::Pub, DeriveInput, Ident, Visibility};
 use toml::{Table, Value};
 
 // TODO: All of this hackery needs tidying up and testing
@@ -15,31 +15,33 @@ pub(crate) fn load_from(default_config_filenames: &[String], override_config_fil
     let merged_configs = try_loading_and_merging_from_file(merged_default_configs, override_config_filename)?;
     let parsed_config = ParsedConfig::new(&merged_configs);
 
-    let config_struct_declarations = parsed_config.tokens_for_struct_declarations(struct_visibility)?;
+    let config_struct_declarations = parsed_config.tokens_for_struct_declarations(&Visibility::Public(Pub(Span::call_site())))?;
     let config_field_values = parsed_config.tokens_for_field_values()?;
 
+    let generated_mod_name = format_ident!("{struct_name}_generated");
+
     Ok(quote! {
-        #[derive(Debug)]
+        #[derive(Debug, PartialEq)]
         #( #struct_attributes )*
         #struct_visibility struct #struct_name {
-            pub VALUES: generated::Config
+            pub VALUES: #generated_mod_name::Config
         }
 
         impl #struct_name {
             pub const fn new() -> Self {
                 Self {
-                    VALUES: generated::Config::new()
+                    VALUES: #generated_mod_name::Config::new()
                 }
             }
 
             pub const fn default() -> Self {
                 Self {
-                    VALUES: generated::Config::default()
+                    VALUES: #generated_mod_name::Config::default()
                 }
             }
         }
 
-        #struct_visibility mod generated {
+        #struct_visibility mod #generated_mod_name {
             #config_struct_declarations
 
             impl Config {
@@ -235,7 +237,7 @@ impl<'a> ParsedConfig<'a> {
         let struct_name = Ident::new(&table.as_struct_name(), Span::call_site());
         let fields = table.as_map.keys().map(|name| Self::tokens_for_struct_field_declaration(table, name)).collect::<Result<Vec<TokenStream>, String>>()?;
         Ok(quote! {
-            #[derive(Debug)]
+            #[derive(Debug, PartialEq)]
             #struct_visibility struct #struct_name {
                 #( #fields, )*
             }

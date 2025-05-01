@@ -1,0 +1,22 @@
+# Not overridden or attempted to override in any other config:
+driver-family-not-overridden="some config for a driver family"
+
+# Provide attempts for overrides by more-general configs (should not be allowed):
+driver-family-not-overridden-above = "driver family"
+
+# To be overridden by more-specific configs (should be allowed):
+driver-family-overridden-in-driver = "from driver family, to be overridden by the driver config"
+driver-family-overridden-in-board-family = "from driver family, to be overridden by the board family config"
+driver-family-overridden-in-board = "from driver family, to be overridden by the board config"
+driver-family-overridden-in-root = "expected to be overridden by the root config"
+
+# Overrides of more-general configs (should be allowed):
+kernel-overridden-in-driver-family = "was kernel config, now driver family config"
+mcu-family-overridden-in-driver-family = "was MCU family, now driver family config"
+mcu-overridden-in-driver-family = "was MCU, now driver family config"
+
+# Attempts at overriding more-specific configs (should not be allowed):
+driver-not-overridden-above = "driver family"
+board-family-not-overridden-above = "driver family"
+board-not-overridden-above = "driver family"
+root-not-overridden-anywhere = "should not happen - driver families are more general than root"
