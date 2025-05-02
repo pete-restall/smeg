@@ -1,26 +1,25 @@
 use proc_macro::TokenStream;
 
+use quote::quote;
+
 use super::config_file_discovery::workspace_config_filenames_in;
 
-pub(crate) fn populate_from_config(args: TokenStream, items: TokenStream) -> TokenStream {
-    let mut parsed_args = PopulateFromConfigArgs::default();
+pub fn all_config_filenames(items: TokenStream) -> TokenStream {
+    let mut parsed_args = AllConfigFilenamesArgs::default();
     let args_parser = syn::meta::parser(|args| parsed_args.parse_mut(args));
-    syn::parse_macro_input!(args with args_parser);
-
-    let parsed_items = syn::parse_macro_input!(items);
+    syn::parse_macro_input!(items with args_parser);
 
     let (default_config_filenames, override_config_filename) = workspace_config_filenames_in(parsed_args.workspace.dir().unwrap()).unwrap();
-    super::all_config::load_from(
-        &default_config_filenames,
-        &override_config_filename,
-        &parsed_items).unwrap().into()
+    quote! {
+        [#( #default_config_filenames, )* #override_config_filename]
+    }.into()
 }
 
-struct PopulateFromConfigArgs {
+struct AllConfigFilenamesArgs {
     workspace: super::WorkspaceConfig
 }
 
-impl PopulateFromConfigArgs {
+impl AllConfigFilenamesArgs {
     fn default() -> Self {
         Self {
             workspace: super::WorkspaceConfig::default()
