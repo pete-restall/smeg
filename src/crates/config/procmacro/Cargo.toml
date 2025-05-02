@@ -18,3 +18,4 @@ toml = "0.8"
 
 [dev-dependencies]
 fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../testing/host-utils" }

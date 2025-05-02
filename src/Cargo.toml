@@ -7,7 +7,8 @@ members = [
     "crates/kernel",
     "crates/drivers/*",
     "crates/mcus/*/*",
-    "crates/os"]
+    "crates/os",
+    "crates/testing/*"]
 
 default-members = ["crates/os"]
 
