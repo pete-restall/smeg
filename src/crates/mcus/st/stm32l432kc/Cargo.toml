@@ -11,6 +11,6 @@ smeg-mcu-st-stm32_family = { path = "../stm32_family"}
 
 [features]
 std = [
-	"smeg-kernel/std",
-	"smeg-mcu-arm-cortex_m4/std",
-	"smeg-mcu-st-stm32_family/std"]
+    "smeg-kernel/std",
+    "smeg-mcu-arm-cortex_m4/std",
+    "smeg-mcu-st-stm32_family/std"]

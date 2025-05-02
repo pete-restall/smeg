@@ -15,10 +15,10 @@ smeg-config = { path = "../config" }
 
 [features]
 std = [
-	"smeg-board-host-native/std",
-	"smeg-board-st-nucleo_l432kc/std",
-	"smeg-config/std",
-	"smeg-kernel/std"]
+    "smeg-board-host-native/std",
+    "smeg-board-st-nucleo_l432kc/std",
+    "smeg-config/std",
+    "smeg-kernel/std"]
 
 smeg-board-host-native = []
 smeg-board-host-native-default = ["dep:smeg-board-host-native", "smeg-board-host-native"]
