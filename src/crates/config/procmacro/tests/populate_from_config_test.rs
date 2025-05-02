@@ -1,4 +1,4 @@
-#![allow(non_snake_case)]
+#![allow(non_snake_case, uncommon_codepoints, mixed_script_confusables)]
 
 use fluent_test::prelude::*;
 
@@ -102,6 +102,27 @@ fn populate_from_config__called_when_hierarchical_smeg_config_tomls_exist__expec
     });
 }
 
-// TODO: Test various name transformations; some-name -> SOME_NAME, some_name -> SOME_NAME, etc.
-// TODO: Test sections; [some-section], [some section], [[some-section]], ["some section"], etc.
-// TODO: Test section overrides
+#[test]
+fn populate_from_config__called_when_config_contains_unrusty_naming__expect_rust_friendly_names_are_used() {
+    #[populate_from_config(workspace_dir = "${workspace_dir}/crates/config/procmacro/tests/fixtures/unrusty_naming_config")]
+    struct Config;
+
+    let config = Config::default();
+    expect!(&config.VALUES).to_equal(&Config_generated::Config {
+        LIVES_IN_ROOT: Config_generated::Config_LivesInRoot {
+            TO_BE_UNDERSCORED: "wibble",
+            SIMPLEARRAY: [1, 2, 3]
+        },
+        LIVES_IN_KERNEL: Config_generated::Config_LivesInKernel {
+            OVERRIDE_MEEE: "deffo overridden",
+            THIS_IS_NOT_OVERRIDDEN: Config_generated::Config_LivesInKernel_ThisIsNotOverridden {
+                _123: "magic"
+            }
+        },
+        HAS_BRACKETS: [
+            Config_generated::Config_HasBrackets_0 {
+                AND_SOME_I: "our approach to i18n is...UTF-7...for simple naivety, non-ASCII identifiers are stripped"
+            }
+        ]
+    });
+}

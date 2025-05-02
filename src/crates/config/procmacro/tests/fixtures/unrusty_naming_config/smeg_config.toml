@@ -1,0 +1,9 @@
+[lives-in-root]
+"simple[array]" = [1, 2, 3]
+"to.be underscored" = "wibble"
+
+["lives in kernel"]
+OvErRiDe_meee = "deffo overridden"
+
+[["has.brackets"]]
+"and-Some-Աͷiҁ҃௦𐐀ೝ" = "our approach to i18n is...UTF-7...for simple naivety, non-ASCII identifiers are stripped"

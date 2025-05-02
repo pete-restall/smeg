@@ -149,11 +149,11 @@ fn human_readable_path(path: &str) -> String {
 
 fn field_name_for_value_name(name: &str) -> String {
     static REPLACEMENTS: OnceLock<Regex> = OnceLock::new();
-    let regex = REPLACEMENTS.get_or_init(|| Regex::new("[^-_A-Z0-9]*([-_A-Z0-9]*)[^-_A-Z0-9]*").unwrap());
+    let regex = REPLACEMENTS.get_or_init(|| Regex::new("[^-_ .A-Z0-9]*([-_ .A-Z0-9]*)[^-_ .A-Z0-9]*").unwrap());
 
     let uppercased_name = name.to_uppercase();
     let rust_friendly_name = regex.replace_all(&uppercased_name, |captures: &Captures| {
-        captures[1].replace('-', "_")
+        captures[1].replace(['-', ' ', '.'], "_")
     }).to_string();
 
     if rust_friendly_name.starts_with(|ch| char::is_digit(ch, 10)) {
