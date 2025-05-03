@@ -1,3 +1,6 @@
+use std::io::Write;
+use std::path::PathBuf;
+
 pub fn main() {
     let source_linker_script = std::env::var("SMEG_SOURCE_LINKER_SCRIPT");
     let target_linker_script = std::env::var("SMEG_TARGET_LINKER_SCRIPT");
@@ -13,6 +16,11 @@ pub fn main() {
     if link_with_libc {
         println!("cargo:rustc-link-arg=-lc");
     }
+
+    let mut config_dump_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    config_dump_path.push("smeg_config_dump.txt");
+    let mut fd = std::fs::File::create(config_dump_path).unwrap();
+    write!(&mut fd, "{:?}", smeg_config::Config::default()).unwrap();
 }
 
 fn rerun_if_changed<T>(filenames: &[&Result<String, T>]) {
