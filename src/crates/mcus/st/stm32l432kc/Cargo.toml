@@ -6,11 +6,11 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 smeg-kernel = { path = "../../../kernel" }
-smeg-mcu-arm-cortex_m4 = { path = "../../arm/cortex_m4"}
+smeg-mcu-arm-cortex_m4_family = { path = "../../arm/cortex_m4_family"}
 smeg-mcu-st-stm32_family = { path = "../stm32_family"}
 
 [features]
 std = [
     "smeg-kernel/std",
-    "smeg-mcu-arm-cortex_m4/std",
+    "smeg-mcu-arm-cortex_m4_family/std",
     "smeg-mcu-st-stm32_family/std"]

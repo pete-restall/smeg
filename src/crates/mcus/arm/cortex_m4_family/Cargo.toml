@@ -1,5 +1,5 @@
 [package]
-name = "smeg-mcu-arm-cortex_m4" # TODO - RENAME TO cortex_m4_family
+name = "smeg-mcu-arm-cortex_m4_family"
 version = "0.1.0"
 edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
