@@ -1,15 +1,9 @@
 use rand::Rng;
 use rand::distr::{Distribution, SampleString};
 
-pub fn any_nonempty_utf8() -> String {
-    let mut rng = rand::rng();
-    let len = rng.random_range(1..=32);
-    AnyUtf8.sample_string(&mut rng, len)
-}
+pub struct AllChars;
 
-struct AnyUtf8;
-
-impl Distribution<char> for AnyUtf8 {
+impl Distribution<char> for AllChars {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> char {
         const NUM_SURROGATES: usize = 0xe000 - 0xd800;
         const NUM_VALID: usize = 0x110000 - NUM_SURROGATES;
@@ -22,9 +16,8 @@ impl Distribution<char> for AnyUtf8 {
     }
 }
 
-impl SampleString for AnyUtf8 {
+impl SampleString for AllChars {
     fn append_string<R: Rng + ?Sized>(&self, rng: &mut R, string: &mut String, len: usize) {
-        string.reserve(len);
-        string.extend(rng.sample_iter(AnyUtf8).take(len));
+        super::super::sample_append_string(AllChars, rng, string, len);
     }
 }

@@ -34,19 +34,19 @@ impl From<String> for StringError {
 mod tests {
     use fluent_test::prelude::*;
 
-    use smeg_testing_host_utils::strings::any_nonempty_utf8;
+    use smeg_testing_host_utils::strings::utf8;
     use super::*;
 
     #[test]
     fn message__get_after_from_string__expect_same_string() {
-        let message = any_nonempty_utf8();
+        let message = utf8::any_nonempty();
         let error = StringError::from(message.as_str());
         expect!(error.message).to_equal(message);
     }
 
     #[test]
     fn message__get_after_string_into__expect_same_string() {
-        let message = any_nonempty_utf8();
+        let message = utf8::any_nonempty();
         let error: StringError = message.as_str().into();
         expect!(error.message).to_equal(message);
     }
@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn message__get_after_from_boxed_error__expect_error_to_string() {
-        let any_error = StubError::new(any_nonempty_utf8());
+        let any_error = StubError::new(utf8::any_nonempty());
         let any_error_to_string = any_error.to_string();
         let error = StringError::from(Box::<dyn Error>::from(any_error));
         expect!(error.message).to_equal(any_error_to_string);
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn message__get_after_boxed_error_into__expect_error_to_string() {
-        let any_error: Box<dyn Error> = Box::from(StubError::new(any_nonempty_utf8()));
+        let any_error: Box<dyn Error> = Box::from(StubError::new(utf8::any_nonempty()));
         let any_error_to_string = any_error.to_string();
         let error: StringError = any_error.into();
         expect!(error.message).to_equal(any_error_to_string);
