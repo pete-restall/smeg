@@ -4,9 +4,7 @@ mod all_config_filenames;
 mod config_file_discovery;
 mod populate_from_config;
 mod results;
-
 mod workspace_config;
-pub(crate) type WorkspaceConfig = workspace_config::WorkspaceConfig;
 
 #[proc_macro]
 pub fn all_config_filenames(items: TokenStream) -> TokenStream {
