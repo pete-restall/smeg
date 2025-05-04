@@ -14,14 +14,16 @@
             "src/target": true
         },
         "rust-analyzer.cargo.allTargets": false,
-        "rust-analyzer.cargo.extraArgs": [],
+        "rust-analyzer.cargo.extraArgs": [
+            "--config", "env.SMEG_OUT_DIR=\"/tmp\""
+        ],
         "rust-analyzer.cargo.features": [
             "smeg-board-host-native-default"
         ],
         "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraArgs": [],
         "rust-analyzer.check.extraEnv": {
-            "RUSTUP_TOOLCHAIN": "nightly",
-            "CARGO_WORKSPACE_DIR": "${workspaceRoot}/src"
+            "RUSTUP_TOOLCHAIN": "nightly"
         },
         "rust-analyzer.linkedProjects": [
             "src/Cargo.toml"
