@@ -1,2 +1,2 @@
-[kernel]
-i-am-kernel-setting = { hello = "world" }
+[kernel.stack]
+size_in_words = 256

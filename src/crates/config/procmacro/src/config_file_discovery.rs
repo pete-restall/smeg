@@ -2,7 +2,7 @@ use std::{error::Error, fs::canonicalize, path::PathBuf};
 
 use glob::glob;
 
-use super::results::*;
+use smeg_build_utils::results::*;
 
 pub(crate) fn workspace_config_filenames_in(workspace_dir: &str) -> Result<(Vec<String>, String), StringError> {
     let workspace_dir = workspace_dir.trim().trim_end_matches('/');

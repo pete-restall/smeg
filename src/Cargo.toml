@@ -8,6 +8,8 @@ members = [
     "crates/drivers/*",
     "crates/mcus/*/*",
     "crates/os",
+
+    "crates/build/*",
     "crates/testing/*"]
 
 default-members = ["crates/os"]

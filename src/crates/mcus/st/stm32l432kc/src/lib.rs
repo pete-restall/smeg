@@ -4,6 +4,9 @@
 mod reset_handler;
 
 #[cfg(target_arch = "arm")]
+mod kernel_stack;
+
+#[cfg(target_arch = "arm")]
 mod interrupts;
 
 #[cfg(target_arch = "arm")]

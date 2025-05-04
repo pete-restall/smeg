@@ -24,7 +24,6 @@ board_configuration=${board_configuration:-default}
 board_triplet="${board_manufacturer}-${board_name}-${board_configuration}";
 
 has_flash_image=true;
-has_linker_script=true;
 has_std=false;
 has_target_json=true;
 link_with_libc=false;
@@ -46,7 +45,6 @@ case ${board_triplet} in
         mcu_manufacturer=host;
         mcu_name=native;
         has_flash_image=false;
-        has_linker_script=false;
         has_std=true;
         has_target_json=false;
         link_with_libc=true;
@@ -66,32 +64,26 @@ target_dir=${target_triplet_dir}/${build_profile_target};
 target_path_prefix=${target_dir}/${board_triplet};
 mkdir -p ${target_dir};
 
-if ${has_std}; then
-    cfg_args+='--config unstable.build-std=["core","std"]';
-fi
+cfg_args="--config env.SMEG_OUT_DIR=\"${THISDIR}/${target_dir}\"";
+linker_args='';
+target_args='';
+test_args='';
 
-if ${has_linker_script}; then
-    source_linker_script=${mcu_dir}/linker-script.lld;
-    target_linker_script=${target_path_prefix}.lld;
-    cp ${source_linker_script} ${target_linker_script};
-    linker_script_args="
-        --config env.SMEG_SOURCE_LINKER_SCRIPT=\"${source_linker_script}\"
-        --config env.SMEG_TARGET_LINKER_SCRIPT=\"${target_linker_script}\"";
-else
-    linker_script_args="";
+if ${has_std}; then
+    cfg_args+=' --config unstable.build-std=["core","std"]';
 fi
 
 if ${link_with_libc}; then
-    linker_script_args+='--config env.SMEG_LINK_WITH_LIBC="true"';
+    linker_args+=' --config env.SMEG_LINK_WITH_LIBC="true"';
 fi
 
 if ${has_target_json}; then
     target_json=${target_path_prefix}.json;
     cp ${mcu_dir}/rust-target.json ${target_json};
     cp ${mcu_dir}/openocd.cfg ${target_dir}/;
-    target_args="--target ${target_json}";
+    target_args+=" --target ${target_json}";
 else
-    target_args="--target-dir ${target_triplet_dir}";
+    target_args+=" --target-dir ${target_triplet_dir}";
 fi
 
 if [ "x${build_action}" == "xtest" ]; then
@@ -99,9 +91,7 @@ if [ "x${build_action}" == "xtest" ]; then
     # build_action="llvm-cov";
     # test_args="--workspace --codecov --output-path lcov.info";
     # target_args="";
-    test_args="--workspace";
-else
-    test_args="";
+    test_args+=" --workspace";
 fi
 
 RUSTUP_TOOLCHAIN=nightly;
@@ -111,7 +101,7 @@ cargo +${RUSTUP_TOOLCHAIN} ${build_action} -v \
     ${target_args} \
     ${cfg_args} \
     --features smeg-board-${board_manufacturer}-${board_name}-${board_configuration} \
-    ${linker_script_args} || exit 3;
+    ${linker_args} || exit 3;
 
 if ${has_flash_image}; then
     flash_sections="-j .text -j .text.* -j .data -j .data.*";

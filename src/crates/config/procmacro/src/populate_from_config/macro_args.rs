@@ -1,4 +1,4 @@
-use crate::results::StringError;
+use smeg_build_utils::results::StringError;
 use crate::workspace_config::WorkspaceConfig;
 
 pub struct MacroArgs {

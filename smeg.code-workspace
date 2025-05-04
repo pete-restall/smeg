@@ -37,6 +37,9 @@
         },
         "rust-analyzer.server.extraEnv": {
             "RUSTUP_TOOLCHAIN": "nightly"
+        },
+        "files.watcherExclude": {
+            "**/target": true
         }
     },
     "launch": {

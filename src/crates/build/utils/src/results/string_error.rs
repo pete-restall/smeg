@@ -5,6 +5,9 @@ pub struct StringError {
     message: String
 }
 
+impl Error for StringError {
+}
+
 impl Display for StringError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.write_str(&self.message)

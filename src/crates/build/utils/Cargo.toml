@@ -1,0 +1,9 @@
+[package]
+name = "smeg-build-utils"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dev-dependencies]
+fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../testing/host-utils" }

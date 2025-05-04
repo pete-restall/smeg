@@ -1,34 +1,25 @@
 use std::io::Write;
-use std::path::PathBuf;
 
-pub fn main() {
-    let source_linker_script = std::env::var("SMEG_SOURCE_LINKER_SCRIPT");
-    let target_linker_script = std::env::var("SMEG_TARGET_LINKER_SCRIPT");
-    rerun_if_changed(&[
-        &source_linker_script,
-        &target_linker_script]);
+use smeg_build_utils::smeg_out_dir;
+use smeg_build_utils::results::ResultAnyError;
 
-    if let Ok(filename) = target_linker_script {
-        println!("cargo:rustc-link-arg=-T{}", filename);
-    }
+pub fn main() -> ResultAnyError<()> {
+    let smeg_out_dir = smeg_out_dir()?;
 
     let link_with_libc = as_boolean(std::env::var("SMEG_LINK_WITH_LIBC"));
     if link_with_libc {
         println!("cargo:rustc-link-arg=-lc");
     }
 
-    let mut config_dump_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
-    config_dump_path.push("smeg_config_dump.txt");
-    let mut fd = std::fs::File::create(config_dump_path).unwrap();
-    write!(&mut fd, "{:?}", smeg_config::Config::default()).unwrap();
-}
-
-fn rerun_if_changed<T>(filenames: &[&Result<String, T>]) {
-    for filename in filenames {
-        if let Ok(filename) = *filename {
-            println!("cargo:rerun-if-changed={}", filename);
-        }
+    let linker_script_filename = format!("{smeg_out_dir}/linker-script.lld");
+    if std::fs::exists(&linker_script_filename)? {
+        println!("cargo::rustc-link-arg=-T{linker_script_filename}");
     }
+
+    let mut fd = std::fs::File::create(format!("{smeg_out_dir}/smeg_config_dump.txt"))?;
+    write!(&mut fd, "{:?}", smeg_config::SMEG_CONFIG)?;
+
+    Ok(())
 }
 
 fn as_boolean<T>(value: Result<String, T>) -> bool {

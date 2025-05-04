@@ -3,7 +3,6 @@ use proc_macro::TokenStream;
 mod all_config_filenames;
 mod config_file_discovery;
 mod populate_from_config;
-mod results;
 mod workspace_config;
 
 #[proc_macro]
