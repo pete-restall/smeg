@@ -17,7 +17,7 @@ pub fn main() -> ResultAnyError<()> {
     }
 
     let mut fd = std::fs::File::create(format!("{smeg_out_dir}/smeg_config_dump.txt"))?;
-    write!(&mut fd, "{:?}", smeg_config::SMEG_CONFIG)?;
+    write!(&mut fd, "{:#?}", smeg_config::SMEG_CONFIG)?;
 
     Ok(())
 }
