@@ -123,6 +123,17 @@ fn populate_from_config__called_when_config_contains_unrusty_naming__expect_rust
             Config_generated::Config_HasBrackets_0 {
                 AND_SOME_I: "our approach to i18n is...UTF-7...for simple naivety, non-ASCII identifiers are stripped"
             }
-        ]
+        ],
+        VERY: Config_generated::Config_Very {
+            NESTED: Config_generated::Config_Very_Nested {
+                USING: Config_generated::Config_Very_Nested_Using {
+                    DOTS: Config_generated::Config_Very_Nested_Using_Dots {
+                        AND: Config_generated::Config_Very_Nested_Using_Dots_And {
+                            MORE: "dots !"
+                        }
+                    }
+                }
+            }
+        }
     });
 }

@@ -1,3 +1,6 @@
 ["lives in kernel"]
 "this-is_not overridden" = { "123" = "magic" }
 OvErRiDe_meee = "ephemeral something or other"
+
+[very.nested.using.dots]
+and.more = "dots !"
