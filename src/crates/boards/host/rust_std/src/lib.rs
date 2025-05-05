@@ -1,7 +1,7 @@
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 
 #[cfg(not(test))]
-pub use smeg_mcu_host_native::main;
+pub use smeg_mcu_host_rust_std::main;
 
 #[cfg(test)]
 pub mod tests {

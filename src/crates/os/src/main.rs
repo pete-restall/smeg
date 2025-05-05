@@ -1,8 +1,8 @@
 #![cfg_attr(not(any(test, feature = "std")), no_std, no_main)]
 
 #[cfg(not(test))]
-#[cfg(feature = "smeg-board-host-native")]
-pub use smeg_board_host_native::main;
+#[cfg(feature = "smeg-board-host-rust_std")]
+pub use smeg_board_host_rust_std::main;
 
 #[allow(unused_imports)]
 #[allow(clippy::single_component_path_imports)]

@@ -41,9 +41,9 @@ echo "Building for:" \
     "configuration=${board_configuration}";
 
 case ${board_triplet} in
-    ( host-native-* )
+    ( host-rust_std-* )
         mcu_manufacturer=host;
-        mcu_name=native;
+        mcu_name=rust_std;
         has_flash_image=false;
         has_std=true;
         has_target_json=false;

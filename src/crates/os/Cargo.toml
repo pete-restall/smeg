@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
-smeg-board-host-native = { path = "../boards/host/native", optional = true, features = ["std"] }
+smeg-board-host-rust_std = { path = "../boards/host/rust_std", optional = true, features = ["std"] }
 smeg-board-st-nucleo_l432kc = { path = "../boards/st/nucleo_l432kc", optional = true }
 smeg-config = { path = "../config" }
 smeg-kernel = { path = "../kernel" }
@@ -16,11 +16,11 @@ smeg-config = { path = "../config" }
 
 [features]
 std = [
-    "smeg-board-host-native/std",
+    "smeg-board-host-rust_std/std",
     "smeg-board-st-nucleo_l432kc/std",
     "smeg-config/std",
     "smeg-kernel/std"]
 
-smeg-board-host-native = []
-smeg-board-host-native-default = ["dep:smeg-board-host-native", "smeg-board-host-native"]
+smeg-board-host-rust_std = []
+smeg-board-host-rust_std-default = ["dep:smeg-board-host-rust_std", "smeg-board-host-rust_std"]
 smeg-board-st-nucleo_l432kc-default = ["dep:smeg-board-st-nucleo_l432kc"]

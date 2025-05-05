@@ -18,7 +18,7 @@
             "--config", "env.SMEG_OUT_DIR=\"/tmp\""
         ],
         "rust-analyzer.cargo.features": [
-            "smeg-board-host-native-default"
+            "smeg-board-host-rust_std-default"
         ],
         "rust-analyzer.check.command": "clippy",
         "rust-analyzer.check.extraArgs": [],
@@ -31,7 +31,7 @@
         "rust-analyzer.runnables.extraArgs": [
             "--workspace",
             "--config", "unstable.build-std=[\"core\",\"std\"]",
-            "--target-dir", "${workspaceRoot}/src/target/host-native-default",
+            "--target-dir", "${workspaceRoot}/src/target/host-rust_std-default",
             "--config", "env.SMEG_LINK_WITH_LIBC=\"true\""
         ],
         "rust-analyzer.runnables.extraEnv": {
@@ -78,10 +78,10 @@
         "version": "2.0.0",
         "tasks": [
             {
-                "label": "Test (Host Native / dev)",
+                "label": "Test (Host Rust std / dev)",
                 "group": "build",
                 "type": "shell",
-                "command": "./build.sh host-native test",
+                "command": "./build.sh host-rust_std test",
                 "options": {
                     "cwd": "${workspaceRoot}/src"
                 },
@@ -99,10 +99,10 @@
                 }
             },
             {
-                "label": "Build (Host Native / dev)",
+                "label": "Build (Host Rust std / dev)",
                 "group": "build",
                 "type": "shell",
-                "command": "./build.sh host-native",
+                "command": "./build.sh host-rust_std",
                 "options": {
                     "cwd": "${workspaceRoot}/src"
                 },
@@ -120,10 +120,10 @@
                 }
             },
             {
-                "label": "Build (Host Native / release)",
+                "label": "Build (Host Rust std / release)",
                 "group": "build",
                 "type": "shell",
-                "command": "./build.sh host-native build release",
+                "command": "./build.sh host-rust_std build release",
                 "options": {
                     "cwd": "${workspaceRoot}/src"
                 },

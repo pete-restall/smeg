@@ -1,13 +1,13 @@
 [package]
-name = "smeg-board-host-native"
+name = "smeg-board-host-rust_std"
 version = "0.1.0"
 edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 smeg-kernel = { path = "../../../kernel", features = ["std"] }
-smeg-mcu-host-native = { path = "../../../mcus/host/native", features = ["std"] }
+smeg-mcu-host-rust_std = { path = "../../../mcus/host/rust_std", features = ["std"] }
 
 [features]
 default = ["std"]
-std = ["smeg-kernel/std", "smeg-mcu-host-native/std"]
+std = ["smeg-kernel/std", "smeg-mcu-host-rust_std/std"]
