@@ -108,7 +108,7 @@
                 },
                 "problemMatcher": {
                     "base": "$rustc",
-                    "fileLocation": "absolute"
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
                 },
                 "presentation": {
                     "echo": true,
@@ -129,7 +129,7 @@
                 },
                 "problemMatcher": {
                     "base": "$rustc",
-                    "fileLocation": "absolute"
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
                 },
                 "presentation": {
                     "echo": true,
@@ -150,7 +150,7 @@
                 },
                 "problemMatcher": {
                     "base": "$rustc",
-                    "fileLocation": "absolute"
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
                 },
                 "presentation": {
                     "echo": true,
@@ -171,7 +171,7 @@
                 },
                 "problemMatcher": {
                     "base": "$rustc",
-                    "fileLocation": "absolute"
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
                 },
                 "presentation": {
                     "echo": true,
