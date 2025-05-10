@@ -1,0 +1,5 @@
+[mcus.host.rust_std]
+number_of_cores = 2
+
+[kernel.stack]
+size_in_words = 4096

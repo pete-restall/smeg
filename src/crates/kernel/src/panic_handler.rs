@@ -2,7 +2,7 @@ use core::panic::PanicInfo;
 
 #[cfg(all(not(test), feature = "std"))]
 pub fn claim_std_panic_hook() {
-    std::panic::set_hook(Box::new(|info| on_panic()));
+    std::panic::set_hook(Box::new(|_info| on_panic()));
 }
 
 fn on_panic() -> ! {
@@ -13,6 +13,7 @@ fn on_panic() -> ! {
     loop { }
 }
 
+#[allow(dead_code)]
 #[cfg_attr(not(any(test, feature = "std")), panic_handler)]
 fn on_core_panic(_info: &PanicInfo) -> ! {
     on_panic();
