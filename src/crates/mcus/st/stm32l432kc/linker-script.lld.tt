@@ -44,10 +44,18 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH_TEXT
 
+    .rodata : \{
+        . = ALIGN(4);
+        __LINKER_RODATA_START = .;
+        *: (.rodata .rodata.*);
+        __LINKER_RODATA_PAST_END = .;
+        . = ALIGN(4);
+    } > FLASH_TEXT
+
     .data ORIGIN(SRAM) : \{
         . = ALIGN(4);
         __LINKER_DATA_START = .;
-        *: (.rodata .rodata.*);
+        *: (.data .data.*);
         __LINKER_DATA_PAST_END = .;
         . = ALIGN(4);
     } > SRAM AT> FLASH_TEXT
