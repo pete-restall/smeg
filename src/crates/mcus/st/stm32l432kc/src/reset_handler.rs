@@ -1,3 +1,5 @@
+include!("../../../../os/mcu_bootstrapping.rs.inc");
+
 use crate::blinky_blinky;
 
 unsafe extern "C" {
@@ -24,13 +26,15 @@ _reset_handler:
     b _reset_handler
 "#,
     sym __LINKER_INITIAL_SP,
-    sym _reset_handler_impl);
+    sym __smeg_os_entrypoint);
 
 #[inline(always)]
 #[allow(static_mut_refs)]
 unsafe extern "C" fn _reset_handler_impl() -> ! {
-    // TODO: since this function will largely be generic across MCUs, this stuff should be passed to a 'smeg runtime init' or somesuch in
-    // the kernel, parameterised for the various things that need passing in.
+    // TODO: this is no longer used - it is left so that the contents can be copied / adapted into the new __smeg_os_entrypoint() / rust::RuntimeBootstrapping
+    // strategy.
+    //
+    // The RuntimeBootstrapping implementation ought to use the __LINKER_* stuff and replace the cruft below:
     unsafe {
         let bss_start = core::ptr::from_mut(&mut __LINKER_BSS_START);
         let bss_end = core::ptr::from_mut(&mut __LINKER_BSS_PAST_END);

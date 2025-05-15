@@ -8,6 +8,10 @@ authors = ["Pete Restall <pete@restall.net>"]
 smeg-config = { path = "../../../config" }
 smeg-kernel = { path = "../../../kernel" }
 
+[dev-dependencies]
+fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../../testing/host-utils" }
+
 [features]
 default = ["std"]
 std = ["smeg-kernel/std"]

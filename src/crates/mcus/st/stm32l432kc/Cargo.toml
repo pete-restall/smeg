@@ -10,6 +10,10 @@ smeg-kernel = { path = "../../../kernel" }
 smeg-mcu-arm-cortex_m4_family = { path = "../../arm/cortex_m4_family"}
 smeg-mcu-st-stm32_family = { path = "../stm32_family"}
 
+[dev-dependencies]
+fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../../testing/host-utils" }
+
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 tinytemplate = "1.2"
