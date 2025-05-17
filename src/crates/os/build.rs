@@ -11,7 +11,7 @@ pub fn main() -> ResultAnyError<()> {
         println!("cargo:rustc-link-arg=-lc");
     }
 
-    let linker_script_filename = format!("{smeg_out_dir}/linker-script.lld");
+    let linker_script_filename = format!("{smeg_out_dir}/smeg-os.lld");
     if std::fs::exists(&linker_script_filename)? {
         println!("cargo::rustc-link-arg=-T{linker_script_filename}");
     }

@@ -1,5 +1,5 @@
 ASSERT(
-    ({sram2_size_in_words} * 4) >= 0 && ({sram2_size_in_words} * 4) < 16K,
+    ({sram2_size_in_words} * 4) >= 0 && ({sram2_size_in_words} * 4) <= 16K,
     "Specified SRAM2 size in words is not valid for the device; sram2_reserved_size_in_words={sram2_size_in_words}");
 
 MEMORY
