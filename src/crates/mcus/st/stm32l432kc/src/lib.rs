@@ -13,3 +13,8 @@ mod interrupts;
 
 #[cfg(target_arch = "arm")]
 mod blinky_blinky;
+
+// TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
+pub fn _needed_to_prevent_linker_gc() {
+    smeg_mcu_arm_cortex_m4_family::_needed_to_prevent_linker_gc();
+}

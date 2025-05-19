@@ -1,7 +1,8 @@
 use proc_macro::TokenStream;
 
+mod error_tag;
+
 #[proc_macro]
-pub fn dummy(_items: TokenStream) -> TokenStream {
-    // TODO: Dummy (placeholder) procedural macro
-    panic!("Dummy (placeholder) procedural macro called; nothing is implemented in kernel-procmacro yet !");
+pub fn error_tag(items: TokenStream) -> TokenStream {
+    error_tag::error_tag(items)
 }

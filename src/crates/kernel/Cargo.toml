@@ -8,5 +8,8 @@ authors = ["Pete Restall <pete@restall.net>"]
 smeg-config = { path = "../config" }
 smeg-kernel-procmacro = { path = "procmacro" }
 
+[dev-dependencies]
+fluent-test = "0.4.3"
+
 [features]
 std = ["smeg-config/std"]

@@ -26,3 +26,8 @@ unsafe fn entrypoint<R: RuntimeBootstrapping, C: McuCoreBootstrapping, B: BoardM
         smeg_kernel::bootstrapping::kernel::entrypoint::<C, B>();
     }
 }
+
+// TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
+pub fn _needed_to_prevent_linker_gc() {
+    board::_needed_to_prevent_linker_gc();
+}
