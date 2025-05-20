@@ -50,17 +50,17 @@ mod tests {
     }
 
     #[test]
-    fn id__get_after_copied__expect_same_id_as_original_tag() {
+    fn id__get_after_copied__expect_same_value_as_original_tag() {
         let original_tag = ErrorTag::new(stub_elf_symbol());
         let copied_tag = original_tag;
         expect!(copied_tag.id).to_equal(original_tag.id);
     }
 
     #[test]
-    fn id__get_after_cloned__expect_same_id_as_original_tag() {
+    fn id__get_after_cloned__expect_same_value_as_original_tag() {
         let original_tag = ErrorTag::new(stub_elf_symbol());
-        let copied_tag = original_tag.clone();
-        expect!(copied_tag.id).to_equal(original_tag.id);
+        let cloned_tag = original_tag.clone();
+        expect!(cloned_tag.id).to_equal(original_tag.id);
     }
 
     #[test]
