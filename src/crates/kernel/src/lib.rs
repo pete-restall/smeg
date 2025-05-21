@@ -16,6 +16,8 @@ pub type HalfUsize = u16;
 #[cfg(target_pointer_width = "64")]
 pub type HalfUsize = u32;
 
+pub(crate) extern crate self as smeg_kernel;
+
 // TODO: This needs moving somewhere sensible
 pub trait HasMcuCoreId {
     fn core_id() -> usize;

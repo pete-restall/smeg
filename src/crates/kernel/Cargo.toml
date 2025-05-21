@@ -10,6 +10,7 @@ smeg-kernel-procmacro = { path = "procmacro" }
 
 [dev-dependencies]
 fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../testing/host-utils" }
 
 [features]
 std = ["smeg-config/std"]
