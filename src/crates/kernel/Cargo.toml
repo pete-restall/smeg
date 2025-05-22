@@ -14,3 +14,4 @@ smeg-testing-host-utils = { path = "../testing/host-utils" }
 
 [features]
 std = ["smeg-config/std"]
+no_default_despair = []
