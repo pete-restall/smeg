@@ -17,9 +17,7 @@
         "rust-analyzer.cargo.extraArgs": [
             "--config", "env.SMEG_OUT_DIR=\"/tmp\""
         ],
-        "rust-analyzer.cargo.features": [
-            "smeg-board-host-rust_std-default"
-        ],
+        "rust-analyzer.cargo.features": [],
         "rust-analyzer.check.command": "clippy",
         "rust-analyzer.check.extraArgs": [],
         "rust-analyzer.check.extraEnv": {
@@ -32,7 +30,8 @@
             "--workspace",
             "--config", "unstable.build-std=[\"core\",\"std\"]",
             "--target-dir", "${workspaceRoot}/src/target/host-rust_std-default",
-            "--config", "env.SMEG_LINK_WITH_LIBC=\"true\""
+            "--config", "env.SMEG_LINK_WITH_LIBC=\"true\"",
+            "--feature", "smeg-board-host-rust_std-default"
         ],
         "rust-analyzer.runnables.extraEnv": {
             "RUSTUP_TOOLCHAIN": "nightly"
