@@ -15,7 +15,7 @@ if [ "x${build_profile}" == "xdev" ]; then
     build_profile_target=debug;
 else
     build_profile_target=release;
-fi;
+fi
 
 board_manufacturer="$(echo ${arg_board} | cut -d- -f 1)";
 board_name="$(echo ${arg_board} | cut -d- -f 2)";
@@ -51,7 +51,7 @@ case ${board_triplet} in
         ;;
 
     ( st-nucleo_l432kc-* ) mcu_manufacturer=st; mcu_name=stm32l432kc ;;
-esac;
+esac
 
 if [ "x${mcu_manufacturer}" == "x" ]; then
     echo "Unknown board triplet '${board_triplet}'.";
@@ -104,7 +104,7 @@ cargo +${RUSTUP_TOOLCHAIN} ${build_action} -v \
     ${linker_args} || exit 3;
 
 if ${has_flash_image}; then
-    flash_sections="-j .text -j .text.* -j .data -j .data.*";
+    flash_sections="-j .text -j .text.* -j .rodata -j .rodata.*";
     image_prefix="${target_dir}/smeg-os";
     echo;
 
@@ -113,4 +113,12 @@ if ${has_flash_image}; then
 
     echo "Generating ${image_prefix}.bin from ${image_prefix}.elf...";
     rust-objcopy ${flash_sections} -O binary ${image_prefix}.elf ${image_prefix}.bin || exit 5;
-fi;
+
+    bin_size_bytes=$(stat -c %s ${image_prefix}.bin);
+    if [ $bin_size_bytes -lt 1024 ]; then
+        echo "!!!!!!!!";
+        echo "Flash binary is an unrealistically small ${bin_size_bytes} bytes - over-zealous LTO, or a misplaced linker script ?";
+        echo "!!!!!!!!";
+        exit 4;
+    fi
+fi

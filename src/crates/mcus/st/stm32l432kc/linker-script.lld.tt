@@ -114,4 +114,12 @@ SECTIONS
         *: (.ARM.exidx .ARM.exidx.*)
         *: (.ARM.extab .ARM.extab.*)
     }
+
+    .do_not_allow 0 (INFO) : \{
+        KEEP(*(.init .init* .fini .fini*));
+        ASSERT(. == 0, "There should be no .init* or .fini* sections");
+
+        KEEP(*(.ctors .ctors* .dtors .dtors*));
+        ASSERT(. == 0, "There should be no .ctors* or .dtors* sections");
+    }
 }
