@@ -9,10 +9,8 @@ pub fn main() -> ResultAnyError<()> {
     let link_with_libc = as_boolean(std::env::var("SMEG_LINK_WITH_LIBC"));
     if link_with_libc {
         println!("cargo:rustc-link-arg=-lc");
-    }
-
-    let linker_script_filename = format!("{smeg_out_dir}/smeg-os.lld");
-    if std::fs::exists(&linker_script_filename)? {
+    } else {
+        let linker_script_filename = format!("{smeg_out_dir}/smeg-os.lld");
         println!("cargo::rustc-link-arg=-T{linker_script_filename}");
     }
 
