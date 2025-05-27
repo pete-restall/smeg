@@ -1,23 +1,22 @@
+#![doc = crate::docs::side_by_side_md!()]
+
 use core::mem::MaybeUninit;
 
 use crate::despair;
-use crate::docs::link_doc;
+use crate::docs;
 use crate::errors::KernelErrorCode;
 
-// TODO: This doesn't work yet, and we're not allowed an inner attribute...
-//#[link_doc]
-
-#[link_doc("BssSectionInitialiser")]
+#[doc = docs::side_by_side_md!("BssSectionInitialiser")]
 pub unsafe trait BssSectionInitialiser {
-    #[link_doc("BssSectionInitialiser.fill_bss_section")]
+    #[doc = docs::side_by_side_md!("BssSectionInitialiser.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8);
 }
 
-#[link_doc("BssSectionInitialiserWithChecks")]
+#[doc = docs::side_by_side_md!("BssSectionInitialiserWithChecks")]
 pub struct BssSectionInitialiserWithChecks;
 
 unsafe impl BssSectionInitialiser for BssSectionInitialiserWithChecks {
-    #[link_doc("BssSectionInitialiserWithChecks.fill_bss_section")]
+    #[doc = docs::side_by_side_md!("BssSectionInitialiserWithChecks.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8) {
         if start.as_ptr() > past_end.as_ptr() {
             despair!(with(KernelErrorCode::LinkerScriptDespair), because("Linker-supplied section pointers for .bss are corrupt"));
@@ -29,11 +28,11 @@ unsafe impl BssSectionInitialiser for BssSectionInitialiserWithChecks {
     }
 }
 
-#[link_doc("BssSectionInitialiserWithoutChecks")]
+#[doc = docs::side_by_side_md!("BssSectionInitialiserWithoutChecks")]
 pub struct BssSectionInitialiserWithoutChecks;
 
 unsafe impl BssSectionInitialiser for BssSectionInitialiserWithoutChecks {
-    #[link_doc("BssSectionInitialiserWithoutChecks.fill_bss_section")]
+    #[doc = docs::side_by_side_md!("BssSectionInitialiserWithoutChecks.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8) {
         unsafe {
             let bss_size_words = past_end.as_ptr().offset_from(start.as_ptr());

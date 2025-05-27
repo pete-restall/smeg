@@ -1,5 +1,4 @@
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{LitStr, parse_macro_input};
 use syn::parse::Parse;
@@ -16,24 +15,15 @@ impl Parse for MacroArgs {
     }
 }
 
-pub fn link_doc(args: TokenStream, items: TokenStream) -> TokenStream {
+pub fn side_by_side_md(args: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as MacroArgs);
-    let items = TokenStream2::from(items);
     let source_path = super::source_path_of_macro_invocation();
-    if let Some(anchor) = args.anchor {
-        let md_path_and_anchor = rs_to_md_path_with_anchor(&source_path, &anchor.value());
-        quote! {
-            #[cfg_attr(doc, doc = ::include_utils::include_md!(#md_path_and_anchor))]
-            #items
-        }
-    } else {
-        let md_path_and_anchor = rs_to_md_path_with_anchor(&source_path, "summary");
-        quote! {
-            //!
-            ::include_utils::include_md!(#md_path_and_anchor)
-            //!
-            #items
-        }
+    let md_path_and_anchor = rs_to_md_path_with_anchor(
+        &source_path,
+        &args.anchor.map_or_else(|| "summary".to_string(), |a| a.value()));
+
+    quote! {
+        ::include_utils::include_md!(#md_path_and_anchor)
     }.into()
 }
 

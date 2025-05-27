@@ -9,13 +9,6 @@ pub fn error_tag(items: TokenStream) -> TokenStream {
     error_tag::error_tag(items)
 }
 
-mod link_doc;
-
-#[proc_macro_attribute]
-pub fn link_doc(args: TokenStream, items: TokenStream) -> TokenStream {
-    link_doc::link_doc(args, items)
-}
-
 mod replace_file_suffix;
 
 #[proc_macro]
@@ -28,6 +21,13 @@ mod replace_suffix;
 #[proc_macro]
 pub fn replace_suffix(items: TokenStream) -> TokenStream {
     replace_suffix::replace_suffix(items)
+}
+
+mod side_by_side_md;
+
+#[proc_macro]
+pub fn side_by_side_md(items: TokenStream) -> TokenStream {
+    side_by_side_md::side_by_side_md(items)
 }
 
 pub(crate) fn source_path_of_macro_invocation() -> String {
