@@ -2,6 +2,8 @@
 
 pub mod bootstrapping;
 
+pub mod docs;
+
 pub mod errors;
 
 #[cfg(target_pointer_width = "32")]

@@ -77,6 +77,27 @@
         "version": "2.0.0",
         "tasks": [
             {
+                "label": "Build Documentation (Host Rust std / dev)",
+                "group": "build",
+                "type": "shell",
+                "command": "./build.sh host-rust_std doc",
+                "options": {
+                    "cwd": "${workspaceRoot}/src"
+                },
+                "problemMatcher": {
+                    "base": "$rustc",
+                    "fileLocation": ["relative", "${workspaceRoot}/src"]
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "never",
+                    "focus": false,
+                    "panel": "shared",
+                    "showReuseMessage": true,
+                    "clear": true
+                }
+            },
+            {
                 "label": "Test (Host Rust std / dev)",
                 "group": "build",
                 "type": "shell",

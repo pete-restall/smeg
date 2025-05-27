@@ -1,23 +1,23 @@
 use core::mem::MaybeUninit;
 
-//use smeg_kernel_procmacro::link_doc;
-
 use crate::despair;
+use crate::docs::link_doc;
 use crate::errors::KernelErrorCode;
 
+// TODO: This doesn't work yet, and we're not allowed an inner attribute...
 //#[link_doc]
 
-//#[link_doc("BssSectionInitialiser")]
+#[link_doc("BssSectionInitialiser")]
 pub unsafe trait BssSectionInitialiser {
-    //#[link_doc("BssSectionInitialiser::fill_bss_section")]
+    #[link_doc("BssSectionInitialiser.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8);
 }
 
-//#[link_doc("BssSectionInitialiserWithChecks")]
+#[link_doc("BssSectionInitialiserWithChecks")]
 pub struct BssSectionInitialiserWithChecks;
 
 unsafe impl BssSectionInitialiser for BssSectionInitialiserWithChecks {
-    //#[link_doc("BssSectionInitialiserWithChecks::fill_bss_section")]
+    #[link_doc("BssSectionInitialiserWithChecks.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8) {
         if start.as_ptr() > past_end.as_ptr() {
             despair!(with(KernelErrorCode::LinkerScriptDespair), because("Linker-supplied section pointers for .bss are corrupt"));
@@ -29,11 +29,11 @@ unsafe impl BssSectionInitialiser for BssSectionInitialiserWithChecks {
     }
 }
 
-//#[link_doc("BssSectionInitialiserWithoutChecks")]
+#[link_doc("BssSectionInitialiserWithoutChecks")]
 pub struct BssSectionInitialiserWithoutChecks;
 
 unsafe impl BssSectionInitialiser for BssSectionInitialiserWithoutChecks {
-    //#[link_doc("BssSectionInitialiserWithoutChecks::fill_bss_section")]
+    #[link_doc("BssSectionInitialiserWithoutChecks.fill_bss_section")]
     unsafe fn fill_bss_section(&self, start: &mut MaybeUninit<usize>, past_end: &MaybeUninit<usize>, fill_value: u8) {
         unsafe {
             let bss_size_words = past_end.as_ptr().offset_from(start.as_ptr());
