@@ -1,9 +1,9 @@
 [package]
-name = "smeg-testing-host-utils"
+name = "smeg-testing-integration"
 version = "0.1.0"
 edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 fluent-test = "0.4.3"
-rand = "0.9.1"
+smeg-kernel = { path = "../../kernel", features = ["no_default_despair"] }

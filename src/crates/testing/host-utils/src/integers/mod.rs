@@ -10,6 +10,19 @@ fn any_within<T: SampleUniform, R: SampleRange<T>>(bounds: R) -> T {
     rng.random_range(bounds)
 }
 
+pub fn any_u8_except(except: u8) -> u8 {
+    any_except(except, any_u8)
+}
+
+fn any_except<T: SampleUniform + PartialEq>(except: T, any_value: fn() -> T) -> T {
+    let value = any_value();
+    if value != except {
+        value
+    } else {
+        any_except(except, any_value)
+    }
+}
+
 pub fn any_usize() -> usize {
     any_within(0..=usize::MAX)
 }

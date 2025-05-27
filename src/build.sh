@@ -94,6 +94,7 @@ if [ "x${build_action}" == "xtest" ]; then
     test_args+=" --workspace";
 fi
 
+FLUENT_TEST_ENHANCED_OUTPUT=true;
 RUSTUP_TOOLCHAIN=nightly;
 cargo +${RUSTUP_TOOLCHAIN} ${build_action} -v \
     ${test_args} \

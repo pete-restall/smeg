@@ -11,6 +11,7 @@ smeg-kernel = { path = "../../../kernel" }
 [dev-dependencies]
 fluent-test = "0.4.3"
 smeg-testing-host-utils = { path = "../../../testing/host-utils" }
+smeg-testing-integration = { path = "../../../testing/integration" }
 
 [features]
 default = ["std"]

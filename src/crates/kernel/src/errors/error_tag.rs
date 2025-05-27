@@ -2,6 +2,7 @@ use core::mem::{align_of, size_of, MaybeUninit};
 
 use crate::HalfUsize;
 
+#[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct ErrorTag {
     id: HalfUsize

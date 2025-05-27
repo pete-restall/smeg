@@ -7,5 +7,8 @@ authors = ["Pete Restall <pete@restall.net>"]
 [dependencies]
 smeg-kernel = { path = "../../../kernel" }
 
+[dev-dependencies]
+smeg-testing-integration = { path = "../../../testing/integration" }
+
 [features]
 std = ["smeg-kernel/std"]

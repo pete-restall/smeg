@@ -13,6 +13,7 @@ smeg-mcu-st-stm32_family = { path = "../stm32_family"}
 [dev-dependencies]
 fluent-test = "0.4.3"
 smeg-testing-host-utils = { path = "../../../testing/host-utils" }
+smeg-testing-integration = { path = "../../../testing/integration" }
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }

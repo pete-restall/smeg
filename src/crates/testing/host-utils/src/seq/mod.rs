@@ -1,6 +1,5 @@
-use rand::seq::IndexedRandom;
+mod any_item_from;
+pub use any_item_from::*;
 
-pub fn any_item_from<T>(items: &[T]) -> &T {
-    let mut rng = rand::rng();
-    items.choose(&mut rng).unwrap()
-}
+mod only_contain_matchers;
+pub use only_contain_matchers::*;

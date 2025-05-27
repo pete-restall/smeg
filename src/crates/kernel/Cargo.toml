@@ -10,8 +10,11 @@ smeg-kernel-procmacro = { path = "procmacro" }
 
 [dev-dependencies]
 fluent-test = "0.4.3"
+include-utils = "0.2.4"
 smeg-testing-host-utils = { path = "../testing/host-utils" }
+smeg-testing-integration = { path = "../testing/integration" }
 
 [features]
 std = ["smeg-config/std"]
+no_bootstrapping_bss_data_bounds_checks = []
 no_default_despair = []

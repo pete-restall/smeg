@@ -8,6 +8,9 @@ authors = ["Pete Restall <pete@restall.net>"]
 smeg-kernel = { path = "../../../kernel", features = ["std"] }
 smeg-mcu-host-rust_std = { path = "../../../mcus/host/rust_std", features = ["std"] }
 
+[dev-dependencies]
+smeg-testing-integration = { path = "../../../testing/integration" }
+
 [features]
 default = ["std"]
 std = ["smeg-kernel/std", "smeg-mcu-host-rust_std/std"]
