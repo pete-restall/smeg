@@ -1,6 +1,6 @@
-<!-- ANCHOR: summary -->
+<!-- ANCHOR: module -->
 TODO: File summary goes here...
-<!-- ANCHOR_END: summary -->
+<!-- ANCHOR_END: module -->
 
 <!-- ANCHOR: BssSectionInitialiser -->
 TODO: Info for BssSectionInitialiser goes here...

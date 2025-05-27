@@ -20,7 +20,7 @@ pub fn side_by_side_md(args: TokenStream) -> TokenStream {
     let source_path = super::source_path_of_macro_invocation();
     let md_path_and_anchor = rs_to_md_path_with_anchor(
         &source_path,
-        &args.anchor.map_or_else(|| "summary".to_string(), |a| a.value()));
+        &args.anchor.map_or_else(|| "module".to_string(), |a| a.value()));
 
     quote! {
         ::include_utils::include_md!(#md_path_and_anchor)
