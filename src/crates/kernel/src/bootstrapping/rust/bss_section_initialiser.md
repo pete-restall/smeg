@@ -47,7 +47,7 @@ See [`BssSectionInitialiser::fill_bss_section`] for implementation notes and ass
 It is possible to detect when `start > past_end` for address calculation, in which case the function will [`despair!`].
 
 Note that it is still possible to fall into [_Undefined Behaviour_][UB] for scenarios that are not able to be detected by this function if the passed arguments are incorrect.  A few (non-exhaustive) examples being:
-* if `start` and `end` are not properly aligned (this could be detected and [`despair!`] in future)
+* if `start` and `past_end` are not properly aligned (this could be detected and [`despair!`] in future)
 * if the block does not cover all memory that needs initialising
 * if the block extends over memory not supposed to be in the section
 * if `fill_value` initialises a variable with an unrepresentable value, such as `0xff` when the section contains a `bool` or an `enum`
