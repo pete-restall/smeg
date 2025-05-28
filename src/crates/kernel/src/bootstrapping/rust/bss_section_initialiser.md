@@ -36,7 +36,7 @@ The `fill_value` is typically `0x00` for most sections where this function is us
 <!-- ANCHOR: BssSectionInitialiserWithChecks -->
 Initialise a _Block Start Symbol_ (BSS) linker section, eg. `.bss`.
 
-An implementation of the [`BssSectionInitialiser`] trait with a sanity checks to [`despair!`] if there is detectable error.
+An implementation of the [`BssSectionInitialiser`] trait with some sanity checks to [`despair!`] if there is detectable error.
 <!-- ANCHOR_END: BssSectionInitialiserWithChecks -->
 
 <!-- ANCHOR: BssSectionInitialiserWithChecks.fill_bss_section -->
