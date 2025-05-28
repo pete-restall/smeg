@@ -57,7 +57,7 @@ mod tests {
     fn fill_bss_section__called_with_start_equal_to_past_end__expect_block_is_not_filled<T: BssSectionInitialiser>(initialiser: T) {
         let original_value = any_usize();
         let fill_value = any_u8_except(original_value as u8);
-        let mut block = [MaybeUninit::<usize>::new(original_value); 1];
+        let mut block = [MaybeUninit::new(original_value); 1];
         unsafe {
             let (start, past_end) = (&raw mut block[0], &block[0]);
             initialiser.fill_bss_section(&mut *start, past_end, fill_value);
@@ -69,7 +69,7 @@ mod tests {
     fn fill_bss_section__called__expect_block_is_filled_up_to_past_end_with_given_byte<T: BssSectionInitialiser>(initialiser: T) {
         let fill_value = any_fill_value();
         let fill_value_as_usize = usize_packed_with(fill_value);
-        let mut block = any_vec_filled_using(2..1024, || MaybeUninit::<usize>::new(any_usize()));
+        let mut block = any_vec_filled_using(2..1024, || MaybeUninit::new(any_usize()));
         let (head, tail) = block.split_at_mut(1);
         let all_excluding_past_end = unsafe {
             initialiser.fill_bss_section(&mut head[0], tail.last().unwrap(), fill_value);
@@ -89,7 +89,7 @@ mod tests {
     }
 
     fn fill_bss_section__called__expect_block_past_end_is_not_filled<T: BssSectionInitialiser>(initialiser: T) {
-        let mut block = any_vec_filled_using(2..1024, || MaybeUninit::<usize>::new(any_usize()));
+        let mut block = any_vec_filled_using(2..1024, || MaybeUninit::new(any_usize()));
         let original_value = unsafe { block.last().unwrap().assume_init() };
         let fill_value = any_u8_except(original_value as u8);
         let (head, tail) = block.split_at_mut(1);
