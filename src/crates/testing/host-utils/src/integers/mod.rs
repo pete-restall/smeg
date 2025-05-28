@@ -30,3 +30,7 @@ pub fn any_usize() -> usize {
 pub fn any_usize_within<R: SampleRange<usize>>(bounds: R) -> usize {
     any_within(bounds)
 }
+
+pub fn any_usize_except(except: usize) -> usize {
+    any_except(except, any_usize)
+}
