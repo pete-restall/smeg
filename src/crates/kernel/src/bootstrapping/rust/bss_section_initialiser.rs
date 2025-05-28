@@ -1,9 +1,9 @@
 #![doc = crate::docs::side_by_side_md!()]
+use crate::docs;
 
 use core::mem::MaybeUninit;
 
 use crate::despair;
-use crate::docs;
 use crate::errors::KernelErrorCode;
 
 #[doc = docs::side_by_side_md!("BssSectionInitialiser")]

@@ -1,3 +1,6 @@
+#![doc = crate::docs::side_by_side_md!()]
+use crate::docs;
+
 mod bss_section_initialiser;
 pub use bss_section_initialiser::*;
 
@@ -19,6 +22,7 @@ mod runtime_initialisers {
     pub type DataSectionInitialiser = super::DataSectionInitialiserWithoutChecks;
 }
 
+#[doc = docs::side_by_side_md!("initialise")]
 pub unsafe fn initialise<R: RuntimeBootstrapping>() {
     // TODO: .bss, .data, etc.
     // This is just temporary debugging below here...a better way of doing this is to pass the types as 'R', to facilitate testing
