@@ -81,6 +81,9 @@ SECTIONS
         LONG(__LINKER_KERNEL_STACK_PAST_END);
     } > FLASH_INITIAL_SP
 
+    .peripherals.ahb1.rcc 0x40021000 (TYPE = SHT_NOBITS) : \{ __LINKER_PERIPHERALS_AHB1_RCC = .; . += 0x400; } > PERIPHERALS
+    .peripherals.ahb2.gpio_b 0x48000400 (TYPE = SHT_NOBITS) : \{ __LINKER_PERIPHERALS_AHB2_GPIOB = .; . += 0x400; } > PERIPHERALS
+
     .smeg.tags.errors 0 (INFO) : \{
         KEEP(* (.smeg.tags.errors))
 
@@ -92,9 +95,6 @@ SECTIONS
     .stack_sizes (INFO) : \{
         KEEP(* (.stack_sizes));
     }
-
-    .peripherals.ahb1.rcc 0x40021000 (TYPE = SHT_NOBITS) : \{ __LINKER_PERIPHERALS_AHB1_RCC = .; . += 0x400; } > PERIPHERALS
-    .peripherals.ahb2.gpio_b 0x48000400 (TYPE = SHT_NOBITS) : \{ __LINKER_PERIPHERALS_AHB2_GPIOB = .; . += 0x400; } > PERIPHERALS
 
     .ARM.attributes /* (NOLOAD) */ : \{ KEEP(* (.ARM.attributes)) }
     .comment /* (NOLOAD) */ : \{ KEEP(* (.comment)) }
