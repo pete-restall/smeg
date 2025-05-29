@@ -14,8 +14,3 @@ pub unsafe extern "C" fn __smeg_os_entrypoint() -> ! {
     use kernel::Kernel;
     unsafe { Kernel::entrypoint() }
 }
-
-// TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
-pub fn _needed_to_prevent_linker_gc() {
-    board::_needed_to_prevent_linker_gc();
-}
