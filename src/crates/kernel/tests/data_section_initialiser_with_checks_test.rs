@@ -5,7 +5,7 @@ use std::mem::MaybeUninit;
 use fluent_test::prelude::*;
 
 use smeg_kernel::errors::KernelErrorCode;
-use smeg_kernel::bootstrapping::rust::{DataSectionInitialiser, DataSectionInitialiserWithChecks};
+use smeg_kernel::bootstrapping::rust::{DataSectionInitialisation, DataSectionInitialiserWithChecks};
 
 use smeg_testing_integration::despair::DespairMatchers;
 
@@ -21,7 +21,7 @@ fn _load_data_section__called_with_start_after_past_end__expect_despair<const DA
         let mut ram = [MaybeUninit::new(0_usize); DATA_SIZE];
         let rom = [0_usize; DATA_SIZE];
         let (invalid_ram_start, invalid_ram_past_end) = invalid_ordering_split_at(INDEX, &mut ram);
-        DataSectionInitialiserWithChecks.load_data_section(invalid_ram_start, invalid_ram_past_end, &rom[0]);
+        DataSectionInitialiserWithChecks::load_data_section(invalid_ram_start, invalid_ram_past_end, &rom[0]);
     }).to_despair_with_error_code(KernelErrorCode::LinkerScriptDespair);
 }
 

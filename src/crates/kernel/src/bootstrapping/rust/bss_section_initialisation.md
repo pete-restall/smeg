@@ -1,7 +1,7 @@
 <!-- ANCHOR: module -->
 <!-- ANCHOR_END: module -->
 
-<!-- ANCHOR: BssSectionInitialiser -->
+<!-- ANCHOR: BssSectionInitialisation -->
 Initialise a _Block Start Symbol_ (BSS) linker section, eg. `.bss`.
 
 A hideously `unsafe` bootstrapping trait, responsible for filling linker-defined BSS sections such as `.bss` with a known value.
@@ -12,9 +12,9 @@ An incorrect linker script can give rise to the possibility of wiping arbitrary 
 
 [MaybeUninit]: https://doc.rust-lang.org/core/mem/union.MaybeUninit.html
 [UB]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-<!-- ANCHOR_END: BssSectionInitialiser -->
+<!-- ANCHOR_END: BssSectionInitialisation -->
 
-<!-- ANCHOR: BssSectionInitialiser.fill_bss_section -->
+<!-- ANCHOR: BssSectionInitialisation.fill_bss_section -->
 Fill a _Block Start Symbol_ (BSS) linker section with `fill_value`.
 
 Extreme care must be taken by implementators to avoid [_Undefined Behaviour_][UB].  Implementations of this function will be called before there is a Rust runtime, meaning many behaviours that Rust considers invariant may not necessarily hold during execution.  In particular, the value of any `static` is not available and all RAM must be considered as _Uninitialised_ - see [`MaybeUninit<T>`][MaybeUninit].
@@ -31,18 +31,18 @@ The `fill_value` is typically `0x00` for most sections where this function is us
 
 [MaybeUninit]: https://doc.rust-lang.org/core/mem/union.MaybeUninit.html
 [UB]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-<!-- ANCHOR_END: BssSectionInitialiser.fill_bss_section -->
+<!-- ANCHOR_END: BssSectionInitialisation.fill_bss_section -->
 
 <!-- ANCHOR: BssSectionInitialiserWithChecks -->
 Initialise a _Block Start Symbol_ (BSS) linker section, eg. `.bss`.
 
-An implementation of the [`BssSectionInitialiser`] trait with some sanity checks to [`despair!`] if there is detectable error.
+An implementation of the [`BssSectionInitialisation`] trait with some sanity checks to [`despair!`] if there is detectable error.
 <!-- ANCHOR_END: BssSectionInitialiserWithChecks -->
 
 <!-- ANCHOR: BssSectionInitialiserWithChecks.fill_bss_section -->
 Fill a _Block Start Symbol_ (BSS) linker section with `fill_value`.
 
-See [`BssSectionInitialiser::fill_bss_section`] for implementation notes and assumptions.
+See [`BssSectionInitialisation::fill_bss_section`] for implementation notes and assumptions.
 
 It is possible to detect when `start > past_end` for address calculation, in which case the function will [`despair!`].
 
@@ -58,15 +58,15 @@ Note that it is still possible to fall into [_Undefined Behaviour_][UB] for scen
 <!-- ANCHOR: BssSectionInitialiserWithoutChecks -->
 Initialise a _Block Start Symbol_ (BSS) linker section, eg. `.bss`.
 
-A minimal implementation of the [`BssSectionInitialiser`] trait that assumes its input arguments are correct and makes no attempt at checking.
+A minimal implementation of the [`BssSectionInitialisation`] trait that assumes its input arguments are correct and makes no attempt at checking.
 
-See [`BssSectionInitialiser::fill_bss_section`] for implementation notes and assumptions.
+See [`BssSectionInitialisation::fill_bss_section`] for implementation notes and assumptions.
 <!-- ANCHOR_END: BssSectionInitialiserWithoutChecks -->
 
 <!-- ANCHOR: BssSectionInitialiserWithoutChecks.fill_bss_section -->
 Fill a _Block Start Symbol_ (BSS) linker section with `fill_value`.
 
-A minimal implementation of the [`BssSectionInitialiser::fill_bss_section`] function that assumes its input arguments are correct and makes no attempt at checking.
+A minimal implementation of the [`BssSectionInitialisation::fill_bss_section`] function that assumes its input arguments are correct and makes no attempt at checking.
 
-See [`BssSectionInitialiser::fill_bss_section`] for implementation notes and assumptions.
+See [`BssSectionInitialisation::fill_bss_section`] for implementation notes and assumptions.
 <!-- ANCHOR_END: BssSectionInitialiserWithoutChecks.fill_bss_section -->

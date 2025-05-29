@@ -1,2 +1,2 @@
-mod runtime_bootstrapper;
-pub use runtime_bootstrapper::*;
+mod mcu_memory_bootstrapper;
+pub use mcu_memory_bootstrapper::*;

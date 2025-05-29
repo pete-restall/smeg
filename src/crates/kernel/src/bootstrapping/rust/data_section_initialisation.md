@@ -1,7 +1,7 @@
 <!-- ANCHOR: module -->
 <!-- ANCHOR_END: module -->
 
-<!-- ANCHOR: DataSectionInitialiser -->
+<!-- ANCHOR: DataSectionInitialisation -->
 Initialise a _data_ linker section, eg. `.data`.
 
 A hideously `unsafe` bootstrapping trait, responsible for loading linker-defined data sections such as `.data` with their initial values.
@@ -12,9 +12,9 @@ An incorrect linker script can give rise to the possibility of wiping arbitrary 
 
 [MaybeUninit]: https://doc.rust-lang.org/core/mem/union.MaybeUninit.html
 [UB]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-<!-- ANCHOR_END: DataSectionInitialiser -->
+<!-- ANCHOR_END: DataSectionInitialisation -->
 
-<!-- ANCHOR: DataSectionInitialiser.load_data_section -->
+<!-- ANCHOR: DataSectionInitialisation.load_data_section -->
 Load a seeded table of pre-computed data from a ROM table into RAM.
 
 Extreme care must be taken by implementators to avoid [_Undefined Behaviour_][UB].  Implementations of this function will be called before there is a Rust runtime, meaning many behaviours that Rust considers invariant may not necessarily hold during execution.  In particular, the value of any `static` is not available and all RAM must be considered as _Uninitialised_ - see [`MaybeUninit<T>`][MaybeUninit].  It is the job of this function to initialise those `static` variables but there may be any number of `.data` sections and implementors cannot rely on any particular order of calls.
@@ -31,18 +31,18 @@ The linker script is also responsible for ensuring the RAM sections are indeed i
 
 [MaybeUninit]: https://doc.rust-lang.org/core/mem/union.MaybeUninit.html
 [UB]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-<!-- ANCHOR_END: DataSectionInitialiser.load_data_section -->
+<!-- ANCHOR_END: DataSectionInitialisation.load_data_section -->
 
 <!-- ANCHOR: DataSectionInitialiserWithChecks -->
 Initialise a _data_ linker section, eg. `.data`.
 
-An implementation of the [`DataSectionInitialiser`] trait with some sanity checks to [`despair!`] if there is detectable error.
+An implementation of the [`DataSectionInitialisation`] trait with some sanity checks to [`despair!`] if there is detectable error.
 <!-- ANCHOR_END: DataSectionInitialiserWithChecks -->
 
 <!-- ANCHOR: DataSectionInitialiserWithChecks.load_data_section -->
 Load a seeded table of pre-computed data from a ROM table into RAM.
 
-See [`DataSectionInitialiser::load_data_section`] for implementation notes and assumptions.
+See [`DataSectionInitialisation::load_data_section`] for implementation notes and assumptions.
 
 It is possible to detect when `ram_start > ram_past_end` for address calculation, in which case the function will [`despair!`].
 
@@ -59,15 +59,15 @@ Note that it is still possible to fall into [_Undefined Behaviour_][UB] for scen
 <!-- ANCHOR: DataSectionInitialiserWithoutChecks -->
 Initialise a _data_ linker section, eg. `.data`.
 
-A minimal implementation of the [`DataSectionInitialiser`] trait that assumes its input arguments are correct and makes no attempt at checking.
+A minimal implementation of the [`DataSectionInitialisation`] trait that assumes its input arguments are correct and makes no attempt at checking.
 
-See [`DataSectionInitialiser::load_data_section`] for implementation notes and assumptions.
+See [`DataSectionInitialisation::load_data_section`] for implementation notes and assumptions.
 <!-- ANCHOR_END: DataSectionInitialiserWithoutChecks -->
 
 <!-- ANCHOR: DataSectionInitialiserWithoutChecks.load_data_section -->
 Load a seeded table of pre-computed data from a ROM table into RAM.
 
-A minimal implementation of the [`DataSectionInitialiser::load_data_section`] function that assumes its input arguments are correct and makes no attempt at checking.
+A minimal implementation of the [`DataSectionInitialisation::load_data_section`] function that assumes its input arguments are correct and makes no attempt at checking.
 
-See [`DataSectionInitialiser::load_data_section`] for implementation notes and assumptions.
+See [`DataSectionInitialisation::load_data_section`] for implementation notes and assumptions.
 <!-- ANCHOR_END: DataSectionInitialiserWithoutChecks.load_data_section -->

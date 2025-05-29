@@ -2,23 +2,23 @@ use core::mem::MaybeUninit;
 
 use smeg_kernel::bootstrapping::rust::*;
 
-pub struct RuntimeBootstrapper;
+pub struct McuMemoryBootstrapper;
 
-unsafe impl RuntimeBootstrapping for RuntimeBootstrapper {
+unsafe impl McuMemoryBootstrapping for McuMemoryBootstrapper {
     #[allow(static_mut_refs)]
-    unsafe fn initialise_bss_sections_using<I: BssSectionInitialiser>(initialiser: &I) {
+    unsafe fn bootstrap_bss_sections_using<I: BssSectionInitialisation>() {
         unsafe extern "C" {
             unsafe static mut __LINKER_BSS_START: MaybeUninit<usize>;
             unsafe static __LINKER_BSS_PAST_END: MaybeUninit<usize>;
         }
 
         unsafe {
-            initialiser.fill_bss_section(&mut __LINKER_BSS_START, &__LINKER_BSS_PAST_END, 0x00);
+            I::fill_bss_section(&mut __LINKER_BSS_START, &__LINKER_BSS_PAST_END, 0x00);
         }
     }
 
     #[allow(static_mut_refs)]
-    unsafe fn initialise_data_sections_using<I: DataSectionInitialiser>(initialiser: &I) {
+    unsafe fn bootstrap_data_sections_using<I: DataSectionInitialisation>() {
         unsafe extern "C" {
             unsafe static mut __LINKER_DATA_START: MaybeUninit<usize>;
             unsafe static __LINKER_DATA_PAST_END: MaybeUninit<usize>;
@@ -26,7 +26,7 @@ unsafe impl RuntimeBootstrapping for RuntimeBootstrapper {
         }
 
         unsafe {
-            initialiser.load_data_section(&mut __LINKER_DATA_START, &__LINKER_DATA_PAST_END, &__LINKER_DATA_LMA_START);
+            I::load_data_section(&mut __LINKER_DATA_START, &__LINKER_DATA_PAST_END, &__LINKER_DATA_LMA_START);
         }
     }
 }

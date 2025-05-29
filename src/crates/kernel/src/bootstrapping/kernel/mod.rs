@@ -1,5 +1,5 @@
 mod entrypoint;
-pub use entrypoint::entrypoint;
+pub use entrypoint::Entrypoint;
 
 mod board_mcu_bootstrapping;
 pub use board_mcu_bootstrapping::*;
