@@ -53,14 +53,8 @@ fn was_expectation_met_for(result: Result<(), Box<dyn Any + Send>>, is_expecting
 }
 
 fn panic_reason_from<'a>(result: Result<(), Box<dyn Any + Send + 'a>>) -> Cow<'a, str> {
-    match result {
-        Ok(()) => Cow::from("Thread did not despair"),
-        Err(err) => match (err.downcast_ref::<&'a str>(), err.downcast_ref::<&'a String>()) {
-            (Some(s), _) => Cow::from(*s),
-            (_, Some(s)) => Cow::from(*s),
-            _ => Cow::from("Unknown error from joined thread")
-        }
-    }
+    use smeg_testing_host_utils::threads::PanicReason;
+    result.panic_reason().unwrap_or(Cow::from("Thread did not despair"))
 }
 
 #[unsafe(no_mangle)]

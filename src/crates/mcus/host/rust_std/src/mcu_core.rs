@@ -1,6 +1,8 @@
 use std::cell::Cell;
 use std::{io, thread, time};
 
+use smeg_kernel::HasMcuCoreId;
+
 #[derive(Copy, Clone)]
 pub struct McuCore {
     id: usize,
@@ -56,8 +58,10 @@ impl McuCore {
         thread::sleep(time::Duration::from_secs(1));
         entrypoint()
     }
+}
 
-    pub fn this_core_id() -> usize {
+impl HasMcuCoreId for McuCore {
+    fn core_id() -> usize {
         McuCore::TLS.get().id
     }
 }
@@ -109,13 +113,13 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn this_core_id__called__expect_same_value_as_tls_core_id() {
+    fn core_id__called__expect_same_value_as_tls_core_id() {
         let core_id = any_core_id();
-        stub_this_core_id(core_id);
-        expect!(McuCore::this_core_id()).to_equal(core_id);
+        stub_core_id(core_id);
+        expect!(McuCore::core_id()).to_equal(core_id);
     }
 
-    pub(crate) fn stub_this_core_id(id: usize) {
+    fn stub_core_id(id: usize) {
         let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
         McuCore::TLS.set(mcu_core);
     }

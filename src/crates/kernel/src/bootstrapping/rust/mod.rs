@@ -11,3 +11,6 @@ pub use mcu_memory_bootstrapping::*;
 
 mod runtime_bootstrapping;
 pub use runtime_bootstrapping::*;
+
+#[cfg(test)]
+pub mod test_doubles;

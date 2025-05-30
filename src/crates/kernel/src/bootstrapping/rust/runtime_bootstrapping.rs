@@ -20,10 +20,11 @@ pub unsafe trait RuntimeBootstrapping {
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod tests {
-    use core::mem::MaybeUninit;
     use std::cell::Cell;
 
     use fluent_test::prelude::*;
+
+    use crate::test_doubles::Dummy;
 
     use super::*;
 
@@ -50,20 +51,10 @@ mod tests {
             }
         }
 
-        struct DummyBssSectionInitialiser;
-        unsafe impl BssSectionInitialisation for DummyBssSectionInitialiser {
-            unsafe fn fill_bss_section(_start: &mut MaybeUninit<usize>, _past_end: &MaybeUninit<usize>, _fill_value: u8) { }
-        }
-
-        struct DummyDataSectionInitialiser;
-        unsafe impl DataSectionInitialisation for DummyDataSectionInitialiser {
-            unsafe fn load_data_section(_ram_start: &mut MaybeUninit<usize>, _ram_past_end: &MaybeUninit<usize>, _rom_start: &usize) { }
-        }
-
         struct RuntimeBootstrapper;
         unsafe impl RuntimeBootstrapping for RuntimeBootstrapper {
-            type BssSectionInitialiser = DummyBssSectionInitialiser;
-            type DataSectionInitialiser = DummyDataSectionInitialiser;
+            type BssSectionInitialiser = Dummy;
+            type DataSectionInitialiser = Dummy;
             type McuMemoryBootstrapper = MockMcuMemoryBootstrapper;
         }
 

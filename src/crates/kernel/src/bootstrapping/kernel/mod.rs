@@ -6,3 +6,6 @@ pub use board_mcu_bootstrapping::*;
 
 mod mcu_core_bootstrapping;
 pub use mcu_core_bootstrapping::*;
+
+#[cfg(test)]
+pub mod test_doubles;
