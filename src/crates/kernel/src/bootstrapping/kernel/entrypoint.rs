@@ -8,9 +8,8 @@ pub unsafe trait Entrypoint {
     type BoardMcuBootstrapper: BoardMcuBootstrapping;
 
     unsafe fn entrypoint() -> ! {
-        // TODO: roll this into the kernel as a default implementation on the Entrypoint trait
         unsafe {
-            if <<Self::McuCoreBootstrapper as McuCoreBootstrapping>::McuCoreId as HasMcuCoreId>::core_id() == 0 {
+            if Self::McuCoreBootstrapper::core_id() == 0 {
                 Self::RuntimeBootstrapper::bootstrap();
             }
         }
@@ -21,8 +20,12 @@ pub unsafe trait Entrypoint {
         #[cfg(test)] panic!("RuntimeBootstrapper was not called");
 
         loop { }
+
+        // We need the MCU to reset the SP to the top of the core's stack, then jump to an endpoint we give it so we can create an object and call into that.
+        // Maybe need a SchedulerBootstrapping, which does that...
     }
 }
+
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod tests {
