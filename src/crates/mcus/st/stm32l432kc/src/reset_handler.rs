@@ -1,7 +1,7 @@
 include!("../../../../os/mcu_bootstrapping.rs.inc");
 
 unsafe extern "C" {
-    unsafe static __LINKER_INITIAL_SP: usize;
+    static __LINKER_INITIAL_SP: usize;
 }
 
 core::arch::global_asm!(r#"
@@ -14,7 +14,6 @@ _reset_handler:
     ldr r0, {0}
     msr msp, r0
     b {1}
-    b _reset_handler
 "#,
     sym __LINKER_INITIAL_SP,
     sym __smeg_os_entrypoint);
