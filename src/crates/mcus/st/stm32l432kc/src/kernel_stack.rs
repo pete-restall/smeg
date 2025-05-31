@@ -1,3 +1,5 @@
+use core::mem::MaybeUninit;
+
 use smeg_config::SMEG_CONFIG;
 
 const STACK_SIZE_WORDS: usize = SMEG_CONFIG.VALUES.KERNEL.STACK.SIZE_IN_WORDS as usize;
@@ -24,4 +26,4 @@ const _: () = assert!(
 
 #[used]
 #[unsafe(link_section = ".kernel.stack.0")]
-pub static RAW: [usize; STACK_SIZE_WORDS] = [0; STACK_SIZE_WORDS];
+pub static RAW: [MaybeUninit<usize>; STACK_SIZE_WORDS] = [MaybeUninit::uninit(); STACK_SIZE_WORDS];
