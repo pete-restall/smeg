@@ -52,9 +52,17 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH_TEXT
 
+    /* TODO: The .data and .bss sections will have some elements that ought to be retained if gating RAM blocks for power-saving, so SRAM2 needs to be used */
+    /* The build script / templating engine should be able to help with this - we can have two different snippets for sections depending on the feature gating */
     .data ORIGIN(SRAM) : \{
         . = ALIGN(4);
         __LINKER_DATA_START = .;
+
+        __LINKER_DATA_FLAGS_GUARANTEED_ZERO_ON_RESET_0 = .;
+        KEEP(*: (.data.flags.guaranteed_zero_on_reset.0));
+        . = ALIGN(4);
+        ASSERT((. - __LINKER_DATA_FLAGS_GUARANTEED_ZERO_ON_RESET_0) == 4, "Section .data.flags.guaranteed_zero_on_reset.0 must fit into a single word");
+
         *: (.data .data.*);
         __LINKER_DATA_PAST_END = .;
         . = ALIGN(4);

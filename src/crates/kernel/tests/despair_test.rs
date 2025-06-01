@@ -18,7 +18,8 @@ fn despair__called_using_with_and_because__expect_despair_handler_is_called_with
 fn any_error_code() -> KernelErrorCode {
     *any_item_from(&[
         KernelErrorCode::GeneralDespair,
-        KernelErrorCode::LinkerScriptDespair])
+        KernelErrorCode::LinkerScriptDespair,
+        KernelErrorCode::BootstrappingPanic])
 }
 
 #[test]

@@ -34,6 +34,13 @@ impl HasMcuCoreId for McuSingleCore {
     fn core_id() -> usize { 0 }
 }
 
+pub fn is_rust_runtime_initialised() -> bool {
+    use core::mem::MaybeUninit;
+    #[unsafe(link_section = ".data.flags.guaranteed_zero_on_reset.0")]
+    static IS_RUST_RUNTIME_INITIALISED: MaybeUninit<bool> = MaybeUninit::new(true);
+    unsafe { core::ptr::read_volatile(IS_RUST_RUNTIME_INITIALISED.as_ptr()) }
+}
+
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod tests {
