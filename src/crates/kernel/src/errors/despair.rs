@@ -22,24 +22,35 @@ macro_rules! despair {
     };
 }
 
-#[cfg(not(feature = "no_default_despair"))]
+#[cfg(all(not(test), not(feature = "no_default_despair")))]
 mod handler {
     use crate::errors::KernelError;
 
     #[unsafe(no_mangle)]
-    pub unsafe extern "Rust" fn __smeg_is_in_despair(squid: KernelError) -> ! {
+    pub unsafe fn __smeg_is_in_despair(squid: KernelError) -> ! {
         let mut squid_as_usize = 0;
         unsafe { core::ptr::write_volatile(&mut squid_as_usize, usize::from(squid)); }
         loop { /* Attach a debugger to examine the error code and tag on the stack */ }
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "no_default_despair")]
+mod handler {
+    use crate::errors::KernelError;
+
+    #[linkage = "weak"]
+    #[unsafe(no_mangle)]
+    pub unsafe fn __smeg_is_in_despair(_squid: KernelError) -> ! {
+        panic!("In stubbed despair, but expected this handler to be overridden because feature 'no_default_despair' has been set.");
+    }
+}
+
+#[cfg(all(test, not(feature = "no_default_despair")))]
 mod handler {
     use crate::errors::KernelError;
 
     #[unsafe(no_mangle)]
-    pub unsafe extern "Rust" fn __smeg_is_in_despair(_squid: KernelError) -> ! {
+    pub unsafe fn __smeg_is_in_despair(_squid: KernelError) -> ! {
         panic!("In despair.  Use an integration test if deliberately exercising despair or if despair is expected.");
     }
 }

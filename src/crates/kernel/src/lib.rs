@@ -1,4 +1,5 @@
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
+#![cfg_attr(feature = "no_default_despair", feature(linkage))]
 
 pub mod bootstrapping;
 

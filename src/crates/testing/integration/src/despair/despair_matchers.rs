@@ -58,7 +58,7 @@ fn panic_reason_from<'a>(result: Result<(), Box<dyn Any + Send + 'a>>) -> Cow<'a
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "Rust" fn __smeg_is_in_despair(squid: KernelError) -> ! {
+pub unsafe fn __smeg_is_in_despair(squid: KernelError) -> ! {
     if let Some(error_code) = EXPECTED_ERROR_CODE.get() {
         expect!(squid.code).to_equal(error_code);
     }
