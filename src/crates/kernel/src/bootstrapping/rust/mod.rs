@@ -9,6 +9,9 @@ pub use data_section_initialisation::*;
 mod mcu_memory_bootstrapping;
 pub use mcu_memory_bootstrapping::*;
 
+mod panic_bootstrapping;
+pub use panic_bootstrapping::*;
+
 mod runtime_bootstrapping;
 pub use runtime_bootstrapping::*;
 
