@@ -5,7 +5,9 @@ use crate::HalfUsize;
 pub enum KernelErrorCode {
     GeneralDespair,
     LinkerScriptDespair,
-    BootstrappingPanic
+    BootstrappingPanic,
+    InsideUnhandledIsr,
+    InsideReservedIsr
 }
 
 impl From<KernelErrorCode> for HalfUsize {
@@ -21,10 +23,12 @@ mod tests {
 
     use super::*;
 
-    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 3] = [
+    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 5] = [
         (KernelErrorCode::GeneralDespair, 0),
         (KernelErrorCode::LinkerScriptDespair, 1),
-        (KernelErrorCode::BootstrappingPanic, 2)];
+        (KernelErrorCode::BootstrappingPanic, 2),
+        (KernelErrorCode::InsideUnhandledIsr, 3),
+        (KernelErrorCode::InsideReservedIsr, 4)];
 
     #[test]
     fn from__called_for_instance_of_each_unit_variant__expect_each_discriminator() {

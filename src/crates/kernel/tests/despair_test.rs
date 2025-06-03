@@ -19,7 +19,9 @@ fn any_error_code() -> KernelErrorCode {
     *any_item_from(&[
         KernelErrorCode::GeneralDespair,
         KernelErrorCode::LinkerScriptDespair,
-        KernelErrorCode::BootstrappingPanic])
+        KernelErrorCode::BootstrappingPanic,
+        KernelErrorCode::InsideUnhandledIsr,
+        KernelErrorCode::InsideReservedIsr])
 }
 
 #[test]

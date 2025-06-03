@@ -28,7 +28,6 @@ EXTERN(_reset_handler);
 SECTIONS
 \{
     .text.isr_vector_table : \{
-        KEEP(*(.smeg.isr_vector_table.arm.cortex_m4));
         KEEP(*(.smeg.isr_vector_table.st.stm32l432kc));
         ASSERT(
             (. - ADDR(.text.isr_vector_table) == LENGTH(FLASH_ISR_VECTOR_TABLE)),
