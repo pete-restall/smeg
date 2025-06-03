@@ -25,7 +25,7 @@ mod panic_handler;
 pub(crate) extern crate self as smeg_kernel;
 
 pub(crate) mod caller {
-    pub struct IsKernel;
+    pub enum IsKernel { }
     pub trait RestrictedToKernel { }
     impl RestrictedToKernel for IsKernel { }
 }
