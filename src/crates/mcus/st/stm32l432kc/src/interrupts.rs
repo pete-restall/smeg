@@ -159,7 +159,7 @@ impl IsrVectorTable {
             _unavailable_sdmmc1: RESERVED_ISR_VECTOR,
             _reserved_66: RESERVED_ISR_VECTOR,
             spi3: None,
-            _unavailable_uart4: None,
+            _unavailable_uart4: RESERVED_ISR_VECTOR,
             _reserved_69: RESERVED_ISR_VECTOR,
             tim6_dac_under: None,
             tim7: None,
@@ -198,8 +198,8 @@ impl IsrVectorTable {
     pub const fn with_default_unhandled(&self) -> Self {
         Self {
             cortex_m4: self.cortex_m4.with_default_unhandled(),
-            wwdg: None,
-            pvd_pvm: None,
+            wwdg: with_default_unhandled(self.wwdg),
+            pvd_pvm: with_default_unhandled(self.pvd_pvm),
             rtc_tamp_css_lse: with_default_unhandled(self.rtc_tamp_css_lse),
             rtc_wkup: with_default_unhandled(self.rtc_wkup),
             flash: with_default_unhandled(self.flash),
@@ -264,12 +264,11 @@ impl IsrVectorTable {
     }
 }
 
-// TODO: probably need to assign this from a kernel-provided macro that takes 'IsrVectorTable::default()' and uses the known list of drivers to
-// mutate it at compile-time.  The known list of drivers will be discovered from the bootstrapping types, so each driver struct can expose a
-// 'const fn bootstrap_isr_vector_table<T>() -> T' method or implement a trait or somesuch.
-
-const fn magic_kernel_bootstrapping_stuff(x: IsrVectorTable) -> IsrVectorTable { x }
-
-#[used]
-#[unsafe(link_section = ".smeg.isr_vector_table.st.stm32l432kc")]
-static ISR_VECTOR_TABLE: IsrVectorTable = magic_kernel_bootstrapping_stuff(IsrVectorTable::default()).with_default_unhandled();
+#[macro_export]
+macro_rules! define_isr_vector_table_from {
+    ($isrs:expr) => {
+        #[used]
+        #[unsafe(link_section = ".smeg.isr_vector_table.st.stm32l432kc")]
+        static _ISR_VECTOR_TABLE: $crate::interrupts::IsrVectorTable = const { $isrs }.with_default_unhandled();
+    }
+}

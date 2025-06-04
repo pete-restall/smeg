@@ -9,12 +9,7 @@ mod reset_handler;
 mod kernel_stack;
 
 #[cfg(target_arch = "arm")]
-mod interrupts;
+pub mod interrupts;
 
 #[cfg(target_arch = "arm")]
 mod blinky_blinky;
-
-// TODO: Eventually when proper symbols are used, this ought to be able to be deleted...
-pub fn _needed_to_prevent_linker_gc() {
-    panic!("should never be called")
-}
