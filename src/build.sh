@@ -91,7 +91,7 @@ if [ "x${build_action}" == "xtest" ]; then
     # build_action="llvm-cov";
     # test_args="--workspace --codecov --output-path lcov.info";
     # target_args="";
-    test_args+=" --workspace";
+    test_args+=" --workspace --features test_doubles";
 fi
 
 FLUENT_TEST_ENHANCED_OUTPUT=true;

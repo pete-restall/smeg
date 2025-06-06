@@ -7,6 +7,7 @@ authors = ["Pete Restall <pete@restall.net>"]
 [dependencies]
 include-utils = { version = "0.2.4", features = ["workspace"] }
 smeg-config = { path = "../config" }
+smeg-testing-host-utils = { path = "../testing/host-utils", optional = true }
 smeg-kernel-procmacro = { path = "procmacro" }
 
 [dev-dependencies]
@@ -17,3 +18,4 @@ smeg-testing-integration = { path = "../testing/integration" }
 [features]
 std = ["smeg-config/std"]
 no_default_despair = []
+test_doubles = ["dep:smeg-testing-host-utils"]

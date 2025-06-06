@@ -30,7 +30,7 @@ pub(crate) mod caller {
     impl RestrictedToKernel for IsKernel { }
 }
 
-#[cfg(test)]
+#[cfg(any(test, feature = "test_doubles"))]
 pub mod test_doubles;
 
 pub fn is_rust_runtime_initialised() -> bool {
@@ -38,6 +38,11 @@ pub fn is_rust_runtime_initialised() -> bool {
     #[unsafe(link_section = ".data.flags.guaranteed_zero_on_reset.0")]
     static IS_RUST_RUNTIME_INITIALISED: MaybeUninit<bool> = MaybeUninit::new(true);
     unsafe { core::ptr::read_volatile(IS_RUST_RUNTIME_INITIALISED.as_ptr()) }
+}
+
+pub const fn const_unwrap_or<T: Copy>(maybe_none: Option<T>, alternative: T) -> T {
+    // FIXME: This can be removed once Rust implements a const implementation for Option::unwrap_or(...)
+    some_or(maybe_none, Some(alternative)).unwrap()
 }
 
 pub const fn some_or<T: Copy>(maybe_none: Option<T>, alternative: Option<T>) -> Option<T> {
@@ -54,6 +59,28 @@ mod test {
     use fluent_test::prelude::*;
 
     use super::*;
+
+    #[test]
+    fn const_unwrap_or__called_with_none__expect_alternative() {
+        const RESULT: bool = const {
+            const NONE: Option<usize> = None;
+            const ALTERNATIVE: usize = 123;
+            const_unwrap_or(NONE, ALTERNATIVE) == ALTERNATIVE
+        };
+
+        expect!(RESULT).to_be_true();
+    }
+
+    #[test]
+    fn const_unwrap_or__called_with_some__expect_same_value() {
+        const RESULT: bool = const {
+            const SOME: Option<char> = Some('x');
+            const ALTERNATIVE: char = 'y';
+            const_unwrap_or(SOME, ALTERNATIVE) == SOME.unwrap()
+        };
+
+        expect!(RESULT).to_be_true();
+    }
 
     #[test]
     fn some_or__called_with_none__expect_alternative() {

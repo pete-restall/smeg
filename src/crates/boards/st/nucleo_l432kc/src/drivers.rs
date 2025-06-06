@@ -1,5 +1,5 @@
 use smeg_mcu_st_stm32l432kc::define_isr_vector_table_from;
-use smeg_mcu_st_stm32l432kc::interrupts::IsrVectorTable;
+use smeg_mcu_st_stm32l432kc::interrupts::IsrVectorTableBuilder;
 
 struct Drivers;
 
@@ -12,4 +12,4 @@ impl Drivers {
     }
 }
 
-define_isr_vector_table_from!(Drivers::collect_isr_vectors(IsrVectorTable::default()));
+define_isr_vector_table_from!(Drivers::collect_isr_vectors(IsrVectorTableBuilder::default()));
