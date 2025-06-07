@@ -1,0 +1,18 @@
+[package]
+name = "smeg-drivers-kernel-syscall"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dependencies]
+cfg-if = "1.0.0"
+smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family", optional = true }
+
+[dev-dependencies]
+fluent-test = "0.4.3"
+
+[features]
+std = ["smeg-kernel/std"]
+smeg-mcu-arm- = ["dep:smeg-mcu-arm-cortex_m4_family"]
+smeg-mcu-arm-cortex_m4_family = ["smeg-mcu-arm-", "dep:smeg-mcu-arm-cortex_m4_family"]

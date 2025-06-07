@@ -3,9 +3,8 @@ members = [
     "crates/boards/*/*",
     "crates/config",
     "crates/config/procmacro",
-    "crates/drivers/*",
+    "crates/drivers/*/*",
     "crates/kernel",
-    "crates/drivers/*",
     "crates/mcus/*/*",
     "crates/os",
 

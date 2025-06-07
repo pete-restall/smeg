@@ -6,7 +6,9 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family" }
 smeg-mcu-st-stm32l432kc = { path = "../../../mcus/st/stm32l432kc" }
+smeg-drivers-kernel-syscall = { path = "../../../drivers/kernel/syscall", features = ["smeg-mcu-arm-cortex_m4_family"] }
 
 [dev-dependencies]
 smeg-testing-integration = { path = "../../../testing/integration" }
