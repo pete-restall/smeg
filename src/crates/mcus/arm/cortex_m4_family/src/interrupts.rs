@@ -144,15 +144,15 @@ pub mod test_doubles {
     }
 
     unsafe extern "C" fn isr_stubbed_for_despair_1() -> ! {
-        despair!(with(KernelErrorCode::GeneralDespair), because("Cortex M4 ISR stub was not expected to be called (1)"));
+        despair!(with(KernelErrorCode::GeneralDespair(1)), because("Cortex M4 ISR stub was not expected to be called (1)"));
     }
 
     unsafe extern "C" fn isr_stubbed_for_despair_2() -> ! {
-        despair!(with(KernelErrorCode::GeneralDespair), because("Cortex M4 ISR stub was not expected to be called (2)"));
+        despair!(with(KernelErrorCode::GeneralDespair(2)), because("Cortex M4 ISR stub was not expected to be called (2)"));
     }
 
     unsafe extern "C" fn isr_stubbed_for_despair_3() -> ! {
-        despair!(with(KernelErrorCode::GeneralDespair), because("Cortex M4 ISR stub was not expected to be called (3)"));
+        despair!(with(KernelErrorCode::GeneralDespair(3)), because("Cortex M4 ISR stub was not expected to be called (3)"));
     }
 
     fn any_stub_sv_call_isr() -> Option<SvCallIsrVector> {
@@ -165,6 +165,6 @@ pub mod test_doubles {
     }
 
     unsafe extern "C" fn sv_call_isr_stubbed_for_despair(_r0: usize, _r1: usize, _r2: usize, _r3: usize) -> ! {
-        despair!(with(KernelErrorCode::GeneralDespair), because("Cortex M4 SV_CALL ISR stub was not expected to be called"));
+        despair!(with(KernelErrorCode::GeneralDespair(0)), because("Cortex M4 SV_CALL ISR stub was not expected to be called"));
     }
 }

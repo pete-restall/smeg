@@ -31,7 +31,7 @@ unsafe extern "C" fn on_sv_call_isr(_r0: usize, _r1: usize, _r2: usize, _r3: usi
     // SyscallErrorCode is not wide enough
 
     smeg_kernel::despair!(
-        with(smeg_kernel::errors::KernelErrorCode::GeneralDespair),
+        with(smeg_kernel::errors::KernelErrorCode::GeneralDespair(0)),
         because("TODO: the unrecognised syscall can actually return an Err(SyscallErrorCode::UnknownSyscall)..."));
 }
 

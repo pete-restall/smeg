@@ -5,6 +5,7 @@ use fluent_test::prelude::*;
 use smeg_kernel::despair;
 use smeg_kernel::errors::KernelErrorCode;
 
+use smeg_testing_host_utils::integers::any_u8;
 use smeg_testing_host_utils::seq::any_item_from;
 use smeg_testing_integration::despair::DespairMatchers;
 
@@ -17,11 +18,14 @@ fn despair__called_using_with_and_because__expect_despair_handler_is_called_with
 
 fn any_error_code() -> KernelErrorCode {
     *any_item_from(&[
-        KernelErrorCode::GeneralDespair,
+        KernelErrorCode::GeneralDespair(any_u8()),
         KernelErrorCode::LinkerScriptDespair,
         KernelErrorCode::BootstrappingPanic,
         KernelErrorCode::InsideUnhandledIsr,
-        KernelErrorCode::InsideReservedIsr])
+        KernelErrorCode::InsideReservedIsr,
+        KernelErrorCode::Retryable(any_u8()),
+        KernelErrorCode::UnknownSyscall,
+        KernelErrorCode::GeneralSyscallError(any_u8())])
 }
 
 #[test]
@@ -33,5 +37,5 @@ fn despair__called_using_with__expect_despair_handler_is_called_with_same_error_
 #[test]
 fn despair__called_using_because__expect_despair_handler_is_called_with_error_code_for_general_despair() {
     expect!(|| { despair!(because("general despair is to be expected")); })
-        .to_despair_with_error_code(KernelErrorCode::GeneralDespair);
+        .to_despair_with_error_code(KernelErrorCode::GeneralDespair(0));
 }
