@@ -81,3 +81,29 @@ mod tests {
         }
     }
 }
+
+#[allow(unused)]
+#[cfg(any(test, feature = "test_doubles"))]
+pub mod test_doubles {
+    use smeg_testing_host_utils::integers::any_u8;
+
+    use super::KernelErrorCode;
+
+    pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 8] {
+        use KernelErrorCode::*;
+        [
+            GeneralDespair(any_u8()),
+            LinkerScriptDespair,
+            BootstrappingPanic,
+            InsideUnhandledIsr,
+            InsideReservedIsr,
+            Retryable(any_u8()),
+            UnknownSyscall,
+            GeneralSyscallError(any_u8())
+        ]
+    }
+}
+
+pub mod prelude {
+    pub use super::KernelErrorCode;
+}

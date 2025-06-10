@@ -88,3 +88,25 @@ mod tests {
         expect!(Into::<HalfUsize>::into(tag)).to_equal(tag.id);
     }
 }
+
+#[cfg(any(test, feature = "test_doubles"))]
+pub mod test_doubles {
+    use crate::HalfUsize;
+    use crate::test_doubles::Stub;
+
+    use smeg_testing_host_utils::integers::any_usize;
+
+    use super::*;
+
+    impl From<Stub> for ErrorTag {
+        fn from(_value: Stub) -> Self {
+            Self {
+                id: any_usize() as HalfUsize
+            }
+        }
+    }
+}
+
+pub mod prelude {
+    pub use super::ErrorTag;
+}

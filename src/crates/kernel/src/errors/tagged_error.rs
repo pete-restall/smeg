@@ -248,3 +248,7 @@ mod tests {
         expect!(Into::<NonZero<usize>>::into(&error).get() as HalfUsize).to_equal(error.tag.into());
     }
 }
+
+pub mod prelude {
+    pub use super::TaggedError;
+}
