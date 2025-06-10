@@ -73,8 +73,9 @@ unsafe extern "C" {
 }
 
 // TODO: just a blinky-blinky to make sure the code links and runs properly on the Nucleo board.
+#[unsafe(no_mangle)]
 #[allow(static_mut_refs)]
-pub unsafe fn blinky_blinky() -> ! {
+pub extern "C" fn blinky_blinky() -> ! {
     // TODO: verify that the linker script gets the addresses right - because LLD differs from LD in some really horrible, subtle ways...
     if !core::ptr::addr_eq(&raw const __LINKER_PERIPHERALS_AHB1_RCC, 0x40021000 as *const u32) {
         panic!("Linker script for AHB1 RCC register is wrong");
@@ -108,9 +109,15 @@ pub unsafe fn blinky_blinky() -> ! {
         let gpiob_odr = &raw mut __LINKER_PERIPHERALS_AHB2_GPIOB.ODR;
 
         let delay = 200000; // Debug builds now include some optimisations, but if not: if cfg!(debug_assertions) { 10000 } else { 200000 };
+        let mut blink = 0;
         loop {
-            let blink = core::ptr::read_volatile(gpiob_odr);
-            core::ptr::write_volatile(gpiob_odr, blink ^ (1 << 3));
+            blink ^= 1;
+            use smeg_kernel::syscalls::McuSyscallInvocation;
+            let result = smeg_mcu_arm_cortex_m4_family::syscalls::Syscalls::invoke_syscall(blink);
+            if !result.is_ok() {
+                smeg_kernel::despair!(with(smeg_kernel::errors::KernelErrorCode::GeneralDespair(0)), because("Syscall ISR returned non-OK value"));
+            }
+
             for _ in 0..delay {
                 asm!("nop");
             }

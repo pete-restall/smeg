@@ -2,7 +2,6 @@
 use smeg_kernel::docs;
 
 use core::arch::asm;
-use core::mem::MaybeUninit;
 use core::sync::atomic::compiler_fence;
 
 use smeg_kernel::errors::{UsizeResult, UsizeResultConversions};
@@ -17,17 +16,18 @@ impl McuSyscallInvocation for Syscalls {
     fn invoke_syscall(id: u8) -> SyscallResult {
         compiler_fence(core::sync::atomic::Ordering::Release);
 
-        let mut result = MaybeUninit::uninit();
+        let id = id as usize;
+        let mut result: usize;
         unsafe {
             asm!(
-                "svcall #0x00",
-                in("r0") id as usize,
+                "svc #0x00",
+                in("r0") id,
                 out("r1") result,
                 options(preserves_flags));
         }
 
         compiler_fence(core::sync::atomic::Ordering::Acquire);
 
-        unsafe { UsizeResult::from_usize_unchecked(result.assume_init()).as_result_unchecked() }
+        unsafe { UsizeResult::from_usize_unchecked(result).as_result_unchecked() }
     }
 }

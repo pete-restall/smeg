@@ -1,5 +1,7 @@
+use core::sync::atomic::compiler_fence;
+
 use crate::caller;
-use crate::bootstrapping::kernel::{BoardMcuBootstrapping, McuCoreBootstrapping};
+use crate::bootstrapping::kernel::{BoardMcuBootstrapping/*, ContextSwitchingBootstrapping*/, McuCoreBootstrapping};
 use crate::bootstrapping::rust::RuntimeBootstrapping;
 
 pub unsafe trait Entrypoint {
@@ -20,6 +22,13 @@ pub unsafe trait Entrypoint {
         // kernel's initialisation task and pass in any injected types (eg. factories, the BoardMcuBootstrapper, etc.)
         #[cfg(test)] panic!("RuntimeBootstrapper was not called");
 
+unsafe {
+    unsafe extern "C" { fn blinky_blinky() -> !; }
+    blinky_blinky();
+}
+
+
+
 // Maybe something like this comes next:
 // McuCoreBootstrapper::bootstrap::<Kernel>()
 //
@@ -38,8 +47,61 @@ pub unsafe trait Entrypoint {
 
         loop { }
 
+// Drivers need a way to register an ISR (at compile-time):
+//     Probably best to use an MCU-provided macro to define the ISRs to ensure the ABI, signature, prologue, epilogue are correct
+//     We need provision for raw ISRs as well as per-core ISRs that take a given context as an argument
+//     The MCU-specific macro can decide how to implement the ISR, probably as a specially named function or a const-friendly Some(...).or(...) type thing
+//     All ISRs should be disabled
+//
+//     Concept:
+//         #[derive(PerCoreIsr)]
+//         struct SomeState {
+//             ...
+//         }
+//
+//         impl PerCoreIsr for SomeState ?
+
+// Bootstrap the syscall mechanism - this involves:
+//     The syscall mechanism is just a driver, so the per-core ISR should've already been registered at compile-time
+//     Any initialisation code needs to be run, such as enabling the syscall interrupt after all other initialisation has been done
+//     As part of building up the ISR body, the syscall driver needs to examine all other drivers for exported syscalls that can be dispatched to
+//     Each syscall ought to be able to be enabled and disabled - calling disabled syscalls ought to kernel_panic!(...) with a TaggedError
+//     The panic_handler, if called from within an ISR because of a failed syscall, ought to flag the offending task as 'not runnable / panicked' and
+//     schedule a user-space recovery task for the bad task, to avoid staying in an ISR too long
+
+// Bootstrap the context-switching (yield) syscall - this involves:
+//     calling back to the MCU module and passing a kernel task to continue system initialisation
+//     note that kernel tasks cannot be pre-empted by other kernel tasks unless we switch to a pure ISR stack and use separate stacks for each kernel task
+//     (leave this option open - probably the better design)
+//
+// context-switching bootstrapping for the Cortex M4 is going to:
+//     set the PSP stack pointer to the top of the kernel task's
+//     reset the MSP stack pointer back to the top for ISRs to use
+//     enable interrupts, preferably just the syscall one
+//     revoke kernel privileges
+//     return from interrupt (but the start of the kernel task)
+
+// A driver can be provided for the trap exception for illegal instructions, privilege issues, etc. which involves:
+//     default implementation will just despair or reset the core (feature-toggled)
+//     any number of driver implementations can be provided to do more interesting things, such as terminate the offending tasks, reset the MCU, emulate
+//     hardware / missing instructions, etc.
+
+// Note that per-core data should be placed adjacent to the per-core ISR stack when linking.  This ensures locality and also an easier way to mark a
+// contiguous block of RAM as protected / accessible for a given core if there is an MPU available.
+
+
         // We need the MCU to reset the SP to the top of the core's stack, then jump to an endpoint we give it so we can create an object and call into that.
         // Maybe need a SchedulerBootstrapping, which does that...
+
+        // kernel
+        //     - syscall mechanism; needs to be (compile-time-)extensible for drivers to create their own syscalls (the scheduler is a driver...)
+        //     - scheduler bootstrapping
+        //     - context switching; needs to be (compile-time-)extensible for drivers to save / restore their own per-task state; only tasks using the driver, though
+
+        // set msp = top of current core's stack and branch to entrypoint
+        // entrypoint creates syscall
+        // entrypoint creates scheduler on stack (factory for this needs to be injected)
+        // scheduler is
     }
 }
 

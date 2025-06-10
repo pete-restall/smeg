@@ -1,18 +1,39 @@
 use smeg_kernel::syscalls::SyscallResult;
 
+use smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines;
+use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
+
 pub use smeg_mcu_arm_cortex_m4_family::interrupts::IsrVectorTableBuilder;
+
+isr_fn_trampolines! {
+    fn on_sv_call_trampoline(&mut IsrBasicStackFrame) -> on_sv_call_isr -> "thread_main" /*"thread_process"*/;
+}
 
 pub const fn collect_isr_vectors(isrs: IsrVectorTableBuilder) -> IsrVectorTableBuilder {
     IsrVectorTableBuilder {
-        sv_call: Some(on_sv_call_isr),
+        sv_call: Some(on_sv_call_trampoline),
         ..isrs
     }
 }
 
-// TODO: Because of pre-emptive late-arriving exceptions not pushing context of their own (ARMv7-M reference manual, see B1.5.11 and 'ExceptionTaken()' on
-// page B1-589), the values of r0-r3 are UNKNOWN on entry !  This means that we cannot rely on the function-call syntax, which would be awesome and
-// efficient - instead, we need to examine the value of r0 from the stack :(  Update this function signature accordingly...
-unsafe extern "C" fn on_sv_call_isr(_r0: usize, _r1: usize, _r2: usize, _r3: usize) -> ! {
+unsafe extern "C" fn on_sv_call_isr(stack_frame: &mut IsrBasicStackFrame) {
+    // TODO: temporary blinky-blinky stuff, to verify syscall invocation on the Nucleo board...
+
+    unsafe {
+        static mut ODR: *mut usize = (0x48000400_usize + 20_usize) as *mut usize;
+        let mut odr = core::ptr::read_volatile(ODR);
+        if stack_frame.r0 == 1 {
+            odr |= 1 << 3;
+        } else if stack_frame.r0 == 0 {
+            odr &= !(1 << 3);
+        }
+
+        core::ptr::write_volatile(ODR, odr);
+
+        stack_frame.r1 = 0;
+    }
+
+
     // just the Cortex-specific bits here, then call into a more generic function that returns a SyscallResult
     // specifically, extract the value of r0 to use as the syscall ID and call the generic handler
     // we rely on the fact that the CPU's context-saving uses the same ABI as C functions, so the Rust compiler will 'do the right thing' with any extra
@@ -32,10 +53,11 @@ unsafe extern "C" fn on_sv_call_isr(_r0: usize, _r1: usize, _r2: usize, _r3: usi
     // the caller-saved r1 value in the stack needs to be overwritten with the usize representation of SyscallResult, so that when the CPU pops r1 on return,
     // the caller can use it as a SyscallResult.  The use of r1 over r0 allows the caller to determine which r0 (syscall ID) triggered the error, since a
     // SyscallErrorCode is not wide enough
-
+/*
     smeg_kernel::despair!(
         with(smeg_kernel::errors::KernelErrorCode::GeneralDespair(0)),
         because("TODO: the unrecognised syscall can actually return an Err(SyscallErrorCode::UnknownSyscall)..."));
+*/
 }
 
 #[cfg(test)]
