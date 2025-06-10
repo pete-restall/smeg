@@ -9,6 +9,9 @@ pub const fn collect_isr_vectors(isrs: IsrVectorTableBuilder) -> IsrVectorTableB
     }
 }
 
+// TODO: Because of pre-emptive late-arriving exceptions not pushing context of their own (ARMv7-M reference manual, see B1.5.11 and 'ExceptionTaken()' on
+// page B1-589), the values of r0-r3 are UNKNOWN on entry !  This means that we cannot rely on the function-call syntax, which would be awesome and
+// efficient - instead, we need to examine the value of r0 from the stack :(  Update this function signature accordingly...
 unsafe extern "C" fn on_sv_call_isr(_r0: usize, _r1: usize, _r2: usize, _r3: usize) -> ! {
     // just the Cortex-specific bits here, then call into a more generic function that returns a SyscallResult
     // specifically, extract the value of r0 to use as the syscall ID and call the generic handler
