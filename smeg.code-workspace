@@ -48,7 +48,7 @@
         "version": "0.2.0",
         "configurations": [
             {
-                "name": "Nucleo L432KC Debug",
+                "name": "Nucleo L432KC Debug (Debug)",
                 "cwd": "${workspaceRoot}",
                 "executable": "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/smeg-os.elf",
                 "device": "STM32L432KC",
@@ -58,6 +58,19 @@
                 "servertype": "openocd",
                 "configFiles": [
                     "${workspaceRoot}/src/target/st-nucleo_l432kc-default/debug/openocd.cfg"
+                ]
+            },
+            {
+                "name": "Nucleo L432KC Debug (Release)",
+                "cwd": "${workspaceRoot}",
+                "executable": "${workspaceRoot}/src/target/st-nucleo_l432kc-default/release/smeg-os.elf",
+                "device": "STM32L432KC",
+                "request": "launch",
+                "type": "cortex-debug",
+                "runToEntryPoint": "_reset_handler",
+                "servertype": "openocd",
+                "configFiles": [
+                    "${workspaceRoot}/src/target/st-nucleo_l432kc-default/release/openocd.cfg"
                 ]
             },
             {
