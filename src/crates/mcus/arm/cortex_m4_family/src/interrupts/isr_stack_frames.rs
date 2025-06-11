@@ -20,15 +20,15 @@ pub type IsrFnMut<T> = unsafe extern "C" fn(&mut T);
 #[macro_export]
 macro_rules! isr_fn_trampolines {
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "handler_main"; ) => {
-        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xfffffff1_usize ) } /* TODO: 0xffffffe1_usize when using FP with extended frame... */
+        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
     };
 
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_main"; ) => {
-        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xfffffff9_usize ) } /* TODO: 0xffffffe9_usize when using FP with extended frame... */
+        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
     };
 
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_process"; ) => {
-        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xfffffffd_usize ) } /* TODO: 0xffffffed_usize when using FP with extended frame... */
+        isr_fn_trampolines! { @__( $trampoline_fn_name, mut, IsrBasicStackFrame, $target_fn_name, 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
     };
 
     ( @__( $trampoline_fn_name:ident, $mutability:ident, $frame_type:ident, $target_fn_name:ident, $fn_return:literal ) ) => {
@@ -36,22 +36,21 @@ macro_rules! isr_fn_trampolines {
         unsafe extern "C" fn $trampoline_fn_name() -> ! {
 //            const _: ::smeg_mcu_arm_cortex_m4_family::interrupts::IsrFnMut<::smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame> = #fn_name;
 
-            unsafe extern "C" fn trampoline(frame: *$mutability $frame_type /*frame_addr: usize*/) -> usize {/*
+            unsafe extern "C" fn trampoline(frame: *$mutability $frame_type /*frame_addr: usize*/) {/*
                 let mut frame = (); // TODO: an attempt at creating provenance given a usize, but this might be UB because it's the stack which isn't disjoint to Rust's working memory... HOWEVER...doesn't work, whereas a raw pointer from asm!(...) does... :-/
                 let mut frame = &$mutability frame as *$mutability ();
                 let mut frame = frame.with_addr(frame_addr).cast::<$frame_type>();*/
                 unsafe {
                     $target_fn_name(&$mutability *frame);
                 }
-
-                $fn_return
             }
 
             ::core::arch::naked_asm!(r#"
                 mov r0, sp
-                bl {}
-                bx r0"#,
-                sym trampoline);
+                mvn lr, #{isr_retval}
+                b {trampoline}"#,
+                isr_retval = const !$fn_return,
+                trampoline = sym trampoline);
         }
     };
 }
