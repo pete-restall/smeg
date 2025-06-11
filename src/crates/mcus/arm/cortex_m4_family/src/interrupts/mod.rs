@@ -1,3 +1,5 @@
+mod isr_fn_trampolines;
+
 mod isr_stack_frames;
 pub use isr_stack_frames::prelude::*;
 
