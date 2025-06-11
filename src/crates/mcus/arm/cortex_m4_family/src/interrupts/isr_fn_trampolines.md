@@ -9,18 +9,23 @@ Note the trailing `;`, which allows several trampolines to be defined within the
 ## 1. Trampoline with a Reference to a Stack Frame
 An example use of the macro might be:
 ```
+# #[macro_use] extern crate smeg_mcu_arm_cortex_m4_family;
+# use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
 isr_fn_trampolines! {
     fn sv_call_isr(&mut IsrBasicStackFrame) -> on_syscall -> "thread_process";
 }
 ```
 The above constructs a trampoline function that can be inserted into the ISR Vector Table, which in turn calls your own ISR `on_syscall`.  The trampoline has the following signature:
 ```
-unsafe extern "C" fn sv_call_isr() -> !;
+unsafe extern "C" {
+    unsafe fn sv_call_isr() -> !;
+}
 ```
 The target function in the above example is `on_syscall` and is for you to write.  It will be along the lines of:
 ```
+# use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
 unsafe extern "C" fn on_syscall(stack_frame: &mut IsrBasicStackFrame) {
-    ...
+    // ...
 }
 ```
 Note the absence of the `!` (never) return - there is no epilogue or prologue to wire in as the trampoline takes care of it.  Once your `on_syscall` function returns, the trampoline returns from the ISR and directs the CPU to return control back to the main program using:

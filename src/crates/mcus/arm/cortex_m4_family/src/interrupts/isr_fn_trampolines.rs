@@ -4,15 +4,15 @@ use smeg_kernel::docs;
 #[doc = docs::side_by_side_md!("isr_fn_trampolines")]
 macro_rules! isr_fn_trampolines {
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "handler_main"; ) => {
-        isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
     };
 
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_main"; ) => {
-        isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
     };
 
     ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_process"; ) => {
-        isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
     };
 
     ( @__(
@@ -24,21 +24,28 @@ macro_rules! isr_fn_trampolines {
         $target_fn_name:ident,
         $fn_return:literal ) ) => {
 
-        #[naked]
+        #[cfg_attr(target_arch = "arm", naked)]
         #[doc = isr_fn_trampolines! { @__( $doc_attr ) }]
         unsafe extern "C" fn $trampoline_fn_name() -> ! {
-            unsafe extern "C" fn trampoline(frame: *$ptr_mutability $frame_type) {
-                unsafe {
-                    $target_fn_name(&$ref_mutability *frame)
+            ::cfg_if::cfg_if! {
+                if #[cfg(target_arch = "arm")] {
+                    unsafe extern "C" fn trampoline(frame: *$ptr_mutability ::smeg_mcu_arm_cortex_m4_family::interrupts::$frame_type) {
+                        unsafe {
+                            $target_fn_name(&$ref_mutability *frame)
+                        }
+                    }
+
+                    ::core::arch::naked_asm!(r#"
+                        mov r0, sp
+                        mvn lr, #{isr_retval}
+                        b {trampoline}"#,
+                        isr_retval = const !$fn_return,
+                        trampoline = sym trampoline);
+
+                } else {
+                    panic!("Cannot call a Cortex M4 ISR trampoline on a non-Cortex M4 (running tests ?)");
                 }
             }
-
-            ::core::arch::naked_asm!(r#"
-                mov r0, sp
-                mvn lr, #{isr_retval}
-                b {trampoline}"#,
-                isr_retval = const !$fn_return,
-                trampoline = sym trampoline);
         }
     };
 

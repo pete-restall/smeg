@@ -6,12 +6,12 @@ use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
 pub use smeg_mcu_arm_cortex_m4_family::interrupts::IsrVectorTableBuilder;
 
 isr_fn_trampolines! {
-    fn on_sv_call_trampoline(&mut IsrBasicStackFrame) -> on_sv_call_isr -> "thread_main" /*"thread_process"*/;
+    fn on_sv_call_isr_trampoline(&mut IsrBasicStackFrame) -> on_sv_call_isr -> "thread_main" /* TODO: "thread_process" or even a new option, to allow context-switching */;
 }
 
 pub const fn collect_isr_vectors(isrs: IsrVectorTableBuilder) -> IsrVectorTableBuilder {
     IsrVectorTableBuilder {
-        sv_call: Some(on_sv_call_trampoline),
+        sv_call: Some(on_sv_call_isr_trampoline),
         ..isrs
     }
 }
@@ -89,6 +89,6 @@ mod test {
     fn collect_isr_vectors__called__expect_sv_call_isr_is_added() {
         let original_isrs = IsrVectorTableBuilder::from(Stub);
         let added_isrs = collect_isr_vectors(original_isrs.clone());
-        expect!(added_isrs.sv_call).to_equal(Some(on_sv_call_isr));
+        expect!(added_isrs.sv_call).to_equal(Some(on_sv_call_isr_trampoline));
     }
 }
