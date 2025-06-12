@@ -1,2 +1,5 @@
 [mcus.st.stm32l432kc]
 reserve_sram2_words = 0
+
+[mcus.st.stm32l432kc.isr_stack]
+size_in_words = 256

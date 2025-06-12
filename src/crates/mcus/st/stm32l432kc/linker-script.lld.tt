@@ -78,14 +78,14 @@ SECTIONS
     } > SRAM
 
     .sram2 ORIGIN(SRAM2) : \{
-        *: (.kernel.stack.0);
-        __LINKER_KERNEL_STACK_PAST_END = .;
-        ASSERT(. == ALIGN(8), "Kernel stack size must be a multiple of 8 bytes");
+        *: (.kernel.stack.isr.0);
+        __LINKER_ISR_STACK_PAST_END = .;
+        ASSERT(. == ALIGN(8), "ISR stack size must be a multiple of 8 bytes");
     } > SRAM2
 
     .text.initial_sp ORIGIN(FLASH_INITIAL_SP) : \{
         __LINKER_INITIAL_SP = .;
-        LONG(__LINKER_KERNEL_STACK_PAST_END);
+        LONG(__LINKER_ISR_STACK_PAST_END);
     } > FLASH_INITIAL_SP
 
     .undefined.0 0x20010000 (TYPE = SHT_NOBITS) : \{ . += 0x1fff0000; } > PERIPHERALS

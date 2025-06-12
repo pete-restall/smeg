@@ -5,10 +5,10 @@ pub mod bootstrapping;
 #[cfg(target_arch = "arm")]
 mod reset_handler;
 
-#[cfg(target_arch = "arm")]
-mod kernel_stack;
-
 pub mod interrupts;
+
+#[cfg(target_arch = "arm")]
+mod isr_stack;
 
 #[cfg(target_arch = "arm")]
 mod blinky_blinky;
