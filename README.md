@@ -16,7 +16,7 @@ Target naming convention - `<manufacturer>-<board>-<variant>`, eg. `st-nucleo_l4
 
 Microcontroller naming convention - `<manufacturer>-<microcontroller>`, eg. `st-stm32l432kc`.
 
-Requires nightly (currently unstable) to build the cross-toolchain for custom targets, which in turn requires the rust source:
+Requires nightly (currently unstable) because of `feature(linkage, naked_functions)` and also to build the cross-toolchain for custom targets, which in turn requires the rust source:
 ```
 $ rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 ```
@@ -49,11 +49,16 @@ Other infrastructure / utility crates that are not directly part of the OS are:
 
 TODO: how to generate a separate linker script for the application with all of the kernel's linked symbols in it ?  Or should we even bother ?
 
+## General Notes
+* Tasks that exit (eg. one-shot) should be able to share a pool of stacks, ie. run as overlays.  This introduces the possibility of deadlocking, however - if another task from the same pool needs to be invoked to service a request from an already running task in the same pool, but there is no available stack, then there is deadlock.
+* An ISR should be able to create / switch to a pre-emptive task without going through the scheduler, in order to offload its work to a non-ISR context but without incurring extra context-switching and scheduling overhead.  This means each MCU core needs to have its own list of (prioritised) tasks.  Each core needs its own scheduler anyway, so the idea is that a (user-space) scheduler task can run on each core and pull tasks from a shared list of tasks that are able to run on any core, and then assign them to the core-specific priority queues.  This should allow each core to control its own workload, pulling tasks from / pushing tasks back to the shared 'runnable' queues as necessary.  It also allows an easy way to implement core affinity and locality for tasks that absolutely must, or might otherwise benefit from, running on the same core.  Running a scheduler on each core means that it can acquire locks on the shared queues but use a Syscall that is guaranteed to invoke the ISR on the same core, thus avoiding locks / critical sections on the core-specific queue manipulation (at least in the case of ARM with `SV_CALL` and `PENDSV`).
+
 ## Important Points to Remember (GOTCHAS !)
 ### Rust and Memory-Mapped I/O (MMIO)
 * Rust references are `dereferenceable` in LLVM parlance, which means they can be read speculatively.  Do _NOT_ have a reference to any MMIO or register or any non-memory 'entity' for this reason.  Side-effects matter.  This rule also excludes `VolatileCell`, `UnsafeCell`, etc. which internally manipulate references.  Use `core::ptr::read_volatile` and `core::ptr::write_volatile`, but note that it is **Undefined Behaviour** if two threads both try (any combination of) volatile read or write to the same location at the same time; `volatile != atomic`.
 * Because Rust references are `dereferenceable`, do not create a pointer to MMIO _from a reference_; instead, use the raw pointer operators `&raw const ...` and `&raw mut ...`.  Do not create references to _ANY_ MMIO structure (eg. a register bank); it's all got to be done through pointers to avoid straying into UB.
 * A `compiler_fence` is required if the order of volatile operations needs to be maintained relative to any non-volatile operations in the block.
+* Not MMIO, but stacks are within Rust's memory model.  Mutating stack frames via pointers from a Syscall ISR (eg. for returning values in registers, as is typical with Syscall interfaces) is technically UB but working around this to provide another interface is more complex and less efficient, especially when a multi-core architecture would complicate the use of mutable `static`s.  Since this is confined to Syscalls (ie. synchronous with program execution) and triggered from assembly language stubs, we can control the visibility of the side-effects in the desired manner.  Technically UB but actually well defined for the given architecture.  There are more valid issues to be raised regarding provenance of stack frame pointer / reference being marshalled across the Rust / assembly / ISR boundary as a `usize`...
 
 ### Linker Script
 * LLD is _NOT_ LD.  It differs in some subtle ways and will not produce the same output.  Documentation is poor-to-non-existent.
