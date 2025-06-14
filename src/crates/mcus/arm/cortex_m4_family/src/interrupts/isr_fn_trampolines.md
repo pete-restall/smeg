@@ -11,9 +11,9 @@ An example use of the macro might be:
 ```
 # #[macro_use] extern crate smeg_mcu_arm_cortex_m4_family;
 # use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
-isr_fn_trampolines! {
-    fn sv_call_isr(&mut IsrBasicStackFrame) -> on_syscall -> "thread_process";
-}
+//isr_fn_trampolines! {
+//    fn sv_call_isr(&mut IsrBasicStackFrame) -> on_syscall -> "thread_process";
+//}
 ```
 The above constructs a trampoline function that can be inserted into the ISR Vector Table, which in turn calls your own ISR `on_syscall`.  The trampoline has the following signature:
 ```

@@ -16,6 +16,8 @@ pub type HalfUsize = u16;
 #[cfg(target_pointer_width = "64")]
 pub type HalfUsize = u32;
 
+pub mod interrupts;
+
 #[cfg(all(not(test), feature = "std"))]
 pub mod panic_handler;
 

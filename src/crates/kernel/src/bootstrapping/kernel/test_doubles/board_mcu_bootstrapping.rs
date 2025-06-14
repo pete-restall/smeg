@@ -5,4 +5,5 @@ use crate::bootstrapping::kernel::BoardMcuBootstrapping;
 use crate::test_doubles::Dummy;
 
 impl BoardMcuBootstrapping for Dummy {
+    type IsrBootstrapper = Dummy;
 }

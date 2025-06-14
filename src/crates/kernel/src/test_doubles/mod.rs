@@ -3,8 +3,10 @@ use crate::docs;
 
 pub mod has_mcu_core_id;
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[doc = docs::side_by_side_md!("Dummy")]
 pub struct Dummy;
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[doc = docs::side_by_side_md!("Stub")]
 pub struct Stub;

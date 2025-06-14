@@ -1,37 +1,40 @@
 use smeg_kernel::docs;
 
+// TODO: documentation needs updating...
 #[macro_export]
 #[doc = docs::side_by_side_md!("isr_fn_trampolines")]
 macro_rules! isr_fn_trampolines {
-    ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "handler_main"; ) => {
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "handler_main"; ) => {
         ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
     };
 
-    ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_main"; ) => {
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "thread_main"; ) => {
         ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
     };
 
-    ( fn $trampoline_fn_name:ident(&mut IsrBasicStackFrame) -> $target_fn_name:ident -> "thread_process"; ) => {
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "thread_process"; ) => {
         ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
     };
 
     ( @__(
         $doc_attr:ident,
         $trampoline_fn_name:ident,
-        $ptr_mutability:ident,
-        $ref_mutability:ident,
-        $frame_type:ident,
+        $ptr_mutability:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
+        $ref_mutability:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
+        $frame_type:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
         $target_fn_name:ident,
         $fn_return:literal ) ) => {
 
         #[cfg_attr(target_arch = "arm", naked)]
         #[doc = isr_fn_trampolines! { @__( $doc_attr ) }]
-        unsafe extern "C" fn $trampoline_fn_name() -> ! {
+        unsafe extern "C" fn $trampoline_fn_name<C: ::smeg_kernel::interrupts::IsrContext>() -> ! {
             ::cfg_if::cfg_if! {
                 if #[cfg(target_arch = "arm")] {
-                    unsafe extern "C" fn trampoline(frame: *$ptr_mutability ::smeg_mcu_arm_cortex_m4_family::interrupts::$frame_type) {
+                    unsafe extern "C" fn trampoline<C: ::smeg_kernel::interrupts::IsrContext>(frame: *$ptr_mutability ::smeg_mcu_arm_cortex_m4_family::interrupts::$frame_type) {
                         unsafe {
-                            $target_fn_name(&$ref_mutability *frame)
+                            // TODO: we need to get to a point where 'C' can be created, with a lifetime ('isr), which contains the frame pointer,
+                            // which then gets passed to the target function:
+                            $target_fn_name::</*'isr, */C>(&$ref_mutability *frame)
                         }
                     }
 
@@ -40,7 +43,7 @@ macro_rules! isr_fn_trampolines {
                         mvn lr, #{isr_retval}
                         b {trampoline}"#,
                         isr_retval = const !$fn_return,
-                        trampoline = sym trampoline);
+                        trampoline = sym trampoline::<C>);
 
                 } else {
                     panic!("Cannot call a Cortex M4 ISR trampoline on a non-Cortex M4 (running tests ?)");

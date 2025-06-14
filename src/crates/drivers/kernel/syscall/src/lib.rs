@@ -2,12 +2,14 @@
 
 #![feature(naked_functions)]
 
+use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
+
 mod mcu;
 
 pub struct Driver;
 
 impl Driver {
-    pub const fn collect_isr_vectors(isrs: mcu::IsrVectorTableBuilder) -> mcu::IsrVectorTableBuilder {
+    pub const fn collect_isr_vectors<I: IsrBootstrapping>(isrs: mcu::IsrVectorTableBuilder<I>) -> mcu::IsrVectorTableBuilder<I> {
         mcu::collect_isr_vectors(isrs)
     }
 }

@@ -1,11 +1,14 @@
+use core::marker::PhantomData;
+
 use smeg_kernel::{const_unwrap_or, despair};
+use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
 use smeg_kernel::errors::KernelErrorCode;
 
 pub type IsrVector = unsafe extern "C" fn() -> !;
 
 // TODO: Is this boilerplate a candidate for something like #[derive(IsrVectorTableBuilder)] ?
 #[cfg_attr(feature = "test_doubles", derive(Clone, Debug, PartialEq))]
-pub struct IsrVectorTableBuilder {
+pub struct IsrVectorTableBuilder<I: IsrBootstrapping> {
     pub nmi: Option<IsrVector>,
     pub hard_fault: Option<IsrVector>,
     pub mem_manage: Option<IsrVector>,
@@ -14,10 +17,11 @@ pub struct IsrVectorTableBuilder {
     pub sv_call: Option<IsrVector>,
     pub debug_monitor: Option<IsrVector>,
     pub pend_sv: Option<IsrVector>,
-    pub sys_tick: Option<IsrVector>
+    pub sys_tick: Option<IsrVector>,
+    pub _isr_bootstrapper: PhantomData<I>
 }
 
-impl IsrVectorTableBuilder {
+impl<I: IsrBootstrapping> IsrVectorTableBuilder<I> {
     pub const fn default() -> Self {
         unsafe extern "C" { unsafe fn _reset_handler() -> !; }
         Self {
@@ -29,7 +33,8 @@ impl IsrVectorTableBuilder {
             sv_call: None,
             debug_monitor: None,
             pend_sv: None,
-            sys_tick: None
+            sys_tick: None,
+            _isr_bootstrapper: PhantomData
         }
     }
 }
@@ -60,7 +65,7 @@ const _: () = {
 };
 
 impl IsrVectorTable {
-    pub const fn from(isrs: IsrVectorTableBuilder) -> Self {
+    pub const fn from<I: IsrBootstrapping>(isrs: IsrVectorTableBuilder<I>) -> Self {
         unsafe extern "C" { unsafe fn _reset_handler() -> !; }
         Self {
             reset_handler: _reset_handler,
@@ -103,10 +108,12 @@ pub mod test_doubles {
     use smeg_kernel::despair;
     use smeg_kernel::errors::KernelErrorCode;
 
-    use smeg_kernel::test_doubles::Stub;
+    use smeg_kernel::test_doubles::{Dummy, Stub};
     use smeg_testing_host_utils::seq::any_item_from;
 
     use super::*;
+
+    type IsrVectorTableBuilder = super::IsrVectorTableBuilder<Dummy>;
 
     impl From<Stub> for IsrVectorTableBuilder {
         fn from(_value: Stub) -> Self {

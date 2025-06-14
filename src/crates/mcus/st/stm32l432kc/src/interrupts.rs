@@ -1,4 +1,6 @@
 use smeg_kernel::const_unwrap_or;
+use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
+
 use smeg_mcu_arm_cortex_m4_family::interrupts::{
     IsrVector,
     IsrVectorTable as CortexM4IsrVectorTable,
@@ -8,8 +10,8 @@ use smeg_mcu_arm_cortex_m4_family::interrupts::{
 };
 
 // TODO: Is this boilerplate a candidate for something like #[derive(IsrVectorTableBuilder)] ?
-pub struct IsrVectorTableBuilder {
-    pub cortex_m4: CortexM4IsrVectorTableBuilder,
+pub struct IsrVectorTableBuilder<I: IsrBootstrapping> {
+    pub cortex_m4: CortexM4IsrVectorTableBuilder::<I>,
     pub wwdg: Option<IsrVector>,
     pub pvd_pvm: Option<IsrVector>,
     pub rtc_tamp_css_lse: Option<IsrVector>,
@@ -73,7 +75,7 @@ pub struct IsrVectorTableBuilder {
     pub crs: Option<IsrVector>
 }
 
-impl IsrVectorTableBuilder {
+impl<I: IsrBootstrapping> IsrVectorTableBuilder<I> {
     pub const fn default() -> Self {
         Self {
             cortex_m4: CortexM4IsrVectorTableBuilder::default(),
@@ -242,7 +244,7 @@ const _: () = {
 };
 
 impl IsrVectorTable {
-    pub const fn from(isrs: IsrVectorTableBuilder) -> Self {
+    pub const fn from<I: IsrBootstrapping>(isrs: IsrVectorTableBuilder<I>) -> Self {
         Self {
             cortex_m4: CortexM4IsrVectorTable::from(isrs.cortex_m4),
             wwdg: const_unwrap_or(isrs.wwdg, UNHANDLED_ISR_VECTOR),

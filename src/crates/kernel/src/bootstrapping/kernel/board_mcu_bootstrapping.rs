@@ -1,3 +1,5 @@
+use super::IsrBootstrapping;
+
 pub trait BoardMcuBootstrapping {
-    // TODO: Board-specific bootstrapping stuff
+    type IsrBootstrapper: IsrBootstrapping;
 }

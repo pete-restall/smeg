@@ -2,4 +2,4 @@
 
 pub mod bootstrapping;
 
-mod drivers;
+pub(crate) mod drivers;
