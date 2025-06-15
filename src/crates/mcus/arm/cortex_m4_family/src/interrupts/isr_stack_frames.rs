@@ -1,10 +1,14 @@
 use smeg_kernel::docs;
 
+#[doc = docs::side_by_side_md!("HasIsrBasicStackFrameMut")]
 pub unsafe trait HasIsrBasicStackFrameMut: HasIsrBasicStackFrame {
+    #[doc = docs::side_by_side_md!("HasIsrBasicStackFrameMut.basic_stack_frame_mut")]
     unsafe fn basic_stack_frame_mut(&mut self) -> &mut IsrBasicStackFrame;
 }
 
+#[doc = docs::side_by_side_md!("HasIsrBasicStackFrame")]
 pub unsafe trait HasIsrBasicStackFrame {
+    #[doc = docs::side_by_side_md!("HasIsrBasicStackFrame.basic_stack_frame")]
     unsafe fn basic_stack_frame(&self) -> &IsrBasicStackFrame;
 }
 

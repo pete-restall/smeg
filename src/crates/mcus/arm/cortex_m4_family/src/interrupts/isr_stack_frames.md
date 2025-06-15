@@ -41,3 +41,49 @@ Stacked bits from the various Program Status Registers.
 
 See Section B1.5.6 of the ARMv7-M Architecture Reference Manual for details.
 <!-- ANCHOR_END: IsrBasicStackFrame.xpsr -->
+
+<!-- ANCHOR: HasIsrBasicStackFrameMut -->
+Unsafe trait providing a *mutable* Basic ISR Stack Frame as per Section B1.5.7 of the ARMv7-M Architecture Reference Manual.
+
+_The use-cases for this trait are very limited - did you perhaps mean to use the *immutable* [`HasIsrBasicStackFrame`], instead ?_
+
+Highly unsafe !  Any modification to the pushed registers will result in _Undefined Behaviour_ according to the rules of
+[Inline Assembly](https://doc.rust-lang.org/reference/inline-assembly.html#r-asm.rules.reg-not-output) !
+
+An example use-case of when mutating the stacked registers does not result in _Undefined Behaviour_ is that of Syscalls.  In this
+scenario, the `SV_CALL` interrupt is invoked synchronously in respect to the main thread via an assembly-language stub.  This means any
+mutations are able to be codified as `out` arguments in the stub in order not interfere with Rust's assumptions and optimisations.  Any
+ISR that can be _invoked asynchronously_ to program flow should _not use this trait_ !
+<!-- ANCHOR_END: HasIsrBasicStackFrameMut -->
+
+<!-- ANCHOR: HasIsrBasicStackFrameMut.basic_stack_frame_mut -->
+A *mutable* Basic ISR Stack Frame as per Section B1.5.7 of the ARMv7-M Architecture Reference Manual.
+
+_The use-cases for this function are very limited - did you perhaps mean to use the *immutable* [`HasIsrBasicStackFrame::basic_stack_frame`], instead ?_
+
+Highly unsafe !  Any modification to the pushed registers will result in _Undefined Behaviour_ according to the rules of
+[Inline Assembly](https://doc.rust-lang.org/reference/inline-assembly.html#r-asm.rules.reg-not-output) !
+
+An example use-case of when mutating the stacked registers does not result in _Undefined Behaviour_ is that of Syscalls.  In this
+scenario, the `SV_CALL` interrupt is invoked synchronously in respect to the main thread via an assembly-language stub.  This means any
+mutations are able to be codified as `out` arguments in the stub in order not interfere with Rust's assumptions and optimisations.  Any
+ISR that can be _invoked asynchronously_ to program flow should _not use this function_ !
+<!-- ANCHOR_END: HasIsrBasicStackFrameMut.basic_stack_frame_mut -->
+
+<!-- ANCHOR: HasIsrBasicStackFrame -->
+Unsafe trait providing a Basic ISR Stack Frame as per Section B1.5.7 of the ARMv7-M Architecture Reference Manual.
+
+Highly unsafe !  It's hard to know where to begin with all of the things that can go wrong here.  The basic assumption is that this trait is
+only used during trampolining (see [`isr_fn_trampolines!`]) where the _stack pointer_ `SP` _should_ be valid on entry into the ISR, ie. not
+`null`, correctly aligned, no over- / under-flow, no intervening `push` or `pop`, etc.  And of course, the assumption that the stack contents have
+been properly and coherently stored, fenced and remain immutable for the duration of the ISR.  Also thrown into the mix is also the issue of
+pointer / reference lifetime and provenance, which are encapsulated inside the trampoline.
+
+In short, use only as a consumer when writing a target function for an ISR trampoline.
+<!-- ANCHOR_END: HasIsrBasicStackFrame -->
+
+<!-- ANCHOR: HasIsrBasicStackFrame.basic_stack_frame -->
+Unsafe function providing a Basic ISR Stack Frame as per Section B1.5.7 of the ARMv7-M Architecture Reference Manual.
+
+See the notes in the [`HasIsrBasicStackFrame`] trait for why this is `unsafe`.
+<!-- ANCHOR_END: HasIsrBasicStackFrame.basic_stack_frame -->
