@@ -1,5 +1,3 @@
-use core::sync::atomic::compiler_fence;
-
 use crate::caller;
 use crate::bootstrapping::kernel::{BoardMcuBootstrapping/*, ContextSwitchingBootstrapping*/, McuCoreBootstrapping};
 use crate::bootstrapping::rust::RuntimeBootstrapping;
@@ -22,12 +20,11 @@ pub unsafe trait Entrypoint {
         // kernel's initialisation task and pass in any injected types (eg. factories, the BoardMcuBootstrapper, etc.)
         #[cfg(test)] panic!("RuntimeBootstrapper was not called");
 
-unsafe {
-    unsafe extern "C" { fn blinky_blinky() -> !; }
-    blinky_blinky();
-}
-
-
+        #[cfg(target_arch = "arm")]
+        unsafe {
+            unsafe extern "C" { fn blinky_blinky() -> !; }
+            blinky_blinky();
+        }
 
 // Maybe something like this comes next:
 // McuCoreBootstrapper::bootstrap::<Kernel>()
