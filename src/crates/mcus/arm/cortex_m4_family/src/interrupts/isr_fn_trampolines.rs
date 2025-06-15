@@ -4,37 +4,46 @@ use smeg_kernel::docs;
 #[macro_export]
 #[doc = docs::side_by_side_md!("isr_fn_trampolines")]
 macro_rules! isr_fn_trampolines {
-    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "handler_main"; ) => {
-        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident<$($context_traits:ty),*>() -> "handler_main"; ) => {
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, $target_fn_name, ($($context_traits),*), 0xf1_u8 ) } /* TODO: 0xe1_u8 when using FP with extended frame... */
     };
 
-    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "thread_main"; ) => {
-        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident<$($context_traits:ty),*>() -> "thread_main"; ) => {
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, $target_fn_name, ($($context_traits),*), 0xf9_u8 ) } /* TODO: 0xe9_u8 when using FP with extended frame... */
     };
 
-    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident -> "thread_process"; ) => {
-        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, mut, mut, IsrBasicStackFrame, $target_fn_name, 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
+    ( fn $trampoline_fn_name:ident() -> $target_fn_name:ident<$($context_traits:ty),*>() -> "thread_process"; ) => {
+        ::smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines! { @__( doc_attr_mut, $trampoline_fn_name, $target_fn_name, ($($context_traits),*), 0xfd_u8 ) } /* TODO: 0xed_u8 when using FP with extended frame... */
     };
 
     ( @__(
         $doc_attr:ident,
         $trampoline_fn_name:ident,
-        $ptr_mutability:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
-        $ref_mutability:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
-        $frame_type:ident, // TODO: can be dropped once the IsrContext is properly wired in (becomes an associated function or method)
         $target_fn_name:ident,
+        ($($context_traits:ty),*),
         $fn_return:literal ) ) => {
 
         #[cfg_attr(target_arch = "arm", naked)]
-        #[doc = isr_fn_trampolines! { @__( $doc_attr ) }]
-        unsafe extern "C" fn $trampoline_fn_name<C: ::smeg_kernel::interrupts::IsrContext>() -> ! {
+        #[doc = isr_fn_trampolines! { @__( $doc_attr ) }] // TODO: doc can now be common for all trampolines
+        unsafe extern "C" fn $trampoline_fn_name<C>() -> !
+            where C:
+                ::smeg_kernel::interrupts::IsrContext +
+                ::core::convert::From<::smeg_mcu_arm_cortex_m4_family::interrupts::IsrContextImpl> +
+                ::core::borrow::BorrowMut<::smeg_mcu_arm_cortex_m4_family::interrupts::IsrContextImpl>
+                $(+ $context_traits)* {
+
             ::cfg_if::cfg_if! {
                 if #[cfg(target_arch = "arm")] {
-                    unsafe extern "C" fn trampoline<C: ::smeg_kernel::interrupts::IsrContext>(frame: *$ptr_mutability ::smeg_mcu_arm_cortex_m4_family::interrupts::$frame_type) {
+                    unsafe extern "C" fn trampoline<C>(stack_frame: *mut ::smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame)
+                        where C:
+                            ::smeg_kernel::interrupts::IsrContext +
+                            ::core::convert::From<::smeg_mcu_arm_cortex_m4_family::interrupts::IsrContextImpl> +
+                            ::core::borrow::BorrowMut<::smeg_mcu_arm_cortex_m4_family::interrupts::IsrContextImpl>
+                            $(+ $context_traits)* {
+
+                        let mut context = C::from(::smeg_mcu_arm_cortex_m4_family::interrupts::IsrContextImpl::from(stack_frame));
                         unsafe {
-                            // TODO: we need to get to a point where 'C' can be created, with a lifetime ('isr), which contains the frame pointer,
-                            // which then gets passed to the target function:
-                            $target_fn_name::</*'isr, */C>(&$ref_mutability *frame)
+                            $target_fn_name(&mut context)
                         }
                     }
 

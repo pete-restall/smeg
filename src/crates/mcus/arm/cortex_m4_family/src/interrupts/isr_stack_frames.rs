@@ -1,5 +1,13 @@
 use smeg_kernel::docs;
 
+pub unsafe trait HasIsrBasicStackFrameMut: HasIsrBasicStackFrame {
+    unsafe fn basic_stack_frame_mut(&mut self) -> &mut IsrBasicStackFrame;
+}
+
+pub unsafe trait HasIsrBasicStackFrame {
+    unsafe fn basic_stack_frame(&self) -> &IsrBasicStackFrame;
+}
+
 #[repr(C)]
 #[doc = docs::side_by_side_md!("IsrBasicStackFrame")]
 pub struct IsrBasicStackFrame {
@@ -34,5 +42,5 @@ const _: () = {
 };
 
 pub mod prelude {
-    pub use super::IsrBasicStackFrame;
+    pub use super::*;
 }

@@ -1,28 +1,33 @@
-use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
+use core::borrow::BorrowMut;
+
 use smeg_kernel::interrupts::IsrContext;
+use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
 use smeg_kernel::syscalls::SyscallResult;
 
 use smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines;
-use smeg_mcu_arm_cortex_m4_family::interrupts::IsrBasicStackFrame;
-
-pub use smeg_mcu_arm_cortex_m4_family::interrupts::IsrVectorTableBuilder;
+use smeg_mcu_arm_cortex_m4_family::interrupts::{HasIsrBasicStackFrameMut, IsrContextImpl, IsrVectorTableBuilder};
 
 isr_fn_trampolines! {
-    // TODO: next iteration - we don't take an IsrBasicStackFrame, etc. we take a smeg_kernel::interrupts::IsrContext which allows us to get at that !
-    fn on_sv_call_isr_trampoline() -> on_sv_call_isr -> "thread_main" /* TODO: "thread_process" or even a new option, to allow context-switching */;
+    fn on_sv_call_isr_trampoline() -> on_sv_call_isr<>() -> "thread_main" /* TODO: "thread_process" or even a new option, to allow context-switching */;
 }
 
-pub const fn collect_isr_vectors<I: IsrBootstrapping>(isrs: IsrVectorTableBuilder<I>) -> IsrVectorTableBuilder<I> {
+pub const fn collect_isr_vectors<I>(isrs: IsrVectorTableBuilder<I>) -> IsrVectorTableBuilder<I>
+    where
+        I: IsrBootstrapping,
+        I::IsrContext: IsrContext + From<IsrContextImpl> + BorrowMut<IsrContextImpl> {
+
     IsrVectorTableBuilder::<I> {
         sv_call: Some(on_sv_call_isr_trampoline::<I::IsrContext>),
         ..isrs
     }
 }
 
-unsafe extern "C" fn on_sv_call_isr<C: IsrContext>(stack_frame: &mut IsrBasicStackFrame) {
+unsafe extern "C" fn on_sv_call_isr<C: BorrowMut<IsrContextImpl>>(isr_context: &mut C) {
     // TODO: temporary blinky-blinky stuff, to verify syscall invocation on the Nucleo board...
 
     unsafe {
+        let stack_frame = isr_context.borrow_mut().basic_stack_frame_mut();
+
         static mut ODR: *mut usize = (0x48000400_usize + 20_usize) as *mut usize;
         let mut odr = core::ptr::read_volatile(ODR);
         if stack_frame.r0 == 1 {
@@ -99,7 +104,7 @@ unsafe extern "C" fn on_sv_call_isr<C: IsrContext>(stack_frame: &mut IsrBasicSta
 mod test {
     use fluent_test::prelude::*;
 
-    use smeg_kernel::test_doubles::{Dummy, Stub};
+    use smeg_mcu_arm_cortex_m4_family::interrupts::test_doubles::{Dummy, Stub};
 
     use super::*;
 

@@ -8,6 +8,7 @@ impl smeg_kernel::bootstrapping::kernel::IsrBootstrapping for DummyToDo {
     type IsrContext = DummyToDo;
 }
 impl smeg_kernel::interrupts::IsrContext for DummyToDo {
+    type Mcu = smeg_kernel::McuSingleCore; // TODO: obviously not...
 }
 
 impl BoardMcuBootstrapping for BoardMcuBootstrapper {

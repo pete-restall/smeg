@@ -1,5 +1,8 @@
+use crate::HasMcuCoreId;
+
 // TODO: document !
 pub trait IsrContext {
+    type Mcu: HasMcuCoreId;
 }
 
 #[cfg(any(test, feature = "test_doubles"))]
@@ -9,5 +12,6 @@ pub mod test_doubles {
     use super::*;
 
     impl IsrContext for Dummy {
+        type Mcu = Dummy;
     }
 }
