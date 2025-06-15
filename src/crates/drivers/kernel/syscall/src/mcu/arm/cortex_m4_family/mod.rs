@@ -22,7 +22,7 @@ pub const fn collect_isr_vectors<I>(isrs: IsrVectorTableBuilder<I>) -> IsrVector
     }
 }
 
-unsafe extern "C" fn on_sv_call_isr<C: BorrowMut<IsrContextImpl>>(isr_context: &mut C) {
+unsafe fn on_sv_call_isr<C: BorrowMut<IsrContextImpl>>(isr_context: &mut C) {
     // TODO: temporary blinky-blinky stuff, to verify syscall invocation on the Nucleo board...
 
     unsafe {
