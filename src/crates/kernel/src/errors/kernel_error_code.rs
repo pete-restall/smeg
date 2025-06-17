@@ -12,6 +12,9 @@ pub enum KernelErrorCode {
     InsideReservedIsr,
     Retryable(u8),
     UnknownSyscall,
+    UnalignedSyscallArgs,
+    UnaddressableSyscallArgs,
+    InvalidSyscallArgs(u8),
     GeneralSyscallError(u8)
 }
 
@@ -36,12 +39,15 @@ mod tests {
 
     use super::*;
 
-    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 5] = [
+    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 7] = [
         (KernelErrorCode::LinkerScriptDespair, 2 << 8),
         (KernelErrorCode::BootstrappingPanic, 3 << 8),
         (KernelErrorCode::InsideUnhandledIsr, 4 << 8),
         (KernelErrorCode::InsideReservedIsr, 5 << 8),
-        (KernelErrorCode::UnknownSyscall, 7 << 8)];
+        (KernelErrorCode::UnknownSyscall, 7 << 8),
+        (KernelErrorCode::UnalignedSyscallArgs, 8 << 8),
+        (KernelErrorCode::UnaddressableSyscallArgs, 9 << 8)
+    ];
 
     #[test]
     fn from__called_for_instance_of_each_unit_variant__expect_each_discriminator() {
@@ -64,13 +70,14 @@ mod tests {
         }
     }
 
-    fn all_non_unit_variants() -> [(KernelErrorCode, HalfUsize); 3] {
+    fn all_non_unit_variants() -> [(KernelErrorCode, HalfUsize); 4] {
         let any_u8 = any_u8();
         let any_u16 = any_u8 as u16;
         [
             (KernelErrorCode::GeneralDespair(any_u8), ((1_u16 << 8) | any_u16) as HalfUsize),
             (KernelErrorCode::Retryable(any_u8), ((6_u16 << 8) | any_u16) as HalfUsize),
-            (KernelErrorCode::GeneralSyscallError(any_u8), ((8_u16 << 8) | any_u16) as HalfUsize)
+            (KernelErrorCode::InvalidSyscallArgs(any_u8), ((10_u16 << 8) | any_u16) as HalfUsize),
+            (KernelErrorCode::GeneralSyscallError(any_u8), ((11_u16 << 8) | any_u16) as HalfUsize)
         ]
     }
 
@@ -89,7 +96,7 @@ pub mod test_doubles {
 
     use super::KernelErrorCode;
 
-    pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 8] {
+    pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 11] {
         use KernelErrorCode::*;
         [
             GeneralDespair(any_u8()),
@@ -99,6 +106,9 @@ pub mod test_doubles {
             InsideReservedIsr,
             Retryable(any_u8()),
             UnknownSyscall,
+            UnalignedSyscallArgs,
+            UnaddressableSyscallArgs,
+            InvalidSyscallArgs(any_u8()),
             GeneralSyscallError(any_u8())
         ]
     }

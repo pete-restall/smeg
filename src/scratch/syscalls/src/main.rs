@@ -20,9 +20,10 @@ trait SyscallArgs: HasSyscallId { }
 unsafe impl<H: SyscallHandler> SyscallIsrTrampoline for H {
     unsafe fn on_syscall(args: usize) -> Result<(), usize> {
         // Alignment can be checked here; the size can too if the IsrContext is passed in so we can retrieve the current task's stack
-        // (or heap) information, which will be the case in the actual implementation.
+        // (or heap) information, which will be the case in the actual implementation - KernelErrorCode::UnalignedSyscallArgs for alignment
+        // issues, and KernelErrorCode::UnaddressableSyscallArgs if they're in the wrong place.
         if align_of::<H::Args>() > 1 && args & (align_of::<H::Args>() - 1) != 0 {
-            return Err(123); // Some sort of error code for an unaligned access
+            return Err(123); // Some sort of error code for an unaligned access - KernelErrorCode::UnalignedSyscallArgs
         }
 
         let mut context = unsafe { SyscallContext { args: &mut *(args as *mut MaybeUninit<H::Args>) } };
@@ -186,6 +187,7 @@ unsafe extern "C" fn syscall_isr(id: usize, args: usize) -> usize {
         return 456; // The address might be within range, but it's not a valid function pointer
     }
 
+    assert!(size_of::<SyscallIsrTrampolinePtr>() == size_of::<usize>(), "we've made the assumption that a function pointer can fit into a single machine word");
     assert!(size_of::<SyscallIsrTrampolinePtr>() == align_of::<SyscallIsrTrampolinePtr>(), "we've made the assumption that size and alignment are the same (ie. a single field) to allow a quick check (ie. single comparison), otherwise it is possible to have correct alignment of something that doesn't point to the start of the struct, which may not be a simple power-of-two with AND mask test...");
 
     let trampoline = id as *const SyscallIsrTrampolinePtr; // UB only happens on dereferencing the pointer so we're able to check its bounds first
@@ -196,14 +198,14 @@ unsafe extern "C" fn syscall_isr(id: usize, args: usize) -> usize {
         (trampoline < &raw const __LINKER_SYSCALLS_ISR_TRAMPOLINES_START) ||
         (trampoline > (&raw const __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END).offset(-1)) {
 
-        return 789; // The address (ID) is out of range, so not a valid function pointer
+        return 789; // The address (ID) is out of range, so not a valid function pointer - KernelErrorCode::UnknownSyscall
     }
 
     But for the PoC we'll be using...
 */
     unsafe extern "Rust" { static __SYSCALL_HANDLER_A: SyscallIsrTrampolinePtr; static __SYSCALL_HANDLER_B: SyscallIsrTrampolinePtr; }
     if trampoline != &raw const __SYSCALL_HANDLER_A && trampoline != &raw const __SYSCALL_HANDLER_B {
-        return 789;
+        return 789; // Use KernelErrorCode::UnknownSyscall
     }
 
     let result = unsafe { (*trampoline)(args) };
