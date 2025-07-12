@@ -24,6 +24,9 @@ pub mod panic_handler;
 #[cfg(not(all(not(test), feature = "std")))]
 mod panic_handler;
 
+mod slice_from;
+pub use slice_from::*;
+
 pub mod syscalls;
 
 pub(crate) extern crate self as smeg_kernel;
