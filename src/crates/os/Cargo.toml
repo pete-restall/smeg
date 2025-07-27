@@ -29,3 +29,9 @@ smeg-board-host-rust_std-default = ["dep:smeg-board-host-rust_std", "smeg-board-
 smeg-board-st-nucleo_l432kc-default = ["dep:smeg-board-st-nucleo_l432kc"]
 
 smeg-kernel-no_bootstrapping_bss_data_safety_checks = []
+
+test_doubles = [
+    "smeg-board-host-rust_std/test_doubles",
+    "smeg-board-st-nucleo_l432kc/test_doubles",
+    "smeg-kernel/test_doubles"
+]

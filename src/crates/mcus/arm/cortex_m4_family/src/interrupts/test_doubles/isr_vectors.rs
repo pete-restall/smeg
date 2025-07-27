@@ -1,5 +1,3 @@
-use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
-
 use smeg_testing_host_utils::seq::any_item_from;
 
 use crate::interrupts::{IsrVector, IsrVectorTableBuilder};
@@ -7,11 +5,7 @@ use crate::interrupts::{IsrVector, IsrVectorTableBuilder};
 use super::{Dummy, Stub};
 
 // TODO: docs...
-impl IsrBootstrapping for Dummy {
-    type IsrContext = Dummy;
-}
-
-impl<I: IsrBootstrapping> From<Stub> for IsrVectorTableBuilder<I> {
+impl From<Stub> for IsrVectorTableBuilder {
     fn from(_value: Stub) -> Self {
         Self {
             nmi: any_stub_isr(),

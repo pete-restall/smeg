@@ -2,6 +2,7 @@ mod isr_context;
 pub use isr_context::*;
 
 mod isr_fn_trampolines;
+pub use isr_fn_trampolines::prelude::*;
 
 mod isr_stack_frames;
 pub use isr_stack_frames::prelude::*;

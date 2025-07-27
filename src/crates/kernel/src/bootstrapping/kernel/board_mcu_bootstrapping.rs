@@ -1,5 +1,3 @@
-use super::IsrBootstrapping;
-
 pub trait BoardMcuBootstrapping {
-    type IsrBootstrapper: IsrBootstrapping;
+    // TODO: Still required ?  Probably a candidate for deletion...
 }

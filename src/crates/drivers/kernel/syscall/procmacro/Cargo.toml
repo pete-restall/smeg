@@ -1,5 +1,5 @@
 [package]
-name = "smeg-kernel-procmacro"
+name = "smeg-drivers-kernel-syscall-procmacro"
 version = "0.1.0"
 edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
@@ -14,4 +14,6 @@ syn = { version = "2.0", features = ["full"] }
 
 [dev-dependencies]
 fluent-test = "0.4.3"
-smeg-kernel = { path = ".." }
+
+[features]
+no_default_syscall_invocation = []

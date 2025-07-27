@@ -1,14 +1,11 @@
-use core::marker::PhantomData;
-
 use smeg_kernel::{const_unwrap_or, despair};
-use smeg_kernel::bootstrapping::kernel::IsrBootstrapping;
 use smeg_kernel::errors::KernelErrorCode;
 
 pub type IsrVector = unsafe extern "C" fn() -> !;
 
 // TODO: Is this boilerplate a candidate for something like #[derive(IsrVectorTableBuilder)] ?
 #[cfg_attr(feature = "test_doubles", derive(Clone, Debug, PartialEq))]
-pub struct IsrVectorTableBuilder<I: IsrBootstrapping> {
+pub struct IsrVectorTableBuilder {
     pub nmi: Option<IsrVector>,
     pub hard_fault: Option<IsrVector>,
     pub mem_manage: Option<IsrVector>,
@@ -17,11 +14,10 @@ pub struct IsrVectorTableBuilder<I: IsrBootstrapping> {
     pub sv_call: Option<IsrVector>,
     pub debug_monitor: Option<IsrVector>,
     pub pend_sv: Option<IsrVector>,
-    pub sys_tick: Option<IsrVector>,
-    pub _isr_bootstrapper: PhantomData<I>
+    pub sys_tick: Option<IsrVector>
 }
 
-impl<I: IsrBootstrapping> IsrVectorTableBuilder<I> {
+impl IsrVectorTableBuilder {
     pub const fn default() -> Self {
         unsafe extern "C" { unsafe fn _reset_handler() -> !; }
         Self {
@@ -33,8 +29,7 @@ impl<I: IsrBootstrapping> IsrVectorTableBuilder<I> {
             sv_call: None,
             debug_monitor: None,
             pend_sv: None,
-            sys_tick: None,
-            _isr_bootstrapper: PhantomData
+            sys_tick: None
         }
     }
 }
@@ -65,7 +60,7 @@ const _: () = {
 };
 
 impl IsrVectorTable {
-    pub const fn from<I: IsrBootstrapping>(isrs: IsrVectorTableBuilder<I>) -> Self {
+    pub const fn from(isrs: IsrVectorTableBuilder) -> Self {
         unsafe extern "C" { unsafe fn _reset_handler() -> !; }
         Self {
             reset_handler: _reset_handler,
@@ -112,8 +107,6 @@ pub mod test_doubles {
     use smeg_testing_host_utils::seq::any_item_from;
 
     use super::*;
-
-    type IsrVectorTableBuilder = super::IsrVectorTableBuilder<Dummy>;
 
     impl From<Stub> for IsrVectorTableBuilder {
         fn from(_value: Stub) -> Self {

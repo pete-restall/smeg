@@ -10,3 +10,9 @@ pub struct Dummy;
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[doc = docs::side_by_side_md!("Stub")]
 pub struct Stub;
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+#[doc = docs::side_by_side_md!("StubFor")]
+pub struct StubFor<T> {
+    pub value: T
+}

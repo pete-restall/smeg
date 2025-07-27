@@ -16,3 +16,4 @@ smeg-testing-integration = { path = "../../../testing/integration" }
 [features]
 default = ["std"]
 std = ["smeg-kernel/std"]
+test_doubles = ["smeg-kernel/test_doubles"]

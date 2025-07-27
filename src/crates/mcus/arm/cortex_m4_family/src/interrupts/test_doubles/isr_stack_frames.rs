@@ -1,7 +1,7 @@
 #![doc = smeg_kernel::docs::side_by_side_md!()]
 use smeg_kernel::docs;
 
-use crate::interrupts::IsrBasicStackFrame;
+use crate::interrupts::{HasIsrBasicStackFrame, IsrBasicStackFrame};
 
 use smeg_testing_host_utils::integers::any_usize;
 

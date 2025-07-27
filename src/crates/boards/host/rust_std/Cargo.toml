@@ -14,3 +14,7 @@ smeg-testing-integration = { path = "../../../testing/integration" }
 [features]
 default = ["std"]
 std = ["smeg-kernel/std", "smeg-mcu-host-rust_std/std"]
+test_doubles = [
+    "smeg-kernel/test_doubles",
+    "smeg-mcu-host-rust_std/test_doubles"
+]

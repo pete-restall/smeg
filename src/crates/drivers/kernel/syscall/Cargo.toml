@@ -6,13 +6,20 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 cfg-if = "1.0.0"
+smeg-drivers-kernel-syscall-procmacro = { path = "procmacro" }
 smeg-kernel = { path = "../../../kernel" }
 smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family", optional = true }
 
 [dev-dependencies]
 fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../../testing/host-utils" }
 
 [features]
+no_default_syscall_invocation = ["smeg-drivers-kernel-syscall-procmacro/no_default_syscall_invocation"]
 std = ["smeg-kernel/std"]
 smeg-mcu-arm- = ["dep:smeg-mcu-arm-cortex_m4_family"]
 smeg-mcu-arm-cortex_m4_family = ["smeg-mcu-arm-", "dep:smeg-mcu-arm-cortex_m4_family"]
+test_doubles = [
+    "smeg-kernel/test_doubles",
+    "smeg-mcu-arm-cortex_m4_family/test_doubles"
+]

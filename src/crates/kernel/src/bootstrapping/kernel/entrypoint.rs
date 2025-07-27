@@ -38,9 +38,46 @@ pub unsafe trait Entrypoint {
 // decorate a free function, so leveraging generics (structs or traits) is not possible.  Perhaps we need a function pointer, initialised as a
 // static - this is doable _iff_ the runtime bootstrapper never panics...but it can, since calculating offset pointers, etc. via core::ptr asserts !
 //
-// So...problem #1 - figure out how to handle a panic _before_ runtime bootstrapping has completed, and problem #2, figure out how to handle injecting
+// So...problem #1 (DONE) - figure out how to handle a panic _before_ runtime bootstrapping has completed, and problem #2, figure out how to handle injecting
 // 'stuff' into the panic handler so it can figure out what core it's running on, what task is running, etc. etc.  Solving #2 allows us to recover or
 // despair, depending on the (initialised) state of the system at the point when the panic occurred.
+
+
+
+    // TODO: bootstrapping requirements to be added for the Cortex M4, before the first syscall:
+    // 1. if there is an FPU, enable lazy stacking
+    // 2. set the priorities of the SV_CALL and PENDSV interrupts to the lowest available a la ARM's approach in the reference manual
+
+    // can tasks only become blocked through a syscall ?
+    //
+    // task switching can only be done through pendsv, otherwise tasks can be missed - eg. ISRs A, B, C where priority 'A > B > C'.  If B is running and
+    // sets the task context to its preferred task, then if it is pre-empted by 'A' after that but before returning, which also sets the task context to
+    // its preferred task, then 'B's task will not get run and will be 'lost'.  We need to ensure that ISRs only flag their preferred tasks as 'runnable'
+    // or clear a bitflag or something _at the same time as setting the pendsv flag_ so that the pendsv can pick the highest priority task, although this
+    // falls down if there is more than one at the same priority. a scheduler can figure out what needs running based on priorities... however this will
+    // require three context switches...one into the scheduler...one back into the syscall / pendsv...and finally into the task.
+    //
+    // we need a way to allow higher priority tasks to pre-empt whatever is running and short-circuit the scheduler, for example to allow a high-priority
+    // interrupt to exit the ISR quickly and transfer control into its (presumably high-priority) processing task, reducing context switching overhead.
+    //
+    // to request a context switch, all 'ready' tasks must be in the prioritised queue, then set icsr.pendsvset
+    //
+    // just before searching for and picking the highest priority task from the queue, set icsr.pendsvclr - if a higher-priority interrupt sets
+    // icsr.pendsvset after this then the algorithm will run again (at the expense of discarding the result of the context-switch and doing another one),
+    // but nothing is lost.  Before the _actual_ context switching (setting the PSP, MMU, etc. etc.) then we could re-check icsr.pendsvset and re-search
+    // the queues if necessary, ie. a loop:
+    // do {
+    //   icsr.pendsvclr = 1;
+    //   find highest priority task - probably involves locking a shared list ?
+    // } while (icsr.pendsvset)
+    // switch to highest priority task && return
+
+    // All ISRs (not just SV_CALL) will need to return via the EXC_RETURN mechanism (leverage 'bx' in some inline assembly, for example) - the trampoline
+    // takes care of this by setting LR prior to calling the target.  Prior to the syscall ISR returning, the caller-saved r1 value in the stack needs to
+    // be overwritten with the usize representation of SyscallResult, so that when the CPU pops r1 on return, the caller can use it as a SyscallResult.  The
+    // use of r1 over r0 allows the caller to determine which r0 (syscall ID) triggered the error, since a SyscallErrorCode is not wide enough
+
+
 
         loop { }
 

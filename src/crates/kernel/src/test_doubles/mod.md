@@ -13,3 +13,7 @@ Easily create simple stubs with [`From`].
 
 Some `struct`s can be created with a default, potentially non-deterministic, set of values.  What that looks like depends on context, but using this `struct` in conjunction with the [`From`] trait allows a convenient way to get such a value.
 <!-- ANCHOR_END: Stub -->
+
+<!-- ANCHOR: StubFor -->
+Create simple parameterised stubs with [`From`].
+<!-- ANCHOR_END: StubFor -->

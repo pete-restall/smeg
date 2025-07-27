@@ -17,4 +17,4 @@ smeg-testing-integration = { path = "../../../testing/integration" }
 
 [features]
 std = ["smeg-kernel/std"]
-test_doubles = ["dep:smeg-testing-host-utils"]
+test_doubles = ["std", "dep:smeg-testing-host-utils"]

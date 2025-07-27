@@ -93,8 +93,13 @@ mod tests {
 #[cfg(any(test, feature = "test_doubles"))]
 pub mod test_doubles {
     use smeg_testing_host_utils::integers::any_u8;
+    use smeg_testing_host_utils::seq::any_item_from;
 
     use super::KernelErrorCode;
+
+    pub fn any_kernel_error_code() -> KernelErrorCode {
+        *any_item_from(&sample_of_all_kernel_error_codes())
+    }
 
     pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 11] {
         use KernelErrorCode::*;

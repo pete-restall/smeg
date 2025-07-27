@@ -151,6 +151,20 @@ mod tests {
     }
 }
 
+#[allow(unused)]
+#[cfg(any(test, feature = "test_doubles"))]
+pub mod test_doubles {
+    use smeg_kernel_procmacro::error_tag;
+
+    use crate::errors::test_doubles::any_kernel_error_code;
+
+    use super::KernelError;
+
+    pub fn any_kernel_error() -> KernelError {
+        KernelError::new(any_kernel_error_code(), error_tag!("stubbed with any_kernel_error()"))
+    }
+}
+
 pub mod prelude {
     pub use super::{KernelError, Result, ResultToUsizeResultConversion};
     pub use super::{UsizeKernelError, UsizeResult, UsizeResultConversions};

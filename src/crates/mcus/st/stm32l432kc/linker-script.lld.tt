@@ -43,6 +43,14 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH_TEXT
 
+    .text.syscalls.isr_trampolines : \{
+        . = ALIGN(4);
+        __LINKER_SYSCALLS_ISR_TRAMPOLINES_START = .;
+        KEEP(*(.smeg.syscalls.isr_trampolines .smeg.syscalls.isr_trampolines.*));
+        __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END = .;
+        . = ALIGN(4);
+    } > FLASH_TEXT
+
     .rodata : \{
         . = ALIGN(4);
         __LINKER_RODATA_START = .;
