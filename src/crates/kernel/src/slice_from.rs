@@ -144,7 +144,7 @@ mod tests {
 
     fn try_slice_from__called_with_unaligned_pointer__expect<T: Sized, F: Fn(isize)>(assertion: F) {
         let bad_alignment = align_of::<T>() as isize - 1;
-        for offset in -bad_alignment..bad_alignment {
+        for offset in -bad_alignment..=bad_alignment {
             if offset != 0 {
                 assertion(offset);
             }
