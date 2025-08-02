@@ -10,7 +10,13 @@ pub mod isr;
 use isr::SyscallIsrTrampolinePtr;
 
 mod mcu;
-use mcu::{collect_isr_vectors, IsrContext, IsrVectorTableBuilder};
+cfg_if::cfg_if! {
+    if #[cfg(not(any(test, feature = "test_doubles")))] {
+        use mcu::{collect_isr_vectors, IsrContext, IsrVectorTableBuilder};
+    } else {
+        use mcu::test_doubles::{collect_isr_vectors, IsrContext, IsrVectorTableBuilder};
+    }
+}
 
 mod syscall_args;
 pub use syscall_args::*;
