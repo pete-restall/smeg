@@ -48,6 +48,9 @@ pub unsafe trait UsizeResultConversions {
 
     #[doc = docs::side_by_side_md!("UsizeResultConversions.as_result_unchecked")]
     unsafe fn as_result_unchecked(self) -> Result<()>;
+
+    #[doc = docs::side_by_side_md!("UsizeResultConversions.as_usize")]
+    fn as_usize(&self) -> usize;
 }
 
 unsafe impl UsizeResultConversions for UsizeResult {
@@ -58,8 +61,11 @@ unsafe impl UsizeResultConversions for UsizeResult {
 
     #[doc = docs::side_by_side_md!("UsizeResult.as_result_unchecked")]
     unsafe fn as_result_unchecked(self) -> Result<()> {
-        assert!(size_of::<KernelErrorCode>() == size_of::<u16>(), "Size of KernelErrorCode must be exactly 16 bits");
-        assert!(size_of::<ErrorTag>() == size_of::<HalfUsize>(), "Size of ErrorTag must be half of a machine word");
+        const {
+            assert!(size_of::<KernelErrorCode>() == size_of::<u16>(), "Size of KernelErrorCode must be exactly 16 bits");
+            assert!(size_of::<ErrorTag>() == size_of::<HalfUsize>(), "Size of ErrorTag must be half of a machine word");
+        }
+
         match self {
             Ok(ok) => Ok(ok),
             Err(err) => unsafe {
@@ -71,6 +77,11 @@ unsafe impl UsizeResultConversions for UsizeResult {
                 ))
             }
         }
+    }
+
+    #[doc = docs::side_by_side_md!("UsizeResult.as_usize")]
+    fn as_usize(&self) -> usize {
+        unsafe { *(self as *const UsizeResult as *const usize) }
     }
 }
 
@@ -146,6 +157,21 @@ mod tests {
                 let err = UsizeResult::Err(UsizeKernelError { value: error_as_usize });
                 let result = unsafe { err.as_result_unchecked() };
                 expect!(NonZero::<usize>::from(result.unwrap_err())).to_equal(error_as_usize);
+            }
+        }
+
+        #[test]
+        fn as_usize__called_with_ok__expect_zero() {
+            let ok = UsizeResult::Ok(());
+            expect!(ok.as_usize()).to_equal(0_usize);
+        }
+
+        #[test]
+        fn as_usize__called_with_valid_err__expect_correct_usize() {
+            for error in sample_of_all_kernel_errors() {
+                let error_as_usize = NonZero::<usize>::from(error);
+                let err = UsizeResult::Err(UsizeKernelError { value: error_as_usize });
+                expect!(err.as_usize()).to_equal(error_as_usize.get());
             }
         }
     }

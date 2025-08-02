@@ -1,6 +1,6 @@
 use core::borrow::BorrowMut;
 
-use smeg_kernel::errors::{KernelErrorCode, ResultToUsizeResultConversion, TaggedError};
+use smeg_kernel::errors::{ResultToUsizeResultConversion, UsizeResultConversions};
 
 use smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines;
 use smeg_mcu_arm_cortex_m4_family::interrupts::{HasIsrBasicStackFrameMut, IsrContextImpl};
@@ -32,7 +32,7 @@ unsafe fn on_sv_call_isr<D: Dependencies, S: SyscallIsrDispatcher<D>>(isr_contex
     unsafe {
         let result = S::dispatch_syscall(isr_context, id, args).as_usize_result();
         let stack_frame = isr_context.borrow_mut().basic_stack_frame_mut();
-        stack_frame.r1 = *(&raw const result as *const usize); // TODO: encapsulate this abomination somewhere inside the KernelError implementation
+        stack_frame.r1 = result.as_usize();
     }
 }
 

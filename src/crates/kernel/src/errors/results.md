@@ -66,6 +66,12 @@ Unsafe method to convert a [`UsizeResult`] into a [`Result<()>`].
 It is _Undefined Behaviour_ if the [`UsizeResult`] was not created from a `usize` that originated from a [`UsizeKernelError`].
 <!-- ANCHOR_END: UsizeResultConversions.as_result_unchecked -->
 
+<!-- ANCHOR: UsizeResultConversions.as_usize -->
+Unsafe method to convert a [`UsizeResult`] into a `usize`.
+
+It is _Undefined Behaviour_ if the [`UsizeResult`] was not created from a `usize` that originated from a [`UsizeKernelError`].
+<!-- ANCHOR_END: UsizeResultConversions.as_usize -->
+
 <!-- ANCHOR: UsizeResult.from_usize_unchecked -->
 Unsafe method to create a [`UsizeResult`] from a `usize` - _Undefined Behaviour_ if `usize` has no equivalent [`KernelError`] !
 
@@ -77,3 +83,9 @@ Unsafe method to convert a [`UsizeResult`] into a [`Result<()>`].
 
 It is _Undefined Behaviour_ if the [`UsizeResult`] was not created from a `usize` that originated from a [`UsizeKernelError`].
 <!-- ANCHOR_END: UsizeResult.as_result_unchecked -->
+
+<!-- ANCHOR: UsizeResult.as_usize -->
+Method to convert a [`UsizeResult`] into a `usize`.
+
+It is _Undefined Behaviour_ if the [`UsizeResult`] was not created from a `usize` that originated from a [`UsizeKernelError`].
+<!-- ANCHOR_END: UsizeResult.as_usize -->
