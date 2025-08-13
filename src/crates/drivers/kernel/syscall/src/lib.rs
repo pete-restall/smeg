@@ -2,19 +2,23 @@
 
 #![feature(naked_functions)]
 
+use core::convert::AsMut;
 use core::marker::PhantomData;
 
+use smeg_kernel::interrupts::{HasIsrContext, IsrContext, NoIsrContext};
 use smeg_kernel::syscalls::SyscallResult;
 
 pub mod isr;
 use isr::SyscallIsrTrampolinePtr;
 
-mod mcu;
+#[path = "mcu/mod.rs"]
+mod _mcu;
+
 cfg_if::cfg_if! {
     if #[cfg(not(any(test, feature = "test_doubles")))] {
-        use mcu::{collect_isr_vectors, IsrContext, IsrVectorTableBuilder};
+        use _mcu as mcu;
     } else {
-        use mcu::test_doubles::{collect_isr_vectors, IsrContext, IsrVectorTableBuilder};
+        use _mcu::test_doubles as mcu;
     }
 }
 
@@ -34,13 +38,17 @@ pub struct Driver<D: Dependencies> {
 }
 
 impl<D: Dependencies> Driver<D> {
-    pub const fn collect_isr_vectors(isrs: IsrVectorTableBuilder) -> IsrVectorTableBuilder {
-        collect_isr_vectors::<D>(isrs)
+    pub const fn collect_isr_vectors(isrs: mcu::IsrVectorTableBuilder) -> mcu::IsrVectorTableBuilder {
+        mcu::collect_isr_vectors::<D>(isrs)
     }
 }
 
+impl<D: Dependencies> HasIsrContext for Driver<D> {
+    type IsrContext = NoIsrContext; // TODO: this will be the API we wish to export to the ISR context for other drivers to use
+}
+
 pub trait Dependencies {
-    type IsrContext: IsrContext;
+    type IsrContext: IsrContext + From<mcu::IsrContext> + AsMut<mcu::IsrContext>;
 
     fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Self::IsrContext>]> {
         assert!(

@@ -101,6 +101,10 @@ impl<D: Dependencies> Syscalls for Driver<D> {
     type BlinkyBlinkySyscallHandler = BlinkyBlinkySyscallHandler<D>;
 }
 
+impl<D: Dependencies> smeg_kernel::interrupts::HasIsrContext for Driver<D> {
+    type IsrContext = smeg_kernel::interrupts::NoIsrContext;
+}
+
 // TODO: just a blinky-blinky to make sure the code links and runs properly on the Nucleo board.
 #[unsafe(no_mangle)]
 #[allow(static_mut_refs)]

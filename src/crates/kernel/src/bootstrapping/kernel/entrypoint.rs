@@ -10,7 +10,7 @@ pub unsafe trait Entrypoint {
 
     unsafe fn entrypoint() -> ! {
         unsafe {
-            if Self::McuCoreBootstrapper::core_id() == 0 {
+            if Self::McuCoreBootstrapper::mcu_core_id() == 0 {
                 Self::RuntimeBootstrapper::bootstrap::<caller::IsKernel>();
             }
         }
@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn entrypoint__called_when_core_id_is_zero__expect_runtime_bootstrapper_is_called() {
+    fn entrypoint__called_when_mcu_core_id_is_zero__expect_runtime_bootstrapper_is_called() {
         struct StubEntrypoint;
         unsafe impl Entrypoint for StubEntrypoint {
             type RuntimeBootstrapper = StubRuntimeBootstrapperForPanic;
@@ -190,13 +190,13 @@ mod tests {
     }
 
     #[test]
-    fn entrypoint__called_when_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called() {
-        _entrypoint__called_when_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<1>();
-        _entrypoint__called_when_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<2>();
-        _entrypoint__called_when_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<345>();
+    fn entrypoint__called_when_mcu_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called() {
+        _entrypoint__called_when_mcu_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<1>();
+        _entrypoint__called_when_mcu_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<2>();
+        _entrypoint__called_when_mcu_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called::<345>();
     }
 
-    fn _entrypoint__called_when_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called<const MCU_CORE_ID: usize>() {
+    fn _entrypoint__called_when_mcu_core_id_is_not_zero__expect_runtime_bootstrapper_is_not_called<const MCU_CORE_ID: usize>() {
         struct StubEntrypoint<const MCU_CORE_ID: usize>;
         unsafe impl<const MCU_CORE_ID: usize> Entrypoint for StubEntrypoint<MCU_CORE_ID> {
             type RuntimeBootstrapper = StubRuntimeBootstrapperForPanic;

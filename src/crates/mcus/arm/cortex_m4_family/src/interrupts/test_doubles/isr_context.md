@@ -26,14 +26,14 @@ Dummy implementation of [`HasIsrBasicStackFrameMut::basic_stack_frame_mut`].
 Panics if called.
 <!-- ANCHOR_END: HasIsrBasicStackFrameMut.basic_stack_frame_mut -->
 
-<!-- ANCHOR: Borrow.borrow -->
-Dummy implementation of [`Borrow::borrow`].
+<!-- ANCHOR: AsMut.as_mut -->
+Dummy implementation of [`AsMut::as_mut`].
 
 Panics if called.
-<!-- ANCHOR_END: Borrow.borrow -->
+<!-- ANCHOR_END: AsMut.as_mut -->
 
-<!-- ANCHOR: BorrowMut.borrow_mut -->
-Dummy implementation of [`BorrowMut::borrow_mut`].
+<!-- ANCHOR: AsRef.as_ref -->
+Dummy implementation of [`AsRef::as_ref`].
 
 Panics if called.
-<!-- ANCHOR_END: BorrowMut.borrow_mut -->
+<!-- ANCHOR_END: AsRef.as_ref -->

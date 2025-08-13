@@ -57,7 +57,6 @@ mod tests {
     use fluent_test::prelude::*;
 
     use smeg_kernel::errors::{ErrorTag, KernelErrorCode, ResultToUsizeResultConversion, UsizeResultConversions};
-    use smeg_kernel::test_doubles::Dummy;
 
     use smeg_testing_host_utils::integers::any_usize;
 
@@ -65,9 +64,11 @@ mod tests {
 
     struct Driver;
 
+    type Dummy = crate::mcu::IsrContext;
+
     impl Dependencies for Driver {
         type IsrContext = Dummy;
-        fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Dummy>]> {
+        fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Self::IsrContext>]> {
             static VECTORS: [SyscallIsrTrampolinePtr<Dummy>; 3] = [dummy_trampoline; 3];
             Some(&VECTORS)
         }
@@ -81,12 +82,12 @@ mod tests {
 
         impl Dependencies for Driver {
             type IsrContext = Dummy;
-            fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Dummy>]> { None }
+            fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Self::IsrContext>]> { None }
         }
 
         let id = any_usize() & !(align_of::<SyscallIsrTrampolinePtr<Dummy>>() - 1);
-        let mut isr_context = Dummy;
-        let args = Dummy;
+        let mut isr_context = Dummy { };
+        let args = Dummy { };
         let result = unsafe {
             DefaultSyscallIsrDispatcher::<Driver>::dispatch_syscall(&mut isr_context, id, &raw const args as usize)
         };
@@ -100,13 +101,13 @@ mod tests {
 
         impl Dependencies for Driver {
             type IsrContext = Dummy;
-            fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Dummy>]> { Some(&[]) }
+            fn trampoline_vector_table<'a>() -> Option<&'a [SyscallIsrTrampolinePtr<Self::IsrContext>]> { Some(&[]) }
         }
 
         let trampolines = Driver::trampoline_vector_table().unwrap();
         let id = &raw const trampolines as usize;
-        let mut isr_context = Dummy;
-        let args = Dummy;
+        let mut isr_context = Dummy { };
+        let args = Dummy { };
         let result = unsafe {
             DefaultSyscallIsrDispatcher::<Driver>::dispatch_syscall(&mut isr_context, id, &raw const args as usize)
         };
@@ -124,8 +125,8 @@ mod tests {
             }
 
             let unaligned_id = (&raw const trampoline as isize + bad_alignment) as usize;
-            let mut isr_context = Dummy;
-            let args = Dummy;
+            let mut isr_context = Dummy { };
+            let args = Dummy { };
             let result = unsafe {
                 DefaultSyscallIsrDispatcher::<Driver>::dispatch_syscall(&mut isr_context, unaligned_id, &raw const args as usize)
             };
@@ -142,8 +143,8 @@ mod tests {
         let first_vector = &raw const *first_vector as isize;
         for index_below in [1, 2, 7, 16] {
             let out_of_bounds_id = (first_vector - index_below * PTR_SIZE) as usize;
-            let mut isr_context = Dummy;
-            let args = Dummy;
+            let mut isr_context = Dummy { };
+            let args = Dummy { };
             let result = unsafe {
                 DefaultSyscallIsrDispatcher::<Driver>::dispatch_syscall(&mut isr_context, out_of_bounds_id, &raw const args as usize)
             };
@@ -160,8 +161,8 @@ mod tests {
         let last_vector = &raw const *last_vector as usize;
         for index_above in [1, 2, 7, 16] {
             let out_of_bounds_id = (last_vector + index_above * PTR_SIZE) as usize;
-            let mut isr_context = Dummy;
-            let args = Dummy;
+            let mut isr_context = Dummy { };
+            let args = Dummy { };
             let result = unsafe {
                 DefaultSyscallIsrDispatcher::<Driver>::dispatch_syscall(&mut isr_context, out_of_bounds_id, &raw const args as usize)
             };
@@ -172,8 +173,19 @@ mod tests {
 
     #[test]
     fn dispatch_syscall__called__expect_result_from_trampoline_is_returned() {
-        struct Stub { pub value: usize, pub tag: ErrorTag }
+        struct Stub { _unused: Dummy, pub value: usize, pub tag: ErrorTag }
+
         impl crate::IsrContext for Stub { }
+
+        impl AsMut<Dummy> for Stub {
+            fn as_mut(&mut self) -> &mut Dummy { &mut self._unused }
+        }
+
+        impl From<Dummy> for Stub {
+            fn from(value: Dummy) -> Self {
+                Self { _unused: value, value: 0, tag: error_tag!("Should never be called") }
+            }
+        }
 
         struct Driver;
         impl Dependencies for Driver {
@@ -198,7 +210,7 @@ mod tests {
             ((x >> 24) ^ (x >> 16) ^ (x >> 8) ^ x) as u8
         }
 
-        let mut isr_context = Stub { value: any_usize(), tag: error_tag!() };
+        let mut isr_context = Stub { _unused: Dummy { }, value: any_usize(), tag: error_tag!() };
         let trampoline_vector_table = Driver::trampoline_vector_table().unwrap();
         let mut id = &raw const trampoline_vector_table[0];
         for index in 0..trampoline_vector_table.len() {

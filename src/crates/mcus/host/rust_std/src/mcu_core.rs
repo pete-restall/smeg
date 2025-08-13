@@ -16,12 +16,12 @@ impl McuCore {
 
     const MIN_KERNEL_STACK_SIZE_WORDS: usize = 4096;
 
-    pub fn try_new(core_id: usize, kernel_stack_size_words: usize) -> Result<McuCore, String> {
+    pub fn try_new(id: usize, kernel_stack_size_words: usize) -> Result<McuCore, String> {
         if kernel_stack_size_words < Self::MIN_KERNEL_STACK_SIZE_WORDS {
             Err("Kernel stack size is unrealistically small.".to_string())
         } else {
             Ok(McuCore {
-                id: core_id,
+                id,
                 kernel_stack_size_words
             })
         }
@@ -37,9 +37,8 @@ impl McuCore {
             .stack_size(self.kernel_stack_size_words * size_of::<usize>())
             .name(format!("mcu-core-{}", self.id))
             .spawn_scoped(scope, move || {
-                let core_id = self.id;
                 Self::TLS.set(self);
-                if core_id == 0 {
+                if self.id == 0 {
                     Self::primary_core(entrypoint);
                 } else {
                     Self::secondary_core(entrypoint);
@@ -60,10 +59,18 @@ impl McuCore {
     }
 }
 
-impl HasMcuCoreId for McuCore {
-    fn core_id() -> usize {
-        McuCore::TLS.get().id
+impl Default for McuCore {
+    fn default() -> Self {
+        let tls = McuCore::TLS.get();
+        Self {
+            id: tls.id,
+            kernel_stack_size_words: tls.kernel_stack_size_words
+        }
     }
+}
+
+impl HasMcuCoreId for McuCore {
+    fn mcu_core_id(&self) -> usize { self.id }
 }
 
 #[cfg(test)]
@@ -79,26 +86,26 @@ pub(crate) mod tests {
     #[test]
     fn try_new__called_with_stack_size_words_less_than_minimum__expect_err() {
         [0, McuCore::MIN_KERNEL_STACK_SIZE_WORDS - 2, McuCore::MIN_KERNEL_STACK_SIZE_WORDS - 1].iter().for_each(|too_few_words| {
-            let err = McuCore::try_new(any_core_id(), *too_few_words).err().expect("must be Err<String>");
+            let err = McuCore::try_new(any_mcu_core_id(), *too_few_words).err().expect("must be Err<String>");
             expect!(err).to_contain("stack size");
         });
     }
 
-    fn any_core_id() -> usize {
+    fn any_mcu_core_id() -> usize {
         any_usize()
     }
 
     #[test]
     fn try_new__called_with_stack_size_words_equal_to_minimum__expect_ok() {
-        let result = McuCore::try_new(any_core_id(), McuCore::MIN_KERNEL_STACK_SIZE_WORDS);
+        let result = McuCore::try_new(any_mcu_core_id(), McuCore::MIN_KERNEL_STACK_SIZE_WORDS);
         expect!(result.is_ok()).to_be_true();
     }
 
     #[test]
-    fn core_id__get__expect_same_value_passed_to_constructor() {
-        let core_id = any_core_id();
-        let mcu_core = McuCore::try_new(core_id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
-        expect!(mcu_core.id).to_equal(core_id);
+    fn mcu_core_id__get__expect_same_value_passed_to_constructor() {
+        let id = any_mcu_core_id();
+        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+        expect!(mcu_core.id).to_equal(id);
     }
 
     fn any_kernel_stack_size_words() -> usize {
@@ -106,22 +113,41 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn mcu_core_id__get_from_default_instance__expect_same_value_as_tls_core_id() {
+        let tls_id = any_mcu_core_id();
+        stub_tls_mcu_core_id(tls_id);
+        expect!(McuCore::default().mcu_core_id()).to_equal(tls_id);
+    }
+
+    fn stub_tls_mcu_core_id(id: usize) {
+        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+        McuCore::TLS.set(mcu_core);
+    }
+
+    #[test]
     fn kernel_stack_size_words__get__expect_same_value_passed_to_constructor() {
         let kernel_stack_size_words = any_kernel_stack_size_words();
-        let mcu_core = McuCore::try_new(any_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
+        let mcu_core = McuCore::try_new(any_mcu_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
         expect!(mcu_core.kernel_stack_size_words).to_equal(kernel_stack_size_words);
     }
 
     #[test]
-    fn core_id__called__expect_same_value_as_tls_core_id() {
-        let core_id = any_core_id();
-        stub_core_id(core_id);
-        expect!(McuCore::core_id()).to_equal(core_id);
+    fn kernel_stack_size_words__get_from_default_instance__expect_same_value_as_tls_stack_size() {
+        let tls_kernel_stack_size_words = any_kernel_stack_size_words();
+        stub_tls_kernel_stack_size_words(tls_kernel_stack_size_words);
+        expect!(McuCore::default().kernel_stack_size_words).to_equal(tls_kernel_stack_size_words);
     }
 
-    fn stub_core_id(id: usize) {
-        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+    fn stub_tls_kernel_stack_size_words(kernel_stack_size_words: usize) {
+        let mcu_core = McuCore::try_new(any_mcu_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
         McuCore::TLS.set(mcu_core);
+    }
+
+    #[test]
+    fn mcu_core_id__called__expect_same_value_passed_to_constructor() {
+        let id = any_mcu_core_id();
+        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+        expect!(mcu_core.mcu_core_id()).to_equal(id);
     }
 
     #[test]
@@ -145,10 +171,10 @@ pub(crate) mod tests {
 
     #[test]
     fn as_thread__called_when_core_id_is_nonzero__expect_entrypoint_is_called() {
-        as_thread__called_with_core_id__expect_entrypoint_is_called(any_nonzero_core_id());
+        as_thread__called_with_core_id__expect_entrypoint_is_called(any_nonzero_mcu_core_id());
     }
 
-    fn any_nonzero_core_id() -> usize {
+    fn any_nonzero_mcu_core_id() -> usize {
         any_usize_within(1..=usize::MAX)
     }
 
@@ -174,10 +200,10 @@ pub(crate) mod tests {
 
     #[test]
     fn as_thread__called_when_core_id_is_nonzero__expect_core_id_is_set_in_tls_before_entrypoint_is_called() {
-        let core_id = any_nonzero_core_id();
-        let mcu_core = McuCore::try_new(core_id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+        let id = any_nonzero_mcu_core_id();
+        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
         let spied = spy_tls_when_entrypoint_called_for(mcu_core);
-        expect!(spied.id).to_equal(core_id);
+        expect!(spied.id).to_equal(id);
     }
 
     #[test]
@@ -191,7 +217,7 @@ pub(crate) mod tests {
     #[test]
     fn as_thread__called_when_core_id_is_nonzero__expect_kernel_stack_size_words_is_set_in_tls_before_entrypoint_is_called() {
         let kernel_stack_size_words = any_kernel_stack_size_words();
-        let mcu_core = McuCore::try_new(any_nonzero_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
+        let mcu_core = McuCore::try_new(any_nonzero_mcu_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
         let spied = spy_tls_when_entrypoint_called_for(mcu_core);
         expect!(spied.kernel_stack_size_words).to_equal(kernel_stack_size_words);
     }
@@ -220,9 +246,9 @@ pub(crate) mod tests {
 
     #[test]
     fn as_thread__called_when_core_id_is_nonzero__expect_thread_is_named_nicely() {
-        let core_id = any_nonzero_core_id();
-        let mcu_core = McuCore::try_new(core_id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
+        let id = any_nonzero_mcu_core_id();
+        let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
         let spied = spy_thread_name_when_entrypoint_called_for(mcu_core);
-        expect!(spied).to_equal(format!("mcu-core-{core_id}"));
+        expect!(spied).to_equal(format!("mcu-core-{id}"));
     }
 }

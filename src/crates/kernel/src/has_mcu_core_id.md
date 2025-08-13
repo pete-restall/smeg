@@ -10,16 +10,16 @@ Core IDs must not change without an intervening power cycle and the number of co
 The mechanism for determining the ID may change depending on the context of the caller.  For example, if the ID is determined by reading from a CPU register then it may be that register is only readable from a privileged mode of execution, ie. in kernelspace.  As such, alternate mechanisms may need to be provided for bootstrapping, userspace, interrupt or indeterminate calling contexts.
 <!-- ANCHOR_END: HasMcuCoreId -->
 
-<!-- ANCHOR: HasMcuCoreId.core_id -->
+<!-- ANCHOR: HasMcuCoreId.mcu_core_id -->
 Retrieves the ID of the core executing the caller.
 
 The mechanism is unspecified and may involve something heavyweight such as a system call, or something lightweight such as a cached ID or reading from a register.  An appropriate implementation should be provided for the context of the caller.
-<!-- ANCHOR_END: HasMcuCoreId.core_id -->
+<!-- ANCHOR_END: HasMcuCoreId.mcu_core_id -->
 
 <!-- ANCHOR: McuSingleCore -->
 Convenience implementation of [`HasMcuCoreId`] for the common degenerate case of a single-core architecture.
 <!-- ANCHOR_END: McuSingleCore -->
 
-<!-- ANCHOR: McuSingleCore.core_id -->
+<!-- ANCHOR: McuSingleCore.mcu_core_id -->
 Returns a hard-coded `const` of `0`.
-<!-- ANCHOR_END: McuSingleCore.core_id -->
+<!-- ANCHOR_END: McuSingleCore.mcu_core_id -->

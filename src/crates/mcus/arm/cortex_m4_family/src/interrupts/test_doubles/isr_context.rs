@@ -1,19 +1,16 @@
 #![doc = smeg_kernel::docs::side_by_side_md!()]
 use smeg_kernel::docs;
 
-use core::borrow::{Borrow, BorrowMut};
 use std::boxed::Box;
+use std::convert::{AsMut, AsRef};
 
-use smeg_kernel::interrupts::IsrContext;
 use smeg_kernel::test_doubles::StubFor;
 
-use crate::interrupts::{HasIsrBasicStackFrame, HasIsrBasicStackFrameMut, IsrBasicStackFrame, IsrContextImpl};
+use crate::interrupts::{HasIsrBasicStackFrame, HasIsrBasicStackFrameMut, IsrBasicStackFrame, IsrContext};
 
 use super::{Dummy, Stub};
 
-impl smeg_kernel::interrupts::IsrContext for Dummy {
-    type Mcu = smeg_kernel::test_doubles::Dummy;
-}
+impl smeg_kernel::interrupts::IsrContext for Dummy { }
 
 impl From<*mut IsrBasicStackFrame> for Dummy {
     #[doc = docs::side_by_side_md!("From<*mut IsrBasicStackFrame>.from")]
@@ -22,9 +19,9 @@ impl From<*mut IsrBasicStackFrame> for Dummy {
     }
 }
 
-impl From<IsrContextImpl> for Dummy {
+impl From<IsrContext> for Dummy {
     #[doc = docs::side_by_side_md!("From<IsrContextImpl>.from")]
-    fn from(_value: IsrContextImpl) -> Self {
+    fn from(_value: IsrContext) -> Self {
         panic!("Aborting because From::<IsrContextImpl>::from() -> Dummy should never be called");
     }
 }
@@ -43,23 +40,23 @@ unsafe impl HasIsrBasicStackFrameMut for Dummy {
     }
 }
 
-impl Borrow<IsrContextImpl> for Dummy {
-    #[doc = docs::side_by_side_md!("Borrow.borrow")]
-    fn borrow(&self) -> &IsrContextImpl {
-        panic!("Aborting because Borrow::<IsrContextImpl>::borrow(&Dummy) should never be called");
+impl AsRef<IsrContext> for Dummy {
+    #[doc = docs::side_by_side_md!("AsRef.as_ref")]
+    fn as_ref(&self) -> &IsrContext {
+        panic!("Aborting because AsRef::<IsrContextImpl>::as_ref(&Dummy) should never be called");
     }
 }
 
-impl BorrowMut<IsrContextImpl> for Dummy {
-    #[doc = docs::side_by_side_md!("BorrowMut.borrow_mut")]
-    fn borrow_mut(&mut self) -> &mut IsrContextImpl {
-        panic!("Aborting because BorrowMut::<IsrContextImpl>::borrow_mut(&mut Dummy) should never be called");
+impl AsMut<IsrContext> for Dummy {
+    #[doc = docs::side_by_side_md!("AsMut.as_mut")]
+    fn as_mut(&mut self) -> &mut IsrContext {
+        panic!("Aborting because AsMut::<IsrContextImpl>::as_mut(&Dummy) should never be called");
     }
 }
 
 pub struct StubIsrContext<T> {
     _stack_frame_for_ptr: Box<IsrBasicStackFrame>,
-    cortex_m4: IsrContextImpl,
+    cortex_m4: IsrContext,
     pub stubbed_with: Option<T>
 }
 
@@ -69,14 +66,14 @@ impl<T> From<StubFor<T>> for StubIsrContext<T> {
         let stack_frame_ptr = stack_frame.as_mut() as *mut IsrBasicStackFrame;
         Self {
             _stack_frame_for_ptr: stack_frame,
-            cortex_m4: IsrContextImpl::from(stack_frame_ptr),
+            cortex_m4: IsrContext::from(stack_frame_ptr),
             stubbed_with: Some(stub.value)
         }
     }
 }
 
-impl<T> From<IsrContextImpl> for StubIsrContext<T> {
-    fn from(stub: IsrContextImpl) -> Self {
+impl<T> From<IsrContext> for StubIsrContext<T> {
+    fn from(stub: IsrContext) -> Self {
         let stack_frame = Box::new(IsrBasicStackFrame::from(Stub));
         Self {
             _stack_frame_for_ptr: stack_frame,
@@ -86,18 +83,12 @@ impl<T> From<IsrContextImpl> for StubIsrContext<T> {
     }
 }
 
-impl<T> IsrContext for StubIsrContext<T> {
-    type Mcu = smeg_kernel::test_doubles::Dummy;
+impl<T> smeg_kernel::interrupts::IsrContext for StubIsrContext<T> { }
+
+impl<T> AsRef<IsrContext> for StubIsrContext<T> {
+    fn as_ref(&self) -> &IsrContext { &self.cortex_m4 }
 }
 
-impl<T> Borrow<IsrContextImpl> for StubIsrContext<T> {
-    fn borrow(&self) -> &IsrContextImpl {
-        &self.cortex_m4
-    }
-}
-
-impl<T> BorrowMut<IsrContextImpl> for StubIsrContext<T> {
-    fn borrow_mut(&mut self) -> &mut IsrContextImpl {
-        &mut self.cortex_m4
-    }
+impl<T> AsMut<IsrContext> for StubIsrContext<T> {
+    fn as_mut(&mut self) -> &mut IsrContext { &mut self.cortex_m4 }
 }

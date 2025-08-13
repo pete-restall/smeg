@@ -1,9 +1,10 @@
-use core::borrow::BorrowMut;
+use core::convert::AsMut;
 
 use smeg_kernel::errors::{ResultToUsizeResultConversion, UsizeResultConversions};
 
 use smeg_mcu_arm_cortex_m4_family::isr_fn_trampolines;
-use smeg_mcu_arm_cortex_m4_family::interrupts::{HasIsrBasicStackFrameMut, IsrContextImpl};
+use smeg_mcu_arm_cortex_m4_family::interrupts::HasIsrBasicStackFrameMut;
+pub use smeg_mcu_arm_cortex_m4_family::interrupts::IsrContext;
 pub use smeg_mcu_arm_cortex_m4_family::interrupts::IsrVectorTableBuilder;
 
 use crate::Dependencies;
@@ -12,9 +13,6 @@ use crate::isr::{DefaultSyscallIsrDispatcher, SyscallIsrDispatcher};
 isr_fn_trampolines! {
     fn on_sv_call_isr_trampoline<Dependencies>() -> on_sv_call_isr<DefaultSyscallIsrDispatcher<D>>() -> "thread_main" /* TODO: "thread_process" or even a new option, to allow context-switching */;
 }
-
-pub trait IsrContext: smeg_kernel::interrupts::IsrContext + From<IsrContextImpl> + BorrowMut<IsrContextImpl> { }
-impl<T: smeg_kernel::interrupts::IsrContext + From<IsrContextImpl> + BorrowMut<IsrContextImpl>> IsrContext for T { }
 
 pub const fn collect_isr_vectors<D: Dependencies>(isrs: IsrVectorTableBuilder) -> IsrVectorTableBuilder {
     IsrVectorTableBuilder {
@@ -25,13 +23,13 @@ pub const fn collect_isr_vectors<D: Dependencies>(isrs: IsrVectorTableBuilder) -
 
 unsafe fn on_sv_call_isr<D: Dependencies, S: SyscallIsrDispatcher<D>>(isr_context: &mut D::IsrContext) {
     let (id, args) = unsafe {
-        let stack_frame = isr_context.borrow_mut().basic_stack_frame_mut();
+        let stack_frame = isr_context.as_mut().basic_stack_frame_mut();
         (stack_frame.r0, stack_frame.r1)
     };
 
     unsafe {
         let result = S::dispatch_syscall(isr_context, id, args).as_usize_result();
-        let stack_frame = isr_context.borrow_mut().basic_stack_frame_mut();
+        let stack_frame = isr_context.as_mut().basic_stack_frame_mut();
         stack_frame.r1 = result.as_usize();
     }
 }
@@ -104,7 +102,7 @@ mod test {
 
         let mut isr_context = StubIsrContext::from(StubFor { value: result });
         unsafe {
-            BorrowMut::<IsrContextImpl>::borrow_mut(&mut isr_context).basic_stack_frame_mut().r1 = any_usize_except(error_as_usize);
+            AsMut::<IsrContext>::as_mut(&mut isr_context).basic_stack_frame_mut().r1 = any_usize_except(error_as_usize);
         }
 
         struct StubDispatcherForResult;
@@ -116,7 +114,7 @@ mod test {
 
         unsafe { on_sv_call_isr::<_, StubDispatcherForResult>(&mut isr_context); }
 
-        let r1 = unsafe { BorrowMut::<IsrContextImpl>::borrow_mut(&mut isr_context).basic_stack_frame().r1 };
+        let r1 = unsafe { AsRef::<IsrContext>::as_ref(&mut isr_context).basic_stack_frame().r1 };
         expect!(r1).to_equal(error_as_usize);
     }
 
@@ -131,7 +129,7 @@ mod test {
         let mut isr_context = StubIsrContext::from(StubFor { value: any_usize() });
         unsafe {
             let stacked_r0 = isr_context.stubbed_with;
-            let stack_frame = BorrowMut::<IsrContextImpl>::borrow_mut(&mut isr_context).basic_stack_frame_mut();
+            let stack_frame = AsMut::<IsrContext>::as_mut(&mut isr_context).basic_stack_frame_mut();
             stack_frame.r0 = stacked_r0.unwrap();
         };
 
@@ -152,7 +150,7 @@ mod test {
         let mut isr_context = StubIsrContext::from(StubFor { value: any_usize() });
         unsafe {
             let stacked_r1 = isr_context.stubbed_with.unwrap();
-            let stack_frame = BorrowMut::<IsrContextImpl>::borrow_mut(&mut isr_context).basic_stack_frame_mut();
+            let stack_frame = AsMut::<IsrContext>::as_mut(&mut isr_context).basic_stack_frame_mut();
             stack_frame.r1 = stacked_r1;
         };
 
