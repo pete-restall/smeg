@@ -138,7 +138,7 @@ mod tests {
         let start = &raw const dummy[0];
         let past_end = &raw const dummy[1];
         try_slice_from__called_with_unaligned_pointer__expect::<T, _>(|offset| {
-            expect!(unsafe { try_slice_from(unsafe { start.byte_offset(offset) }, past_end) }.is_none()).to_be_true();
+            expect!(unsafe { try_slice_from(start.byte_offset(offset), past_end) }.is_none()).to_be_true();
         });
     }
 
@@ -165,7 +165,7 @@ mod tests {
         let start = &raw const dummy[0];
         let past_end = &raw const dummy[1];
         try_slice_from__called_with_unaligned_pointer__expect::<T, _>(|offset| {
-            expect!(unsafe { try_slice_from(start, unsafe { past_end.byte_offset(offset) }) }.is_none()).to_be_true();
+            expect!(unsafe { try_slice_from(start, past_end.byte_offset(offset)) }.is_none()).to_be_true();
         });
     }
 
@@ -178,7 +178,7 @@ mod tests {
         let dummy = [Dummy([0; 8]), Dummy([0; 8]), Dummy([0; 8])];
         let start = &raw const dummy[0];
         let past_end = &raw const dummy[2];
-        expect!(unsafe { try_slice_from(unsafe { start.byte_offset(4) }, past_end) }.is_none()).to_be_true();
+        expect!(unsafe { try_slice_from(start.byte_offset(4), past_end) }.is_none()).to_be_true();
     }
 
     #[test]
@@ -190,6 +190,6 @@ mod tests {
         let dummy = [Dummy([0; 8]), Dummy([0; 8]), Dummy([0; 8])];
         let start = &raw const dummy[0];
         let past_end = &raw const dummy[2];
-        expect!(unsafe { try_slice_from(start, unsafe { past_end.byte_offset(-4) }) }.is_none()).to_be_true();
+        expect!(unsafe { try_slice_from(start, past_end.byte_offset(-4)) }.is_none()).to_be_true();
     }
 }
