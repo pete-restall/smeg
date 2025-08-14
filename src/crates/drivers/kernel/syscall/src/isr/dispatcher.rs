@@ -32,11 +32,11 @@ unsafe impl<D: Dependencies> SyscallIsrDispatcher<D> for DefaultSyscallIsrDispat
 
         let trampoline_vector_table = D::trampoline_vector_table();
         if trampoline_vector_table.is_none_or(|table| table.len() == 0) {
-            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!())));
+            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!("no syscalls; possibly no drivers or a linker script error ?"))));
         }
 
         if id & (align_of::<SyscallIsrTrampolinePtr<D::IsrContext>>() - 1) != 0 {
-            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!())));
+            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!("incorrect alignment for Syscall ID argument"))));
         }
 
         let trampoline_vector_table = trampoline_vector_table.unwrap();
@@ -44,7 +44,7 @@ unsafe impl<D: Dependencies> SyscallIsrDispatcher<D> for DefaultSyscallIsrDispat
         let last_vector = &raw const *trampoline_vector_table.last().unwrap();
         let trampoline_vector = id as *const SyscallIsrTrampolinePtr<D::IsrContext>;
         if trampoline_vector < first_vector || trampoline_vector > last_vector {
-            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!())));
+            return Err(KernelError::from(TaggedError::new(KernelErrorCode::UnknownSyscall, error_tag!("Syscall ID is outside the trampoline vector table"))));
         }
 
         unsafe { (*trampoline_vector)(isr_context, args) }
