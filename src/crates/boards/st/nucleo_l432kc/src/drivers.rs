@@ -1,7 +1,7 @@
 use core::convert::{AsMut, AsRef, From};
 
+use smeg_kernel::tasks::HasTaskScheduler;
 use smeg_mcu_arm_cortex_m4_family::interrupts::IsrVectorTableBuilder as CortexM4IsrVectorTableBuilder;
-
 use smeg_mcu_st_stm32l432kc::interrupts::IsrVectorTableBuilder as Stm32IsrVectorTableBuilder;
 
 mod mcu {
@@ -27,18 +27,48 @@ mod syscall {
     pub type IsrContext = <Driver as HasIsrContext>::IsrContext;
 }
 
+mod task_scheduler {
+    // TODO: Temporary until a proper task scheduler driver is introduced
+    use smeg_kernel::IsAddressableMut;
+    use smeg_kernel::tasks::{HasInterruptedTask, HasInterruptedTaskMut};
+
+    pub struct Driver;
+
+    pub struct DummyInterruptedTask;
+
+    impl smeg_kernel::tasks::Task for DummyInterruptedTask { }
+
+    impl<T> IsAddressableMut<T> for DummyInterruptedTask {
+        fn is_addressable_mut(&self, _ptr: *mut T) -> bool { true }
+    }
+
+    pub struct IsrContext;
+
+    impl smeg_kernel::interrupts::IsrContext for IsrContext { }
+
+    impl HasInterruptedTask for IsrContext {
+        type InterruptedTask = DummyInterruptedTask;
+
+        fn interrupted_task(&self) -> Option<&Self::InterruptedTask> { None }
+    }
+
+    impl HasInterruptedTaskMut for IsrContext {
+        fn interrupted_task_mut(&mut self) -> Option<&mut Self::InterruptedTask> { None }
+    }
+}
+
 pub struct Drivers {
     mcu: mcu::Driver,
     syscall: syscall::Driver,
-    blinky_blinky: blinky_blinky::Driver
-//    task_scheduler: task_scheduler::Driver
+    blinky_blinky: blinky_blinky::Driver,
+    task_scheduler: task_scheduler::Driver
 }
 
 pub struct IsrContext {
     mcu: mcu::IsrContext,
     syscall: syscall::IsrContext,
-    blinky_blinky: blinky_blinky::IsrContext
-//    task_scheduler: task_scheduler::Driver::IsrContext
+    blinky_blinky: blinky_blinky::IsrContext,
+    task_scheduler: task_scheduler::IsrContext
 }
 
 impl smeg_kernel::interrupts::IsrContext for IsrContext { }
@@ -57,24 +87,23 @@ impl From<mcu::FamilyIsrContext> for IsrContext {
         Self {
             mcu: value.into(),
             syscall: syscall::IsrContext { }, // TODO: everything except the MCU should implement Default (or maybe From<...> ?)
+            task_scheduler: task_scheduler::IsrContext { },
             blinky_blinky: blinky_blinky::IsrContext { }
         }
     }
 }
 
-/*
-// TODO: Think about how we want to achieve this.  The ISR context needs to provide a way to identify the Task that has been interrupted, but the
-// type of Task is governed by the Task Scheduler that is being used.  In turn the Task Scheduler requires the MCU Core ID to determine the currently
-// running task, which is part of the ISR context :-/
-//
-// Fundamentally, the MCU-specific crate needs to implement the HasMcu / HasMcuCoreId trait, but does not know or care about the HasInterruptedTask trait.
-impl HasInterruptedTask for IsrContext {
-    type InterruptedTask = TaskScheduler::InterruptedTask;
-
-    fn interrupted_task(&self) -> &Self::InterruptedTask { self.task_scheduler.interrupted_task(&isr_context) }
-    fn interrupted_task_mut(&self) -> &mut Self::InterruptedTask { self.task_scheduler.interrupted_task_mut(&isr_context) }
+impl HasTaskScheduler for IsrContext {
+    type TaskScheduler = task_scheduler::IsrContext;
 }
-*/
+
+impl AsRef<task_scheduler::IsrContext> for IsrContext {
+    fn as_ref(&self) -> &task_scheduler::IsrContext { &self.task_scheduler }
+}
+
+impl AsMut<task_scheduler::IsrContext> for IsrContext {
+    fn as_mut(&mut self) -> &mut task_scheduler::IsrContext { &mut self.task_scheduler }
+}
 
 // TODO: temporary way to thrash out how a Driver should look whilst also verifying the code by blinking the LED on the Nucleo board
 #[cfg(target_arch = "arm")]

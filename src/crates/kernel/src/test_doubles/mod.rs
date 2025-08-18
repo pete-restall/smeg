@@ -2,6 +2,7 @@
 use crate::docs;
 
 pub mod has_mcu_core_id;
+pub mod is_addressable;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[doc = docs::side_by_side_md!("Dummy")]

@@ -18,6 +18,9 @@ pub type HalfUsize = u32;
 
 pub mod interrupts;
 
+mod is_addressable;
+pub use is_addressable::*;
+
 #[cfg(all(not(test), feature = "std"))]
 pub mod panic_handler;
 
@@ -30,6 +33,8 @@ pub use slice_from::*;
 pub mod syscalls;
 
 pub(crate) extern crate self as smeg_kernel;
+
+pub mod tasks;
 
 pub(crate) mod caller {
     pub enum IsKernel { }
