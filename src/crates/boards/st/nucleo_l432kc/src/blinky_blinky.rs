@@ -1,9 +1,8 @@
 use core::arch::asm;
 
-use smeg_drivers_kernel_syscall::{SyscallInvocation, syscall_args};
+use smeg_drivers_kernel_syscall::{SyscallInvocation, SyscallResult, syscall_args};
 use smeg_drivers_kernel_syscall::isr::{SyscallIsrContext, SyscallIsrHandler};
 use smeg_kernel::interrupts::IsrContext;
-use smeg_kernel::syscalls::SyscallResult;
 
 // TODO: temporary blinky-blinky stuff, to verify syscall invocation on the Nucleo board...
 

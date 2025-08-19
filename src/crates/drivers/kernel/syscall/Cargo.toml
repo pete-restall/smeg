@@ -6,6 +6,7 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 cfg-if = "1.0.0"
+include-utils = { version = "0.2.4", features = ["workspace"] }
 smeg-drivers-kernel-syscall-procmacro = { path = "procmacro" }
 smeg-kernel = { path = "../../../kernel" }
 smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family", optional = true }

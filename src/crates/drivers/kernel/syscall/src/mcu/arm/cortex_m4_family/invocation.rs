@@ -1,9 +1,8 @@
 use core::sync::atomic::{compiler_fence, Ordering};
 
 use smeg_kernel::errors::{UsizeResult, UsizeResultConversions};
-use smeg_kernel::syscalls::SyscallResult;
 
-use crate::{SyscallArgs, SyscallInvocation};
+use crate::{SyscallArgs, SyscallInvocation, SyscallResult};
 
 #[cfg(not(feature = "no_default_syscall_invocation"))]
 impl<T: SyscallArgs> SyscallInvocation for T {

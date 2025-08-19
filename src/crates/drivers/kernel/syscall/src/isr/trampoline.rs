@@ -4,8 +4,9 @@ use core::mem::MaybeUninit;
 use smeg_kernel::errors::{error_tag, KernelError, KernelErrorCode, TaggedError};
 use smeg_kernel::IsAddressableMut;
 use smeg_kernel::interrupts::IsrContext;
-use smeg_kernel::syscalls::SyscallResult;
 use smeg_kernel::tasks::{HasInterruptedTask, HasTaskScheduler};
+
+use crate::SyscallResult;
 
 use super::{SyscallIsrContext, SyscallIsrHandler};
 
@@ -49,13 +50,12 @@ mod tests {
     use smeg_kernel::IsAddressableMut;
     use smeg_kernel::errors::{KernelErrorCode, ResultToUsizeResultConversion, UsizeResultConversions};
     use smeg_kernel::interrupts::IsrContext;
-    use smeg_kernel::syscalls::SyscallResult;
     use smeg_kernel::tasks::{HasInterruptedTask, HasTaskScheduler, Task, TaskScheduler};
     use smeg_kernel::test_doubles::Dummy;
 
     use fluent_test::prelude::*;
 
-    use crate::{HasSyscallId, SyscallArgs};
+    use crate::{HasSyscallId, SyscallArgs, SyscallResult};
 
     use super::*;
     use super::super::{SyscallIsrContext, SyscallIsrHandler};

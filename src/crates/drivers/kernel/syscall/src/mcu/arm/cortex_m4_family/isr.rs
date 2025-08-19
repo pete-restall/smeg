@@ -42,7 +42,6 @@ mod test {
 
     use fluent_test::prelude::*;
 
-    use smeg_kernel::syscalls::SyscallResult;
     use smeg_kernel::test_doubles::StubFor;
 
     use smeg_mcu_arm_cortex_m4_family::interrupts::{HasIsrBasicStackFrame};
@@ -50,6 +49,8 @@ mod test {
     use smeg_mcu_arm_cortex_m4_family::interrupts::test_doubles::isr_context::StubIsrContext;
 
     use smeg_testing_host_utils::integers::{any_usize, any_usize_except};
+
+    use crate::SyscallResult;
 
     use super::*;
 

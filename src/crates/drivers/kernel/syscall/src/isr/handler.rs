@@ -1,7 +1,6 @@
 use smeg_kernel::interrupts::IsrContext;
-use smeg_kernel::syscalls::SyscallResult;
 
-use crate::SyscallArgs;
+use crate::{SyscallArgs, SyscallResult};
 
 use super::SyscallIsrContext;
 

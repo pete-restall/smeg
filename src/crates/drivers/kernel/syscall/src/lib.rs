@@ -5,8 +5,8 @@
 use core::convert::AsMut;
 use core::marker::PhantomData;
 
+use smeg_kernel::docs;
 use smeg_kernel::interrupts::{HasIsrContext, IsrContext, NoIsrContext};
-use smeg_kernel::syscalls::SyscallResult;
 
 pub mod isr;
 use isr::SyscallIsrTrampolinePtr;
@@ -28,6 +28,9 @@ pub use syscall_args::*;
 mod syscall_map;
 
 pub use smeg_drivers_kernel_syscall_procmacro::syscall_args;
+
+#[doc = docs::side_by_side_md!("SyscallResult")]
+pub type SyscallResult = smeg_kernel::errors::Result<()>;
 
 pub trait SyscallInvocation {
     fn invoke_syscall(&mut self) -> SyscallResult;

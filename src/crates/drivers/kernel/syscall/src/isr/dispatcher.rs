@@ -1,9 +1,8 @@
 use core::marker::PhantomData;
 
 use smeg_kernel::errors::{error_tag, KernelError, KernelErrorCode, TaggedError};
-use smeg_kernel::syscalls::SyscallResult;
 
-use crate::Dependencies;
+use crate::{Dependencies, SyscallResult};
 
 use super::SyscallIsrTrampolinePtr;
 
