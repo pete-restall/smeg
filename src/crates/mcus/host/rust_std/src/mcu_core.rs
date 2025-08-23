@@ -1,12 +1,14 @@
 use std::cell::Cell;
 use std::{io, thread, time};
+use std::num::NonZero;
 
+use smeg_config::SMEG_CONFIG;
 use smeg_kernel::HasMcuCoreId;
 
 #[derive(Copy, Clone)]
 pub struct McuCore {
     id: usize,
-    kernel_stack_size_words: usize
+    kernel_stack_size_words: NonZero<usize>
 }
 
 impl McuCore {
@@ -14,11 +16,17 @@ impl McuCore {
         static TLS: Cell<McuCore> = panic!("McuCore TLS has not been initialised");
     }
 
-    const MIN_KERNEL_STACK_SIZE_WORDS: usize = 4096;
+    const MIN_KERNEL_STACK_SIZE_WORDS: NonZero<usize> = NonZero::new(4096).unwrap();
 
-    pub fn try_new(id: usize, kernel_stack_size_words: usize) -> Result<McuCore, String> {
-        if kernel_stack_size_words < Self::MIN_KERNEL_STACK_SIZE_WORDS {
-            Err("Kernel stack size is unrealistically small.".to_string())
+    pub fn try_new(id: usize, kernel_stack_size_words: NonZero<usize>) -> Result<McuCore, String> {
+        let number_of_mcu_cores: usize = <Self as HasMcuCoreId>::NUMBER_OF_MCU_CORES.get();
+        if id >= number_of_mcu_cores {
+            Err(format!("Core ID is out of range; id={}, NUMBER_OF_MCU_CORES={}", id, number_of_mcu_cores))
+        } else if kernel_stack_size_words < Self::MIN_KERNEL_STACK_SIZE_WORDS {
+            Err(format!(
+                "Kernel stack size is unrealistically small; kernel_stack_size_words={}, MIN_KERNEL_STACK_SIZE_WORDS={}",
+                kernel_stack_size_words,
+                Self::MIN_KERNEL_STACK_SIZE_WORDS))
         } else {
             Ok(McuCore {
                 id,
@@ -34,7 +42,7 @@ impl McuCore {
         where F: FnOnce() + Send + 'scope {
 
         thread::Builder::new()
-            .stack_size(self.kernel_stack_size_words * size_of::<usize>())
+            .stack_size(self.kernel_stack_size_words.get() * size_of::<usize>())
             .name(format!("mcu-core-{}", self.id))
             .spawn_scoped(scope, move || {
                 Self::TLS.set(self);
@@ -69,7 +77,13 @@ impl Default for McuCore {
     }
 }
 
+const NUMBER_OF_MCU_CORES: i64 = SMEG_CONFIG.VALUES.MCUS.HOST.RUST_STD.NUMBER_OF_CORES;
+const _: () = assert!(NUMBER_OF_MCU_CORES >= 1, "Number of simulated MCU cores must be at least 1.");
+const _: () = assert!(NUMBER_OF_MCU_CORES <= usize::BITS as i64, "Number of simulated MCU cores must be no more than the number of bits in a usize (optimisation).");
+
 impl HasMcuCoreId for McuCore {
+    const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(NUMBER_OF_MCU_CORES as usize).unwrap();
+
     fn mcu_core_id(&self) -> usize { self.id }
 }
 
@@ -80,19 +94,29 @@ pub(crate) mod tests {
 
     use fluent_test::prelude::*;
 
-    use smeg_testing_host_utils::integers::{any_usize, any_usize_within};
+    use smeg_testing_host_utils::integers::any_usize_within;
     use super::*;
 
     #[test]
+    fn try_new__called_with_mcu_core_id_greater_than_or_equal_to_number_of_cores__expect_err() {
+        let number_of_mcu_cores = McuCore::NUMBER_OF_MCU_CORES.get();
+        [number_of_mcu_cores, number_of_mcu_cores + 1, number_of_mcu_cores + 10].iter().for_each(|bad_core_id| {
+            let err = McuCore::try_new(*bad_core_id, McuCore::MIN_KERNEL_STACK_SIZE_WORDS).err().expect("must be Err<String>");
+            expect!(err).to_contain("ore ID");
+        });
+    }
+
+    #[test]
     fn try_new__called_with_stack_size_words_less_than_minimum__expect_err() {
-        [0, McuCore::MIN_KERNEL_STACK_SIZE_WORDS - 2, McuCore::MIN_KERNEL_STACK_SIZE_WORDS - 1].iter().for_each(|too_few_words| {
-            let err = McuCore::try_new(any_mcu_core_id(), *too_few_words).err().expect("must be Err<String>");
+        [1, McuCore::MIN_KERNEL_STACK_SIZE_WORDS.get() - 2, McuCore::MIN_KERNEL_STACK_SIZE_WORDS.get() - 1].iter().for_each(|too_few_words| {
+            let too_few_words = NonZero::new(*too_few_words).unwrap();
+            let err = McuCore::try_new(any_mcu_core_id(), too_few_words).err().expect("must be Err<String>");
             expect!(err).to_contain("stack size");
         });
     }
 
     fn any_mcu_core_id() -> usize {
-        any_usize()
+        any_usize_within(0..McuCore::NUMBER_OF_MCU_CORES.get())
     }
 
     #[test]
@@ -102,14 +126,20 @@ pub(crate) mod tests {
     }
 
     #[test]
+    fn NUMBER_OF_MCU_CORES__get__expect_value_from_config() {
+        expect!(McuCore::NUMBER_OF_MCU_CORES.get()).to_equal(SMEG_CONFIG.VALUES.MCUS.HOST.RUST_STD.NUMBER_OF_CORES as usize);
+    }
+
+    #[test]
     fn mcu_core_id__get__expect_same_value_passed_to_constructor() {
         let id = any_mcu_core_id();
         let mcu_core = McuCore::try_new(id, any_kernel_stack_size_words()).expect("must be Ok<McuCore>");
         expect!(mcu_core.id).to_equal(id);
     }
 
-    fn any_kernel_stack_size_words() -> usize {
-        any_usize_within(McuCore::MIN_KERNEL_STACK_SIZE_WORDS..McuCore::MIN_KERNEL_STACK_SIZE_WORDS + 100)
+    fn any_kernel_stack_size_words() -> NonZero<usize> {
+        let min_words = McuCore::MIN_KERNEL_STACK_SIZE_WORDS.get();
+        NonZero::new(any_usize_within(min_words..min_words + 100)).unwrap()
     }
 
     #[test]
@@ -138,7 +168,7 @@ pub(crate) mod tests {
         expect!(McuCore::default().kernel_stack_size_words).to_equal(tls_kernel_stack_size_words);
     }
 
-    fn stub_tls_kernel_stack_size_words(kernel_stack_size_words: usize) {
+    fn stub_tls_kernel_stack_size_words(kernel_stack_size_words: NonZero<usize>) {
         let mcu_core = McuCore::try_new(any_mcu_core_id(), kernel_stack_size_words).expect("must be Ok<McuCore>");
         McuCore::TLS.set(mcu_core);
     }
@@ -175,7 +205,7 @@ pub(crate) mod tests {
     }
 
     fn any_nonzero_mcu_core_id() -> usize {
-        any_usize_within(1..=usize::MAX)
+        any_usize_within(1..McuCore::NUMBER_OF_MCU_CORES.get())
     }
 
     #[test]

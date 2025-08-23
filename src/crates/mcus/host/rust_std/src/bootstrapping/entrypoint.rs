@@ -1,17 +1,12 @@
 include!("../../../../../os/mcu_bootstrapping.rs.inc");
 
 use std::{io, thread};
+use std::num::NonZero;
 
 use smeg_config::SMEG_CONFIG;
+use smeg_kernel::HasMcuCoreId;
 
 use crate::McuCore;
-
-const NUMBER_OF_CORES: usize = SMEG_CONFIG.VALUES.MCUS.HOST.RUST_STD.NUMBER_OF_CORES as usize;
-const _: () = assert!(NUMBER_OF_CORES >= 1, "Number of simulated MCU cores must be at least 1.");
-const _: () = assert!(
-    NUMBER_OF_CORES <= 16,
-    "Number of simulated MCU cores probably should be less than 16; this is an artificial limit for sense-checking purposes only, so feel free \
-    to tweak the asserted limit if necessary.");
 
 const KERNEL_STACK_SIZE_WORDS: usize = SMEG_CONFIG.VALUES.KERNEL.STACK.SIZE_IN_WORDS as usize;
 const _: () = assert!(KERNEL_STACK_SIZE_WORDS >= 4096, "Kernel stack size is unrealistically small.");
@@ -19,8 +14,8 @@ const _: () = assert!(KERNEL_STACK_SIZE_WORDS >= 4096, "Kernel stack size is unr
 pub fn entrypoint() -> Result<isize, String> {
     smeg_kernel::panic_handler::claim_std_panic_hook();
 
-    let mut mcu_cores = (0..NUMBER_OF_CORES)
-        .map(|core_id| McuCore::try_new(core_id, KERNEL_STACK_SIZE_WORDS))
+    let mut mcu_cores = (0..McuCore::NUMBER_OF_MCU_CORES.get())
+        .map(|core_id| McuCore::try_new(core_id, NonZero::new(KERNEL_STACK_SIZE_WORDS).unwrap()))
         .collect::<Result<Vec<_>, String>>()?;
 
     thread::scope(|scope| -> Result<isize, String> {

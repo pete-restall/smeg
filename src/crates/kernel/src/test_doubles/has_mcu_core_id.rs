@@ -1,11 +1,16 @@
 #![doc = crate::docs::side_by_side_md!()]
 use crate::docs;
 
+use core::num::NonZero;
+
 use crate::HasMcuCoreId;
 
 use super::Dummy;
 
 impl HasMcuCoreId for Dummy {
+    #[doc = docs::side_by_side_md!("Dummy.NUMBER_OF_MCU_CORES")]
+    const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(1).unwrap();
+
     #[doc = docs::side_by_side_md!("Dummy.mcu_core_id")]
     fn mcu_core_id(&self) -> usize { usize::default() }
 }
@@ -14,6 +19,9 @@ impl HasMcuCoreId for Dummy {
 pub struct StubForConstantMcuCoreId<const MCU_CORE_ID: usize>;
 
 impl<const MCU_CORE_ID: usize> HasMcuCoreId for StubForConstantMcuCoreId<MCU_CORE_ID> {
+    #[doc = docs::side_by_side_md!("StubForConstantMcuCoreId.NUMBER_OF_MCU_CORES")]
+    const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(MCU_CORE_ID + 1).unwrap();
+
     #[doc = docs::side_by_side_md!("StubForConstantMcuCoreId.mcu_core_id")]
     fn mcu_core_id(&self) -> usize { MCU_CORE_ID }
 }
