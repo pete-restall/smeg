@@ -1,7 +1,11 @@
+//#![feature(generic_const_exprs)]
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 #![cfg_attr(feature = "no_default_despair", feature(linkage))]
 
 pub mod bootstrapping;
+
+mod const_types;
+pub use const_types::*;
 
 pub mod docs;
 

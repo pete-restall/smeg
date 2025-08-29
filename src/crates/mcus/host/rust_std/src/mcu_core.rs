@@ -3,7 +3,7 @@ use std::{io, thread, time};
 use std::num::NonZero;
 
 use smeg_config::SMEG_CONFIG;
-use smeg_kernel::HasMcuCoreId;
+use smeg_kernel::{ConstUsize, HasConstUsizeValue, HasMcuCoreId};
 
 #[derive(Copy, Clone)]
 pub struct McuCore {
@@ -16,12 +16,12 @@ impl McuCore {
         static TLS: Cell<McuCore> = panic!("McuCore TLS has not been initialised");
     }
 
+    pub(crate) const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(<<Self as HasMcuCoreId>::NumberOfMcuCores>::VALUE).unwrap();
     const MIN_KERNEL_STACK_SIZE_WORDS: NonZero<usize> = NonZero::new(4096).unwrap();
 
     pub fn try_new(id: usize, kernel_stack_size_words: NonZero<usize>) -> Result<McuCore, String> {
-        let number_of_mcu_cores: usize = <Self as HasMcuCoreId>::NUMBER_OF_MCU_CORES.get();
-        if id >= number_of_mcu_cores {
-            Err(format!("Core ID is out of range; id={}, NUMBER_OF_MCU_CORES={}", id, number_of_mcu_cores))
+        if id >= Self::NUMBER_OF_MCU_CORES.get() {
+            Err(format!("Core ID is out of range; id={}, NUMBER_OF_MCU_CORES={}", id, Self::NUMBER_OF_MCU_CORES.get()))
         } else if kernel_stack_size_words < Self::MIN_KERNEL_STACK_SIZE_WORDS {
             Err(format!(
                 "Kernel stack size is unrealistically small; kernel_stack_size_words={}, MIN_KERNEL_STACK_SIZE_WORDS={}",
@@ -77,12 +77,15 @@ impl Default for McuCore {
     }
 }
 
-const NUMBER_OF_MCU_CORES: i64 = SMEG_CONFIG.VALUES.MCUS.HOST.RUST_STD.NUMBER_OF_CORES;
-const _: () = assert!(NUMBER_OF_MCU_CORES >= 1, "Number of simulated MCU cores must be at least 1.");
-const _: () = assert!(NUMBER_OF_MCU_CORES <= usize::BITS as i64, "Number of simulated MCU cores must be no more than the number of bits in a usize (optimisation).");
+const NUMBER_OF_MCU_CORES: usize = {
+    const VALUE: i64 = SMEG_CONFIG.VALUES.MCUS.HOST.RUST_STD.NUMBER_OF_CORES;
+    assert!(VALUE >= 1, "Number of simulated MCU cores must be at least 1.");
+    assert!(VALUE <= usize::BITS as i64, "Number of simulated MCU cores must be no more than the number of bits in a usize (optimisation).");
+    VALUE as usize
+};
 
 impl HasMcuCoreId for McuCore {
-    const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(NUMBER_OF_MCU_CORES as usize).unwrap();
+    type NumberOfMcuCores = ConstUsize<NUMBER_OF_MCU_CORES>;
 
     fn mcu_core_id(&self) -> usize { self.id }
 }
@@ -95,6 +98,7 @@ pub(crate) mod tests {
     use fluent_test::prelude::*;
 
     use smeg_testing_host_utils::integers::any_usize_within;
+
     use super::*;
 
     #[test]

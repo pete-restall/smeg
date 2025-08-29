@@ -2,11 +2,11 @@
 Test doubles for [`HasMcuCoreId`].
 <!-- ANCHOR_END: module -->
 
-<!-- ANCHOR: Dummy.NUMBER_OF_MCU_CORES -->
-Dummy value of [`HasMcuCoreId.NUMBER_OF_MCU_CORES`].
+<!-- ANCHOR: Dummy.NumberOfMcuCores -->
+Dummy value of [`HasMcuCoreId.NumberOfMcuCores`].
 
-Returns `1`.
-<!-- ANCHOR_END: Dummy.NUMBER_OF_MCU_CORES -->
+Alias for [`ConstUsize<1>`].
+<!-- ANCHOR_END: Dummy.NumberOfMcuCores -->
 
 <!-- ANCHOR: Dummy.mcu_core_id -->
 Dummy implementation of [`HasMcuCoreId.mcu_core_id`].
@@ -20,11 +20,11 @@ Stub implementation of [`HasMcuCoreId`] for a given MCU Core ID.
 The MCU's Core ID is stubbed to be the value of the `const` generic argument `MCU_CORE_ID`.
 <!-- ANCHOR_END: StubForConstantMcuCoreId -->
 
-<!-- ANCHOR: StubForConstantMcuCoreId.NUMBER_OF_MCU_CORES -->
-Stub value of [`HasMcuCoreId.NUMBER_OF_MCU_CORES`].
+<!-- ANCHOR: StubForConstantMcuCoreId.NumberOfMcuCores -->
+Stub value of [`HasMcuCoreId.NumberOfMcuCores`].
 
-Returns the stubbed constant from the `const` generic argument `MCU_CORE_ID + 1`.
-<!-- ANCHOR_END: StubForConstantMcuCoreId.NUMBER_OF_MCU_CORES -->
+Alias for the [`ConstUsize<{MCU_CORE_ID + 1}>`].
+<!-- ANCHOR_END: StubForConstantMcuCoreId.NumberOfMcuCores -->
 
 <!-- ANCHOR: StubForConstantMcuCoreId.mcu_core_id -->
 Stub implementation of [`HasMcuCoreId.mcu_core_id`].

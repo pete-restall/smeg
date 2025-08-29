@@ -1,10 +1,9 @@
 use crate::docs;
-
-use core::num::NonZero;
+use crate::{ConstUsize, HasConstUsizeValue};
 
 #[doc = docs::side_by_side_md!("HasMcuCoreId")]
 pub trait HasMcuCoreId {
-    const NUMBER_OF_MCU_CORES: NonZero<usize>;
+    type NumberOfMcuCores: HasConstUsizeValue;
 
     #[doc = docs::side_by_side_md!("HasMcuCoreId.mcu_core_id")]
     fn mcu_core_id(&self) -> usize;
@@ -14,7 +13,7 @@ pub trait HasMcuCoreId {
 pub trait McuSingleCore: HasMcuCoreId { }
 
 impl<T: McuSingleCore> HasMcuCoreId for T {
-    const NUMBER_OF_MCU_CORES: NonZero<usize> = NonZero::new(1).unwrap();
+    type NumberOfMcuCores = ConstUsize<1>;
 
     #[doc = docs::side_by_side_md!("McuSingleCore.mcu_core_id")]
     fn mcu_core_id(&self) -> usize { 0 }
@@ -31,8 +30,8 @@ mod tests {
     impl McuSingleCore for StubSingleCoreMcu { }
 
     #[test]
-    fn NUMBER_OF_MCU_CORES__get__expect_one() {
-        expect!(StubSingleCoreMcu::NUMBER_OF_MCU_CORES.get()).to_equal(1);
+    fn NumberOfMcuCores__get_VALUE__expect_one() {
+        expect!(<<StubSingleCoreMcu as HasMcuCoreId>::NumberOfMcuCores>::VALUE).to_equal(1);
     }
 
     #[test]
