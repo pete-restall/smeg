@@ -2,6 +2,47 @@ use core::num::NonZero;
 
 use crate::HalfUsize;
 
+/*
+TODO: Since KernelErrorCode is 16 bits and not all errors use the second byte, move the simple u8 errors such as LinkerScriptDespair, into their
+own category (or categories).  If each top-level error in the enum has an argument then this increases the address space available for the errors.
+Such categories would have their own enums.  Suggested layout:
+
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum KernelErrorCode {
+    GeneralDespair(u8) = 1,
+    Retryable(u8),
+    CoreError(CoreKernelErrorCode),
+    McuError(McuKernelErrorCode),
+    SyscallError(SyscallKernelErrorCode),
+    InvalidSyscallArgs(u8),
+    GeneralSyscallError(u8)
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum CoreKernelErrorCode {
+    LinkerScriptDespair,
+    BootstrappingPanic
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum McuKernelErrorCode {
+    InsideUnhandledIsr,
+    InsideReservedIsr,
+    InvalidCoreId
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum SyscallKernelErrorCode {
+    UnknownSyscall,
+    UnalignedArgs,
+    UnaddressableArgs
+}
+*/
+
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum KernelErrorCode {
@@ -10,6 +51,7 @@ pub enum KernelErrorCode {
     BootstrappingPanic,
     InsideUnhandledIsr,
     InsideReservedIsr,
+    InvalidMcuCoreId,
     Retryable(u8),
     UnknownSyscall,
     UnalignedSyscallArgs,
@@ -39,14 +81,15 @@ mod tests {
 
     use super::*;
 
-    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 7] = [
+    static UNIT_VARIANTS: [(KernelErrorCode, HalfUsize); 8] = [
         (KernelErrorCode::LinkerScriptDespair, 2 << 8),
         (KernelErrorCode::BootstrappingPanic, 3 << 8),
         (KernelErrorCode::InsideUnhandledIsr, 4 << 8),
         (KernelErrorCode::InsideReservedIsr, 5 << 8),
-        (KernelErrorCode::UnknownSyscall, 7 << 8),
-        (KernelErrorCode::UnalignedSyscallArgs, 8 << 8),
-        (KernelErrorCode::UnaddressableSyscallArgs, 9 << 8)
+        (KernelErrorCode::InvalidMcuCoreId, 6 << 8),
+        (KernelErrorCode::UnknownSyscall, 8 << 8),
+        (KernelErrorCode::UnalignedSyscallArgs, 9 << 8),
+        (KernelErrorCode::UnaddressableSyscallArgs, 10 << 8)
     ];
 
     #[test]
@@ -75,9 +118,9 @@ mod tests {
         let any_u16 = any_u8 as u16;
         [
             (KernelErrorCode::GeneralDespair(any_u8), ((1_u16 << 8) | any_u16) as HalfUsize),
-            (KernelErrorCode::Retryable(any_u8), ((6_u16 << 8) | any_u16) as HalfUsize),
-            (KernelErrorCode::InvalidSyscallArgs(any_u8), ((10_u16 << 8) | any_u16) as HalfUsize),
-            (KernelErrorCode::GeneralSyscallError(any_u8), ((11_u16 << 8) | any_u16) as HalfUsize)
+            (KernelErrorCode::Retryable(any_u8), ((7_u16 << 8) | any_u16) as HalfUsize),
+            (KernelErrorCode::InvalidSyscallArgs(any_u8), ((11_u16 << 8) | any_u16) as HalfUsize),
+            (KernelErrorCode::GeneralSyscallError(any_u8), ((12_u16 << 8) | any_u16) as HalfUsize)
         ]
     }
 
@@ -101,7 +144,7 @@ pub mod test_doubles {
         *any_item_from(&sample_of_all_kernel_error_codes())
     }
 
-    pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 11] {
+    pub fn sample_of_all_kernel_error_codes() -> [KernelErrorCode; 12] {
         use KernelErrorCode::*;
         [
             GeneralDespair(any_u8()),
@@ -109,6 +152,7 @@ pub mod test_doubles {
             BootstrappingPanic,
             InsideUnhandledIsr,
             InsideReservedIsr,
+            InvalidMcuCoreId,
             Retryable(any_u8()),
             UnknownSyscall,
             UnalignedSyscallArgs,

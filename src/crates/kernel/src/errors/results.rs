@@ -118,7 +118,7 @@ mod tests {
         }
     }
 
-    fn sample_of_all_kernel_errors() -> [KernelError; 11] {
+    fn sample_of_all_kernel_errors() -> [KernelError; 12] {
         use crate::errors::kernel_error_code::test_doubles::sample_of_all_kernel_error_codes;
         sample_of_all_kernel_error_codes().map(|code| KernelError::new(code, ErrorTag::from(Stub)))
     }

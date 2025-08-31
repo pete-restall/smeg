@@ -23,7 +23,7 @@ pub struct McuCoreLocal<M: HasMcuCoreId, T> {
 */
 
 // Instead we can extract the generic argument with a bit of ugly bounds inference along the lines of:
-pub struct McuCoreLocal<M, const N: usize, T> where M: HasMcuCoreId<NumberOfMcuCores=ConstUsize<N>>, [(); N]: Sized {
+pub struct McuCoreLocal<M, const N: usize, T> where M: HasMcuCoreId<NumberOfMcuCores = ConstUsize<N>>, [(); N]: Sized {
     mcu: M,
     values: [T; N]
 }

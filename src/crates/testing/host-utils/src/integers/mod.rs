@@ -23,6 +23,15 @@ fn any_except<T: SampleUniform + PartialEq>(except: T, any_value: fn() -> T) -> 
     }
 }
 
+pub fn any_isize() -> isize {
+    match isize::BITS {
+        i16::BITS => any_within(i16::MIN..=i16::MAX) as isize,
+        i32::BITS => any_within(i32::MIN..=i32::MAX) as isize,
+        i64::BITS => any_within(i64::MIN..=i64::MAX) as isize,
+        _ => panic!("Unhandled number of bits for an isize")
+    }
+}
+
 pub fn any_usize() -> usize {
     any_within(0..=usize::MAX)
 }
