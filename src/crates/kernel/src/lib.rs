@@ -1,3 +1,4 @@
+#![feature(negative_impls)]
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 #![cfg_attr(feature = "no_default_despair", feature(linkage))]
 
@@ -37,6 +38,8 @@ mod slice_from;
 pub use slice_from::*;
 
 pub(crate) extern crate self as smeg_kernel;
+
+pub mod sync;
 
 pub mod tasks;
 
