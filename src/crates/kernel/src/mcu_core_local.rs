@@ -29,15 +29,6 @@ impl<'mcu, M, const N: usize, T> McuCoreLocal<'mcu, M, N, T> where
 
     #[doc = docs::side_by_side_md!("McuCoreLocal.with")]
     pub fn with<F, R>(&self, f: F) -> R where F: FnOnce(&T) -> R {
-        // TODO: The `with()` function ought to take another argument to constrain (albeit not in a fool-proof way) execution to within ISR contexts.
-        // Something along the lines of `with(&self, isr_context: I, f: F) where I: IsrContext + Guard`
-        // The isr_context implementation could then supply two+ methods for the caller to use, along the lines of:
-        //   unsafe fn no_locking(&self) -> &impl IsrContext + Guard { ... }
-        //   unsafe fn isrs_disabled_for_mcu_core(&self) -> &impl IsrContext + Guard { ... }
-        // The Guard trait just needs to implement Drop - in the no_locking() case it's a nop; in the other, the constructor can disable interrupts on the
-        // current core, then re-enable them in 'drop()'.  This also gives the caller an option for an ISR critical section / non-atomic manipulation
-        // whilst at least flagging to the user that this method really needs something from an ISR context, even if it's not possible to enforce that
-        // at compile-time.
         let core_id = self.mcu.mcu_core_id();
         if core_id >= N {
             despair!(
