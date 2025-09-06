@@ -4,7 +4,7 @@ use core::ops::{Deref, DerefMut};
 use crate::errors::Result;
 use crate::interrupts::IsrContext;
 
-use super::LockGuard;
+use super::{Lock, LockGuard, TryLock};
 
 pub struct NoLock<T> {
     value: UnsafeCell<T>
@@ -13,14 +13,6 @@ pub struct NoLock<T> {
 impl<T> NoLock<T> {
     pub const fn new(value: T) -> Self where T: Default {
         Self { value: UnsafeCell::new(value) }
-    }
-
-    pub fn lock(&self) -> Result<NoLockGuard<T>> {
-        self.try_lock()
-    }
-
-    pub fn try_lock(&self) -> Result<NoLockGuard<T>> {
-        Ok(NoLockGuard { lock: self })
     }
 
     pub fn into_inner(self) -> Result<T> {
@@ -32,11 +24,27 @@ impl<T> NoLock<T> {
     }
 }
 
-pub struct NoLockGuard<'a, T> {
-    lock: &'a NoLock<T>
+impl<'protected, T: 'protected> Lock<'protected, T> for NoLock<T> {
+    type Guard = NoLockGuard<'protected, T>;
+
+    fn lock(&'protected self) -> Result<Self::Guard> {
+        Ok(NoLockGuard { lock: self })
+    }
 }
 
-impl<T> LockGuard<T> for NoLockGuard<'_, T> { }
+impl<'protected, T: 'protected> TryLock<'protected, T> for NoLock<T> {
+    type Guard = NoLockGuard<'protected, T>;
+
+    fn try_lock(&'protected self) -> Result<Self::Guard> {
+        Ok(NoLockGuard { lock: self })
+    }
+}
+
+pub struct NoLockGuard<'protected, T> {
+    lock: &'protected NoLock<T>
+}
+
+impl<T> LockGuard<'_, T> for NoLockGuard<'_, T> { }
 
 impl<T> IsrContext for NoLockGuard<'_, T> { }
 
@@ -65,7 +73,7 @@ mod tests {
 
     use fluent_test::prelude::*;
 
-    use crate::sync::NoLock;
+    use super::*;
 
     mod no_lock_tests {
         use super::*;
