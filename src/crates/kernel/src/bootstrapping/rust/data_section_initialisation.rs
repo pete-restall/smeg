@@ -35,6 +35,13 @@ unsafe impl DataSectionInitialisation for DataSectionInitialiserWithoutChecks {
     #[doc = docs::side_by_side_md!("DataSectionInitialiserWithoutChecks.load_data_section")]
     unsafe fn load_data_section(ram_start: &mut MaybeUninit<usize>, ram_past_end: &MaybeUninit<usize>, rom_start: &usize) {
         unsafe {
+            // TODO: There should also be other schemes that we can choose - not just memcpy() - because the .data section is going to get very
+            // large and consume a commensurate amount of flash.  A better approach would be to compress the data in flash and unpack it on startup.
+            // This would require the LMA in the linker-script to be a section outside of the flash that can be post-processed in the ELF and then
+            // the compressed version would be used to produce the hex / bin.  A rudimentary scheme for compression - very small code - could be
+            // RLE, maybe of the form: u8 <N*u8> ..., where the initial u8 is number of repetitions (6 bits, 1 -> 64) plus a unit of
+            // repetition N (2 bits, 1-4 bytes).  A simple Huffman encoding scheme could also be used, which would be even more efficient - in reality,
+            // most bytes and words will probably be 0, so a significant flash saving could be made if there is a lot of .data.
             let data_size_words = ram_past_end.as_ptr().offset_from(ram_start.as_ptr());
             core::ptr::copy_nonoverlapping(rom_start as *const usize, ram_start.as_mut_ptr(), data_size_words as usize);
         }
