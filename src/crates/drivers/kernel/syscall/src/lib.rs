@@ -41,6 +41,10 @@ pub struct Driver<D: Dependencies> {
 }
 
 impl<D: Dependencies> Driver<D> {
+    pub const fn new() -> Self {
+        Self { _dependencies: PhantomData }
+    }
+
     pub const fn collect_isr_vectors(isrs: mcu::IsrVectorTableBuilder) -> mcu::IsrVectorTableBuilder {
         mcu::collect_isr_vectors::<D>(isrs)
     }

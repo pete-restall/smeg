@@ -32,7 +32,12 @@ mod task_scheduler {
     use smeg_kernel::IsAddressableMut;
     use smeg_kernel::tasks::{HasInterruptedTask, HasInterruptedTaskMut};
 
-    pub struct Driver;
+    pub struct Dependencies;
+    impl smeg_drivers_kernel_task_scheduler::Dependencies for Dependencies {
+        type IsrContext = super::IsrContext;
+    }
+
+    pub type Driver = smeg_drivers_kernel_task_scheduler::Driver<Dependencies>;
 
     pub struct DummyInterruptedTask;
 
@@ -57,12 +62,7 @@ mod task_scheduler {
     }
 }
 
-pub struct Drivers {
-    mcu: mcu::Driver,
-    syscall: syscall::Driver,
-    blinky_blinky: blinky_blinky::Driver,
-    task_scheduler: task_scheduler::Driver
-}
+pub struct Drivers;
 
 pub struct IsrContext {
     mcu: mcu::IsrContext,
@@ -74,6 +74,26 @@ pub struct IsrContext {
 impl smeg_kernel::interrupts::IsrContext for IsrContext { }
 
 // TODO: all of these implementations probably ought to be tested... also candidates for a macro along with the above structs
+// TODO: something not quite right about this - the instantiation is good, it allows cache coherency for driver data, easy MMU mapping, etc.  The bad is the AsRef, which is only required for each driver to get its own (singleton) data, but could be used by other drivers that should be using the API on the IsrContext.  Maybe a way to get around this is to add something like a 'caller::XxxDriverOnly' to the AsRef method ?  And perhaps to other methods inside the XxxDriver ?
+macro_rules! instantiate_drivers {
+    ($driver:ident) => {
+        impl AsRef<$driver::Driver> for IsrContext {
+            fn as_ref(&self) -> &$driver::Driver {
+                #[unsafe(link_section = stringify!(".data.drivers.", $driver))]
+                static DRIVER: $driver::Driver = $driver::Driver::new();
+                &DRIVER
+            }
+        }
+    };
+
+    ($driver:ident, $($drivers:ident),+) => {
+        instantiate_drivers!($driver);
+        instantiate_drivers!($($drivers),+);
+    }
+}
+
+instantiate_drivers!(mcu, syscall, blinky_blinky, task_scheduler);
+
 impl AsRef<mcu::FamilyIsrContext> for IsrContext {
     fn as_ref(&self) -> &mcu::FamilyIsrContext { self.mcu.as_ref() }
 }

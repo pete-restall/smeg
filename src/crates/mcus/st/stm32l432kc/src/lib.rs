@@ -15,6 +15,12 @@ mod isr_stack;
 
 pub struct Driver;
 
+impl Driver {
+    pub const fn new() -> Self {
+        Self { }
+    }
+}
+
 impl McuSingleCore for Driver { }
 
 impl HasIsrContext for Driver {

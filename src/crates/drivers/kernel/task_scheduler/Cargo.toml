@@ -1,0 +1,26 @@
+[package]
+name = "smeg-drivers-kernel-task_scheduler"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[dependencies]
+cfg-if = "1.0.0"
+include-utils = { version = "0.2.4", features = ["workspace"] }
+smeg-drivers-kernel-syscall = { path = "../syscall" }
+smeg-kernel = { path = "../../../kernel" }
+smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family", optional = true }
+
+[dev-dependencies]
+fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../../testing/host-utils" }
+
+[features]
+std = ["smeg-kernel/std"]
+smeg-mcu-arm- = ["dep:smeg-mcu-arm-cortex_m4_family"]
+smeg-mcu-arm-cortex_m4_family = ["smeg-mcu-arm-", "dep:smeg-mcu-arm-cortex_m4_family"]
+test_doubles = [
+    "smeg-drivers-kernel-syscall/test_doubles",
+    "smeg-kernel/test_doubles",
+    "smeg-mcu-arm-cortex_m4_family/test_doubles"
+]

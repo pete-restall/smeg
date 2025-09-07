@@ -6,14 +6,24 @@ authors = ["Pete Restall <pete@restall.net>"]
 
 [dependencies]
 cfg-if = "1.0.0"
+smeg-drivers-kernel-syscall = { path = "../../../drivers/kernel/syscall", features = ["smeg-mcu-arm-cortex_m4_family"] }
+smeg-drivers-kernel-task_scheduler = { path = "../../../drivers/kernel/task_scheduler", features = ["smeg-mcu-arm-cortex_m4_family"] }
 smeg-kernel = { path = "../../../kernel" }
 smeg-mcu-arm-cortex_m4_family = { path = "../../../mcus/arm/cortex_m4_family" }
 smeg-mcu-st-stm32l432kc = { path = "../../../mcus/st/stm32l432kc" }
-smeg-drivers-kernel-syscall = { path = "../../../drivers/kernel/syscall", features = ["smeg-mcu-arm-cortex_m4_family"] }
 
 [dev-dependencies]
 smeg-testing-integration = { path = "../../../testing/integration" }
 
 [features]
-std = ["smeg-kernel/std", "smeg-mcu-st-stm32l432kc/std"]
-test_doubles = ["smeg-drivers-kernel-syscall/test_doubles"]
+std = [
+    "smeg-drivers-kernel-syscall/std",
+    "smeg-drivers-kernel-task_scheduler/std",
+    "smeg-kernel/std",
+    "smeg-mcu-st-stm32l432kc/std"
+]
+
+test_doubles = [
+    "smeg-drivers-kernel-syscall/test_doubles",
+    "smeg-drivers-kernel-task_scheduler/test_doubles"
+]
