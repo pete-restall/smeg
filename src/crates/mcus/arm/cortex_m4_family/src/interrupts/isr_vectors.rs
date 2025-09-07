@@ -103,7 +103,7 @@ pub mod test_doubles {
     use smeg_kernel::despair;
     use smeg_kernel::errors::KernelErrorCode;
 
-    use smeg_kernel::test_doubles::{Dummy, Stub};
+    use smeg_kernel::test_doubles::Stub;
     use smeg_testing_host_utils::seq::any_item_from;
 
     use super::*;

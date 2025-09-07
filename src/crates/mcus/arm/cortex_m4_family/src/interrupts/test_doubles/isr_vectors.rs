@@ -2,7 +2,7 @@ use smeg_testing_host_utils::seq::any_item_from;
 
 use crate::interrupts::{IsrVector, IsrVectorTableBuilder};
 
-use super::{Dummy, Stub};
+use super::Stub;
 
 // TODO: docs...
 impl From<Stub> for IsrVectorTableBuilder {

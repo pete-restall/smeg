@@ -4,7 +4,6 @@ use std::{io, thread};
 use std::num::NonZero;
 
 use smeg_config::SMEG_CONFIG;
-use smeg_kernel::HasMcuCoreId;
 
 use crate::McuCore;
 
