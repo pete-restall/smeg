@@ -75,7 +75,7 @@ mod tests {
 
     use super::*;
 
-    mod no_lock_tests {
+    mod no_lock {
         use super::*;
 
         #[test]
@@ -133,7 +133,7 @@ mod tests {
         }
     }
 
-    mod no_lock_guard_tests {
+    mod no_lock_guard {
         use core::ops::{Deref, DerefMut};
 
         use super::*;
