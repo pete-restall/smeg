@@ -37,12 +37,12 @@ pub trait SyscallInvocation {
 }
 
 pub struct Driver<D: Dependencies> {
-    _dependencies: PhantomData<D>
+    dependencies: D
 }
 
 impl<D: Dependencies> Driver<D> {
-    pub const fn new() -> Self {
-        Self { _dependencies: PhantomData }
+    pub const fn new(dependencies: D) -> Self {
+        Self { dependencies }
     }
 
     pub const fn collect_isr_vectors(isrs: mcu::IsrVectorTableBuilder) -> mcu::IsrVectorTableBuilder {
@@ -73,4 +73,15 @@ pub trait Dependencies {
                 &raw const __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END as *const SyscallIsrTrampolinePtr<Self::IsrContext>)
         }
     }
+}
+
+#[macro_export]
+macro_rules! import_driver {
+    ($deps:ident $($args:tt)?) => {
+        const {
+            type Driver = ::smeg_drivers_kernel_syscall::Driver<$deps>;
+            const DRIVER: Driver = Driver::new($deps $($args)?);
+            DRIVER
+        }
+    };
 }

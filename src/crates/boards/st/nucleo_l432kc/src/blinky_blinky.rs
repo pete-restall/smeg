@@ -87,12 +87,12 @@ pub trait Syscalls {
 
 use core::marker::PhantomData;
 pub struct Driver<D: Dependencies> {
-    _dependencies: PhantomData<D>
+    dependencies: D
 }
 
 impl<D: Dependencies> Driver<D> {
-    pub const fn new() -> Self {
-        Self { _dependencies: PhantomData }
+    pub const fn new(dependencies: D) -> Self {
+        Self { dependencies }
     }
 
     pub const fn collect_isr_vectors<T>(isrs: T) -> T {
@@ -107,6 +107,24 @@ impl<D: Dependencies> Syscalls for Driver<D> {
 impl<D: Dependencies> smeg_kernel::interrupts::HasIsrContext for Driver<D> {
     type IsrContext = smeg_kernel::interrupts::NoIsrContext;
 }
+
+#[macro_export]
+macro_rules! import_driver {
+    ($deps:ident $($args:tt)?) => {
+        const {
+            type Driver = crate::blinky_blinky::Driver<$deps>;
+            const DRIVER: Driver = Driver::new($deps $($args)?);
+
+            ::smeg_drivers_kernel_syscall::syscall_map! {
+                BlinkyBlinkySyscall -> <Driver as crate::blinky_blinky::Syscalls>::BlinkyBlinkySyscallHandler
+            }
+
+            DRIVER
+        }
+    };
+}
+
+pub use import_driver;
 
 // TODO: just a blinky-blinky to make sure the code links and runs properly on the Nucleo board.
 #[unsafe(no_mangle)]

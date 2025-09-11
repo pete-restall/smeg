@@ -43,11 +43,21 @@ pub mod sync;
 
 pub mod tasks;
 
-pub(crate) mod caller {
-    pub enum IsKernel { }
-    pub trait RestrictedToKernel { }
-    impl RestrictedToKernel for IsKernel { }
+#[macro_export]
+macro_rules! def_private_api_token {
+    (Kernel) => { ::smeg_kernel::def_private_api_token!(@__(IsKernel, RestrictedToKernel)); };
+    (Driver) => { ::smeg_kernel::def_private_api_token!(@__(IsDriver, RestrictedToDriver)); };
+
+    (@__($token:ident, $restriction:ident)) => {
+        pub(crate) mod caller {
+            pub enum $token { }
+            pub trait $restriction { }
+            impl $restriction for $token { }
+        }
+    };
 }
+
+def_private_api_token!(Kernel);
 
 #[cfg(any(test, feature = "test_doubles"))]
 pub mod test_doubles;

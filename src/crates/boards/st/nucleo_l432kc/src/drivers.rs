@@ -6,8 +6,12 @@ use smeg_mcu_st_stm32l432kc::interrupts::IsrVectorTableBuilder as Stm32IsrVector
 
 mod mcu {
     use smeg_kernel::interrupts::HasIsrContext;
+    pub use smeg_mcu_st_stm32l432kc::import_driver;
 
-    pub type Driver = smeg_mcu_st_stm32l432kc::Driver;
+    pub struct Dependencies;
+    impl smeg_mcu_st_stm32l432kc::Dependencies for Dependencies { }
+
+    pub type Driver = smeg_mcu_st_stm32l432kc::Driver<Dependencies>;
 
     pub type IsrContext = <Driver as HasIsrContext>::IsrContext;
     // pub type FamilyIsrContext = <Driver as HasFamilyIsrContext>::FamilyIsrContext; // TODO: DOES NOT WORK DUE TO 'impl From<T> for T' IN core !
@@ -15,6 +19,7 @@ mod mcu {
 }
 
 mod syscall {
+    pub use smeg_drivers_kernel_syscall::import_driver;
     use smeg_kernel::interrupts::HasIsrContext;
 
     pub struct Dependencies;
@@ -28,7 +33,7 @@ mod syscall {
 }
 
 mod task_scheduler {
-    // TODO: Temporary until a proper task scheduler driver is introduced
+    pub use smeg_drivers_kernel_task_scheduler::import_driver;
     use smeg_kernel::IsAddressableMut;
     use smeg_kernel::tasks::{HasInterruptedTask, HasInterruptedTaskMut};
 
@@ -39,6 +44,7 @@ mod task_scheduler {
 
     pub type Driver = smeg_drivers_kernel_task_scheduler::Driver<Dependencies>;
 
+    // TODO: Temporary until a proper task scheduler driver is introduced
     pub struct DummyInterruptedTask;
 
     impl smeg_kernel::tasks::Task for DummyInterruptedTask { }
@@ -73,14 +79,22 @@ pub struct IsrContext {
 
 impl smeg_kernel::interrupts::IsrContext for IsrContext { }
 
+macro_rules! collect_isr_vectors {
+    ($isrs:ident) => { $isrs };
+
+    ($driver:ident, $($drivers:ident),+) => { $driver::Driver::collect_isr_vectors(collect_isr_vectors!($($drivers),+)) };
+}
+
 // TODO: all of these implementations probably ought to be tested... also candidates for a macro along with the above structs
 // TODO: something not quite right about this - the instantiation is good, it allows cache coherency for driver data, easy MMU mapping, etc.  The bad is the AsRef, which is only required for each driver to get its own (singleton) data, but could be used by other drivers that should be using the API on the IsrContext.  Maybe a way to get around this is to add something like a 'caller::XxxDriverOnly' to the AsRef method ?  And perhaps to other methods inside the XxxDriver ?
 macro_rules! instantiate_drivers {
     ($driver:ident) => {
         impl AsRef<$driver::Driver> for IsrContext {
             fn as_ref(&self) -> &$driver::Driver {
+                type Dependencies = $driver::Dependencies;
+
                 #[unsafe(link_section = stringify!(".data.drivers.", $driver))]
-                static DRIVER: $driver::Driver = $driver::Driver::new();
+                static DRIVER: $driver::Driver = $driver::import_driver!(Dependencies { });
                 &DRIVER
             }
         }
@@ -89,7 +103,7 @@ macro_rules! instantiate_drivers {
     ($driver:ident, $($drivers:ident),+) => {
         instantiate_drivers!($driver);
         instantiate_drivers!($($drivers),+);
-    }
+    };
 }
 
 instantiate_drivers!(mcu, syscall, blinky_blinky, task_scheduler);
@@ -130,23 +144,18 @@ impl AsMut<task_scheduler::IsrContext> for IsrContext {
 mod blinky_blinky {
     use smeg_kernel::interrupts::HasIsrContext;
 
-    use smeg_drivers_kernel_syscall::syscall_map;
-
     pub struct Dependencies;
 
-    pub type Driver = super::super::blinky_blinky::Driver<Dependencies>;
+    pub type Driver = crate::blinky_blinky::Driver<Dependencies>;
 
-    impl super::super::blinky_blinky::Dependencies for Dependencies {
+    impl crate::blinky_blinky::Dependencies for Dependencies {
         type IsrContext = super::IsrContext;
     }
 
-    syscall_map! { BlinkyBlinkySyscall -> <Driver as super::super::blinky_blinky::Syscalls>::BlinkyBlinkySyscallHandler }
+    pub use crate::blinky_blinky::import_driver;
 
     pub type IsrContext = <Driver as HasIsrContext>::IsrContext;
 }
-
-// TODO: does each driver need to export a macro that takes a bunch of dependencies, and then instantiates it ?  Knowing the concrete types would allow
-// the macro to create 'generic' statics (eg. the SyscallHandler trampoline tables)
 
 // TODO: this file looks like it could be completely generic, given a list of drivers (that we can iterate over to register 'stuff' like ISRs)
 // and the correct imports (so long as all MCUs, etc. follow a naming convention)
@@ -160,6 +169,6 @@ impl Drivers {
     }
 
     const fn collect_cortex_m4_isr_vectors(isrs: CortexM4IsrVectorTableBuilder) -> CortexM4IsrVectorTableBuilder {
-        syscall::Driver::collect_isr_vectors(isrs)
+        collect_isr_vectors!(blinky_blinky, task_scheduler, syscall, isrs)
     }
 }

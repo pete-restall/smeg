@@ -13,20 +13,35 @@ pub mod interrupts;
 #[cfg(target_arch = "arm")]
 mod isr_stack;
 
-pub struct Driver;
+pub trait Dependencies { }
 
-impl Driver {
-    pub const fn new() -> Self {
-        Self { }
+pub struct Driver<D: Dependencies> {
+    dependencies: D
+}
+
+impl<D: Dependencies> Driver<D> {
+    pub const fn new(dependencies: D) -> Self {
+        Self { dependencies }
     }
 }
 
-impl McuSingleCore for Driver { }
+impl<D: Dependencies> McuSingleCore for Driver<D> { }
 
-impl HasIsrContext for Driver {
+impl<D: Dependencies> HasIsrContext for Driver<D> {
     type IsrContext = interrupts::IsrContext;
 }
 
-impl HasFamilyIsrContext for Driver {
+impl<D: Dependencies> HasFamilyIsrContext for Driver<D> {
     type FamilyIsrContext = interrupts::FamilyIsrContext;
+}
+
+#[macro_export]
+macro_rules! import_driver {
+    ($deps:ident $($args:tt)?) => {
+        const {
+            type Driver = ::smeg_mcu_st_stm32l432kc::Driver<$deps>;
+            const DRIVER: Driver = Driver::new($deps $($args)?);
+            DRIVER
+        }
+    };
 }

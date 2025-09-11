@@ -6,7 +6,6 @@
 use smeg_kernel::docs;
 
 use core::convert::AsMut;
-use core::marker::PhantomData;
 
 use smeg_kernel::interrupts::{HasIsrContext, IsrContext, NoIsrContext};
 
@@ -22,12 +21,12 @@ cfg_if::cfg_if! {
 }
 
 pub struct Driver<D: Dependencies> {
-    _dependencies: PhantomData<D>
+    dependencies: D
 }
 
 impl<D: Dependencies> Driver<D> {
-    pub const fn new() -> Self {
-        Self { _dependencies: PhantomData }
+    pub const fn new(dependencies: D) -> Self {
+        Self { dependencies }
     }
 
     pub const fn collect_isr_vectors(isrs: mcu::IsrVectorTableBuilder) -> mcu::IsrVectorTableBuilder {
@@ -44,3 +43,22 @@ pub trait Dependencies {
 }
 
 mod yield_syscall;
+pub use yield_syscall::*;
+
+smeg_kernel::def_private_api_token!(Driver);
+
+#[macro_export]
+macro_rules! import_driver {
+    ($deps:ident $($args:tt)?) => {
+        const {
+            type Driver = ::smeg_drivers_kernel_task_scheduler::Driver<$deps>;
+            const DRIVER: Driver = Driver::new($deps $($args)?);
+
+            ::smeg_drivers_kernel_syscall::syscall_map! {
+                YieldSyscall -> ::smeg_drivers_kernel_task_scheduler::YieldSyscallHandler<$deps>
+            }
+
+            DRIVER
+        }
+    };
+}
