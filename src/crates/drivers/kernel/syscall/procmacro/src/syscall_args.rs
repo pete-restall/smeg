@@ -14,7 +14,7 @@ pub fn syscall_args(_args: TokenStream, items: TokenStream) -> TokenStream {
             impl ::smeg_drivers_kernel_syscall::HasSyscallId for #args_ident {
                 fn syscall_id() -> usize {
                     unsafe extern "Rust" {
-                        #[link_name = concat!(".smeg.syscalls.isr_trampolines.", #syscall_name)]
+                        #[link_name = concat!(".rodata.drivers.syscall.isr_trampolines.", #syscall_name)]
                         static TRAMPOLINE: ::core::mem::MaybeUninit<usize>;
                     }
 

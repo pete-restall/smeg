@@ -43,11 +43,11 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH_TEXT
 
-    .text.syscalls.isr_trampolines : \{
+    .rodata.drivers.syscall.isr_trampolines : \{
         . = ALIGN(4);
-        __LINKER_SYSCALLS_ISR_TRAMPOLINES_START = .;
-        KEEP(*(.smeg.syscalls.isr_trampolines .smeg.syscalls.isr_trampolines.*));
-        __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END = .;
+        __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_START = .;
+        KEEP(*(.rodata.drivers.syscall.isr_trampolines .rodata.drivers.syscall.isr_trampolines.*));
+        __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_PAST_END = .;
         . = ALIGN(4);
     } > FLASH_TEXT
 

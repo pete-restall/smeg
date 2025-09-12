@@ -14,8 +14,8 @@ macro_rules! syscall_map {
 
             #[used]
             #[unsafe(no_mangle)]
-            #[unsafe(link_section = ".smeg.syscalls.isr_trampolines.vector_table")]
-            #[unsafe(export_name = concat!(".smeg.syscalls.isr_trampolines.", stringify!($syscall_name)))]
+            #[unsafe(link_section = ".rodata.drivers.syscall.isr_trampolines.vector_table")]
+            #[unsafe(export_name = concat!(".rodata.drivers.syscall.isr_trampolines.", stringify!($syscall_name)))]
             pub static TRAMPOLINE: SyscallIsrTrampolinePtr<IsrContext> = <Handler as SyscallIsrTrampoline<IsrContext>>::on_syscall;
         };
     };

@@ -63,14 +63,14 @@ pub trait Dependencies {
             "This code makes the assumption that a Syscall trampoline pointer is the same size regardless of its argument");
 
         unsafe extern "Rust" {
-            static __LINKER_SYSCALLS_ISR_TRAMPOLINES_START: SyscallIsrTrampolinePtr<usize>;
-            static __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END: SyscallIsrTrampolinePtr<usize>;
+            static __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_START: SyscallIsrTrampolinePtr<usize>;
+            static __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_PAST_END: SyscallIsrTrampolinePtr<usize>;
         }
 
         unsafe {
             smeg_kernel::try_slice_from(
-                &raw const __LINKER_SYSCALLS_ISR_TRAMPOLINES_START as *const SyscallIsrTrampolinePtr<Self::IsrContext>,
-                &raw const __LINKER_SYSCALLS_ISR_TRAMPOLINES_PAST_END as *const SyscallIsrTrampolinePtr<Self::IsrContext>)
+                &raw const __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_START as *const SyscallIsrTrampolinePtr<Self::IsrContext>,
+                &raw const __LINKER_DRIVERS_SYSCALL_ISR_TRAMPOLINES_PAST_END as *const SyscallIsrTrampolinePtr<Self::IsrContext>)
         }
     }
 }
