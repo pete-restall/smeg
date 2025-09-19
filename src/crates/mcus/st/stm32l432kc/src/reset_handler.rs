@@ -6,7 +6,7 @@ unsafe extern "C" {
 }
 
 core::arch::global_asm!(r#"
-    .section .smeg.bootstrap.reset_handler, "ax"
+    .pushsection .smeg.bootstrap.reset_handler, "ax"
     .global _reset_handler
     .type _reset_handler, %function
     .thumb_func
@@ -18,6 +18,8 @@ _reset_handler:
     ldr r0, {1}
     msr msp, r0
     b {2}
+
+    .popsection
 "#,
     sym __LINKER_DATA_FLAGS_GUARANTEED_ZERO_ON_RESET_0,
     sym __LINKER_INITIAL_SP,
