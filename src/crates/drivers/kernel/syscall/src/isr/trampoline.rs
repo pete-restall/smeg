@@ -25,7 +25,13 @@ unsafe impl<H: SyscallIsrHandler> SyscallIsrTrampoline<H::IsrContext> for H wher
         let args_ptr = args as *mut MaybeUninit<H::Args>;
         let task_scheduler = isr_context.as_mut();
         if let Some(interrupted_task) = task_scheduler.interrupted_task()  {
-            if !interrupted_task.is_addressable_mut(args_ptr) {
+            #[cfg(debug_assertions)]
+            let is_unaligned = (align_of::<H::Args>() > 1) && (args & (align_of::<H::Args>() - 1)) != 0;
+
+            #[cfg(not(debug_assertions))]
+            let is_unaligned = false;
+
+            if !interrupted_task.is_addressable_mut(args_ptr) || is_unaligned {
                 return Err(KernelError::from(TaggedError::new(
                     KernelErrorCode::UnaddressableSyscallArgs,
                     error_tag!("Syscall Arguments are not addressable by the interrupted task (caller)"))));
@@ -365,27 +371,20 @@ mod tests {
     }
 
     #[test]
-    fn on_syscall__called_when_args_is_addressible_by_interrupted_task_but_unaligned_and_handler_returns_ok__expect_ok_is_returned_because_is_addressable_broke_its_contract() {
-        let ok = Ok(());
+    #[cfg(debug_assertions)]
+    fn on_syscall__called_when_args_is_addressable_by_interrupted_task_but_unaligned__expect_unaddressable_syscall_args_err_is_returned_for_debug_builds() {
         let mut args = [Aligned2Args; 3];
-        on_syscall__called_when_args_is_addressible_by_interrupted_task_but_unaligned__expect_same_result_as_handler_is_returned(&mut args[1], ok);
+        on_syscall__called_when_args_is_addressable_by_interrupted_task_but_unaligned__expect_unaddressable_syscall_args_err_is_returned(&mut args[1]);
 
         let mut args = [Aligned4Args; 3];
-        on_syscall__called_when_args_is_addressible_by_interrupted_task_but_unaligned__expect_same_result_as_handler_is_returned(&mut args[1], ok);
+        on_syscall__called_when_args_is_addressable_by_interrupted_task_but_unaligned__expect_unaddressable_syscall_args_err_is_returned(&mut args[1]);
 
         let mut args = [Aligned64Args; 3];
-        on_syscall__called_when_args_is_addressible_by_interrupted_task_but_unaligned__expect_same_result_as_handler_is_returned(&mut args[1], ok);
+        on_syscall__called_when_args_is_addressable_by_interrupted_task_but_unaligned__expect_unaddressable_syscall_args_err_is_returned(&mut args[1]);
     }
 
-    fn on_syscall__called_when_args_is_addressible_by_interrupted_task_but_unaligned__expect_same_result_as_handler_is_returned<A: HasSyscallId>(
-        args: &mut A,
-        result: SyscallResult) {
-
-        let error_as_usize = match result {
-            Ok(()) => 0,
-            Err(error) => NonZero::<usize>::from(error).get()
-        };
-
+    #[cfg(debug_assertions)]
+    fn on_syscall__called_when_args_is_addressable_by_interrupted_task_but_unaligned__expect_unaddressable_syscall_args_err_is_returned<A: HasSyscallId>(args: &mut A) {
         type StubbedSyscallHandler<T> = StubSyscallHandler<StubIsrContext<StubTaskScheduler<StubInterruptedTask>>, T>;
 
         on_syscall__called_when_interrupted_task_and_unaligned_args__expect::<A, _>(|offset| {
@@ -394,15 +393,15 @@ mod tests {
                 StubTaskScheduler::stub_with_interrupted_task(
                     StubInterruptedTask::stub_is_addressable_for(unaligned_args_ptr, true)));
 
-            let _syscall_handler = StubbedSyscallHandler::stub_for_ptr(&isr_context, unaligned_args_ptr, result);
             let result = unsafe {
                 <StubbedSyscallHandler<A> as SyscallIsrTrampoline<_>>::on_syscall(&mut isr_context, unaligned_args_ptr as usize)
-            }.as_usize_result();
+            };
 
-            expect!(result.as_usize()).to_equal(error_as_usize);
+            expect!(result.unwrap_err().code).to_equal(KernelErrorCode::UnaddressableSyscallArgs);
         });
     }
 
+    #[cfg(debug_assertions)]
     fn on_syscall__called_when_interrupted_task_and_unaligned_args__expect<A, F: FnMut(isize)>(mut assertion: F) {
         let bad_alignment = align_of::<A>() as isize - 1;
         for offset in -bad_alignment..=bad_alignment {
