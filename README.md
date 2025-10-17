@@ -36,6 +36,11 @@ Requires `cargo-llvm-cov` to enable code coverage:
 $ cargo +nightly install cargo-llvm-cov
 ```
 
+Requires `rust-analyzer` to enable vscode linting, refactoring, etc.:
+```
+$ rustup component add --toolchain nightly rust-analyzer
+```
+
 The `dev` profile (`debug` target) includes various debug assertions with panic strings, which increases the size of the `.data` section considerably.  The `release` profile (`release` target) does not include these, so there is no impact on `.data`.
 
 ## Crate Hierarchy
