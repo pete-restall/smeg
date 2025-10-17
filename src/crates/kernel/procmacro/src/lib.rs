@@ -31,15 +31,7 @@ pub fn side_by_side_md(items: TokenStream) -> TokenStream {
 }
 
 pub(crate) fn source_path_of_macro_invocation() -> String {
-    let source_path = Span::call_site()
-        .source()
-        .source_file()
-        .path();
-
-    source_path
-        .to_str()
-        .expect("Source path (ie. file!()) contains non-UTF-8 characters")
-        .to_string()
+    Span::call_site().file()
 }
 
 pub(crate) use replace_suffix::try_replace_suffix;
