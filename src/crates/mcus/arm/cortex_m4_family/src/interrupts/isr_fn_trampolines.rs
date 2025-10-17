@@ -42,7 +42,7 @@ macro_rules! isr_fn_trampolines {
         ($($fn_generics:ty),*),
         $fn_return:literal ) ) => {
 
-        #[cfg_attr(target_arch = "arm", naked)]
+        #[cfg_attr(target_arch = "arm", unsafe(naked))]
         #[doc = "ARM Cortex M4 ISR Trampoline Stub - see [`isr_fn_trampoline!`] for details."]
         unsafe extern "C" fn $trampoline_fn_name<D>() -> !
             where
@@ -65,6 +65,7 @@ macro_rules! isr_fn_trampolines {
                     ::core::arch::naked_asm!(r#"
                         mov r0, sp
                         mvn lr, #{isr_retval}
+
                         b {trampoline}"#,
                         isr_retval = const !$fn_return,
                         trampoline = sym trampoline::<D>);

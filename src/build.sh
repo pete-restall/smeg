@@ -115,7 +115,7 @@ if ${has_flash_image}; then
     echo "Generating ${image_prefix}.bin from ${image_prefix}.elf...";
     rust-objcopy ${flash_sections} -O binary ${image_prefix}.elf ${image_prefix}.bin || exit 5;
 
-    bin_size_bytes=$(stat -c %s ${image_prefix}.bin);
+    bin_size_bytes=$(stat -f %z ${image_prefix}.bin);
     if [ $bin_size_bytes -lt 1024 ]; then
         echo "!!!!!!!!";
         echo "Flash binary is an unrealistically small ${bin_size_bytes} bytes - over-zealous LTO, or a misplaced linker script ?";
