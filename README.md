@@ -20,6 +20,10 @@ Requires nightly (currently unstable) because of `feature(linkage, naked_functio
 ```
 $ rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 ```
+Or:
+```
+$ rustup component add rust-src --toolchain nightly-x86_64-unknown-freebsd
+```
 
 Requires `cargo-binutils` to enable the `build.sh` script to produce raw binaries without knowing anything about toolchains:
 ```
