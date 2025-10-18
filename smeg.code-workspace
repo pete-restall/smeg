@@ -6,8 +6,6 @@
     ],
     "settings": {
         "cortex-debug.liveWatchRefreshRate": 500,
-        "cortex-debug.openocdPath": "/usr/bin/openocd",
-        "cortex-debug.armToolchainPath": "/opt/arm/local/cortex-m4f/bin",
         "cortex-debug.armToolchainPrefix": "arm-none-eabi",
         "cortex-debug.enableTelemetry": false,
         "files.exclude": {
