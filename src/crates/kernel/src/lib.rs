@@ -25,6 +25,8 @@ pub mod interrupts;
 mod is_addressable;
 pub use is_addressable::*;
 
+pub mod mem;
+
 #[cfg(all(not(test), feature = "std"))]
 pub mod panic_handler;
 
