@@ -1,0 +1,17 @@
+[package]
+name = "smeg-mcu-arm-cortex_m4_family-procmacro"
+version = "0.1.0"
+edition = "2024"
+authors = ["Pete Restall <pete@restall.net>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+
+[dev-dependencies]
+fluent-test = "0.4.3"
+smeg-testing-host-utils = { path = "../../../../testing/host-utils" }
