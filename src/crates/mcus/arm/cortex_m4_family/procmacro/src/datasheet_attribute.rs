@@ -93,7 +93,8 @@ mod tests {
             parse_quote! { #[datasheet("NAME", "SECTION", 123, 456)] },
             parse_quote! { #[datasheet("NAME", "SECTION", -73)] },
             parse_quote! { #[datasheet("NAME")] },
-            parse_quote! { #[datasheet("NAME", "SECTION")] }
+            parse_quote! { #[datasheet("NAME", "SECTION")] },
+            parse_quote! { #[::datasheet("NAME", "SECTION", 123)] }
         ];
 
         for malformed_attribute in malformed_attributes {
