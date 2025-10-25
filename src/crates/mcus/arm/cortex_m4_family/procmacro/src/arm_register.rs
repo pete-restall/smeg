@@ -23,8 +23,8 @@ pub fn arm_register(_args: TokenStream, items: TokenStream) -> TokenStream {
         Some(("isize", type_ident)) => RegisterDefinitionGenerator::<isize>::generate(&derive, &type_ident),
         Some(("usize", type_ident)) => RegisterDefinitionGenerator::<usize>::generate(&derive, &type_ident),
 
-        _ => panic!("A register can only be defined as struct(i8|u8|i16|u16|i32|u32|i64|u64|isize|usize)")
-    }.into()
+        _ => Err("A register can only be defined as struct(i8|u8|i16|u16|i32|u32|i64|u64|isize|usize)".to_string())
+    }.unwrap().into()
 }
 
 macro_rules! match_register_type {

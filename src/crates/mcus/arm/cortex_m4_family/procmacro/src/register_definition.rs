@@ -1,15 +1,17 @@
+use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::ops::BitXor;
 
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{DeriveInput, Ident};
 
-pub struct RegisterDefinitionGenerator<T: Copy> {
+pub struct RegisterDefinitionGenerator<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
     _type: PhantomData<T>
 }
 
-impl<T: Copy> RegisterDefinitionGenerator<T> {
-    pub fn generate(derive: &DeriveInput, type_ident: &Ident) -> TokenStream {
+impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterDefinitionGenerator<T> {
+    pub fn generate(derive: &DeriveInput, type_ident: &Ident) -> Result<TokenStream, String> {
         let (visibility, register_ident) = (&derive.vis, &derive.ident);
 
         //let attrs = derive.attrs.iter().map(RegisterAttribute::<T>::parse).collect::<Result<Vec<_>>>();
@@ -22,7 +24,7 @@ impl<T: Copy> RegisterDefinitionGenerator<T> {
         //iterate fields below and build up consts, etc.
         //figure out if the register is readable (any ro|rw) and writable (any wo|wr)
 
-        quote! {
+        Ok(quote! {
             #[repr(transparent)]
             #[derive(Copy, Clone)]
             #visibility struct #register_ident(#type_ident);
@@ -41,6 +43,6 @@ impl<T: Copy> RegisterDefinitionGenerator<T> {
     //     pub fn implementer_raw(&self) -> usize { unsafe { self.accessor.mmio_read_masked::<{Cpuid::IMPLEMENTER_MASK}>() } }
 
             // TODO: #visibility type {#register_name}Cell<M> = {Readonly|Writeonly|ReadWrite}Cell<M, #register_name>;
-        }
+        })
     }
 }
