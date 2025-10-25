@@ -27,8 +27,8 @@ impl<T> RegisterAttribute<T>
 
     fn parse_named(name: &str, attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
         match name {
-            "datasheet" => Ok(RegisterAttribute::<T>::Datasheet(RegisterDatasheetAttribute::try_from(attr)?)),
-            "ro" | "wo" | "rw" | "xx" => Ok(RegisterAttribute::<T>::Field(RegisterFieldAttribute::try_from(attr)?)),
+            "datasheet" => Ok(RegisterAttribute::Datasheet(RegisterDatasheetAttribute::try_from(attr)?)),
+            "ro" | "wo" | "rw" | "xx" => Ok(RegisterAttribute::Field(RegisterFieldAttribute::try_from(attr)?)),
             _ => Err(format!("Register definition contains an unknown attribute; name={}", name))
         }
     }
