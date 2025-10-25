@@ -5,6 +5,9 @@ mod arm_register;
 mod datasheet_attribute;
 use datasheet_attribute::*;
 
+mod field_attribute;
+use field_attribute::*;
+
 mod register_attribute;
 mod register_definition;
 

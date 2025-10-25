@@ -2,6 +2,10 @@ use rand::Rng;
 use rand::distr::{Distribution, SampleString};
 use rand::distr::uniform::SampleRange;
 
+mod any_case;
+pub use any_case::*;
+
+pub mod ascii;
 pub mod utf8;
 
 pub(crate) fn any_string_of<D, R>(distribution: D, len: R) -> String where

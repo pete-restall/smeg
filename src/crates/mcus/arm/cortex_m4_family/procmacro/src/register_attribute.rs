@@ -1,33 +1,23 @@
+use std::fmt::{Debug, Display};
+use std::ops::BitXor;
+use std::str::FromStr;
+
 use quote::ToTokens;
 use syn::Attribute;
 
-use super::RegisterDatasheetAttribute;
+use super::{RegisterDatasheetAttribute, RegisterFieldAttribute};
 
 #[derive(Clone, Debug)]
-enum ReservedRegisterField {
-    UnknownSetZeroOrPreserved,
-    UnknownSetOneOrPreserved,
-    SetZero,
-    SetZeroOrPreserved,
-    SetOne,
-    SetOneOrPreserved
-}
-
-#[derive(Clone, Debug)]
-struct RegisterFieldAttribute<T: Copy> {
-    mask: T,
-    reserved: Option<ReservedRegisterField>,
-    is_readable: bool,
-    is_writable: bool
-}
-
-#[derive(Clone, Debug)]
-enum RegisterAttribute<T: Copy> {
+enum RegisterAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
     Field(RegisterFieldAttribute<T>),
     Datasheet(RegisterDatasheetAttribute)
 }
 
-impl<T: Copy> RegisterAttribute<T> {
+impl<T> RegisterAttribute<T>
+    where
+        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+        T::Err: Display {
+
     pub fn parse(attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
         match attr.path().get_ident() {
             Some(ident) => Self::parse_named(&ident.to_string(), attr),
@@ -38,6 +28,7 @@ impl<T: Copy> RegisterAttribute<T> {
     fn parse_named(name: &str, attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
         match name {
             "datasheet" => Ok(RegisterAttribute::<T>::Datasheet(RegisterDatasheetAttribute::try_from(attr)?)),
+            "ro" | "wo" | "rw" | "xx" => Ok(RegisterAttribute::<T>::Field(RegisterFieldAttribute::try_from(attr)?)),
             _ => Err(format!("Register definition contains an unknown attribute; name={}", name))
         }
     }
@@ -106,5 +97,19 @@ mod tests {
         expect!(is_datasheet).to_be_true();
     }
 
-    // TODO: mask cannot be zero
+    #[test]
+    fn parse__called_with_field_attributes__expect_field_variants() {
+        let field_attributes: Vec<syn::Attribute> = vec![
+            parse_quote! { #[ro(FIELD_1, 0b0000_0001)] },
+            parse_quote! { #[wo(FIELD_2, 0x23)] },
+            parse_quote! { #[rw(FIELD_3, 0x456)] },
+            parse_quote! { #[xx(SBZP, 789)] },
+        ];
+
+        for field_attribute in field_attributes {
+            let result = RegisterAttribute::<u32>::parse(&field_attribute).expect("must be ok");
+            let is_field = match result { RegisterAttribute::<u32>::Field(_) => true, _ => false };
+            expect!(is_field).to_be_true();
+        }
+    }
 }

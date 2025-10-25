@@ -15,6 +15,7 @@ impl<T: Copy> RegisterDefinitionGenerator<T> {
         //let attrs = derive.attrs.iter().map(RegisterAttribute::<T>::parse).collect::<Result<Vec<_>>>();
         //err will panic
         //look for datasheet and extract that for docs; multiple datasheets panic
+        //test all fields for (case-insensitive) unique names
         //test all fields for overlapping bits; else panic
         //test or'd fields to ensure all bits set; else panic
         //group all reserved fields by their type and or them
