@@ -1,6 +1,9 @@
 use smeg_kernel::mem::*;
 
+use crate::arm_register;
 use crate::mem::*;
+
+use super::SystemControlBlockMemoryAttributes;
 
 // TODO: Some sort of accessor is required - the #[arm_register] attribute will define it - but the structure and implementation are yet to be decided
 pub struct IcsrAccessor<'mem> {
