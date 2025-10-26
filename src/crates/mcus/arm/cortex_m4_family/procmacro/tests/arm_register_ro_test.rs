@@ -22,17 +22,23 @@ fn repr__of_struct__expect_transparent_with_same_size_and_alignment_as_u32() {
 }
 
 #[test]
-fn value__get_after_copied__expect_same_value_as_original() {
-    let original_reg = ReadonlyU32WithoutReservedBits(any_u32());
-    let copied_reg = original_reg;
-    expect!(copied_reg.0).to_equal(original_reg.0);
+fn IS_READONLY__get__expect_true() {
+    expect!(ReadonlyU32WithoutReservedBits::IS_READONLY).to_be_true();
 }
 
 #[test]
-fn value__get_after_cloned__expect_same_value_as_original() {
-    let original_reg = ReadonlyU32WithoutReservedBits(any_u32());
-    let cloned_reg = original_reg.clone();
-    expect!(cloned_reg.0).to_equal(original_reg.0);
+fn IS_READABLE__get__expect_true() {
+    expect!(ReadonlyU32WithoutReservedBits::IS_READABLE).to_be_true();
+}
+
+#[test]
+fn IS_WRITEONLY__get__expect_false() {
+    expect!(ReadonlyU32WithoutReservedBits::IS_WRITEONLY).to_be_false();
+}
+
+#[test]
+fn IS_WRITABLE__get__expect_false() {
+    expect!(ReadonlyU32WithoutReservedBits::IS_WRITABLE).to_be_false();
 }
 
 #[test]
@@ -89,10 +95,6 @@ fn FIELD_1_WIDTH__get__expect_correct_number_of_bits() {
 // expect method ReadonlyU32WithoutReservedBitsAccessor.msb_field_se() to return sign-extended right-aligned value
 // expect method ReadonlyU32WithoutReservedBitsAccessor.msb_field_la() to return left-aligned value
 
-// expect any unmasked bits cause a compilation failure - how to do that ?
-// expect any field other than usize causes a compilation failure - how to do that ?
-// expect masks with overlapping 1 causes a compilation failure - how to do that ?
-
 // for registers that can be written to, things get more interesting...llsc
 //     - we can only provide a 'set_unchecked(value)' to set the entire register, because 'SB?P' values need writing depending on _whether they've been read before or not_.
 //       (ARM Glossary, 105565_0200_02_en - this version does not explicitly state it, but the ARMv6 glossary even stipulates the value written must correspond to the value
@@ -104,24 +106,3 @@ fn FIELD_1_WIDTH__get__expect_correct_number_of_bits() {
 //       underlying CellAccessor that the RegAccessor will need to use (impl RegAccessor<'mem, C> { pub fn whatever_llsc_rmw(...) where C::Type: LlscReadModifyWrite { ... } } )
 //     - Maybe we only provide 'set_unchecked' and let the higher-level code handle locking, or atomicity ?
 //     - Do we want const versions of the setters, to avoid a lot of runtime masking when, for example, setting initial (non-reserved) values ?
-
-/* TODO: replace this file with something meaningful for the ArmRegister and ArmRegisterAccessor macros...
-use fluent_test::prelude::*;
-
-use smeg_kernel::HalfUsize;
-use smeg_kernel_procmacro::error_tag;
-
-#[test]
-fn error_tag__called__expect_sequentially_increasing_ids() {
-    let error_tags = vec![
-        error_tag!("this is an error tag"),
-        error_tag!("and ", "another", "error", "tag", "but", "with", 1, 2, 3, "to", "stringify", "and", "concat"),
-        error_tag!("and another")
-    ];
-
-    let tag_ids: Vec<_> = error_tags.iter().map(Into::<HalfUsize>::into).collect();
-
-    expect!(tag_ids[1]).to_equal(tag_ids[0] + 1);
-    expect!(tag_ids[2]).to_equal(tag_ids[1] + 1);
-}
-*/

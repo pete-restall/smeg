@@ -55,14 +55,12 @@ impl<T> RegisterDefinitionGenerator<T>
             return Err("Register definition has incomplete field mask; every bit needs to be defined".to_string())
         }
 
-        //group all reserved fields by their type and or them
         //iterate fields below and build up consts, etc.
         //figure out if the register is readable (any ro|rw) and writable (any wo|wr)
 
         let (visibility, register_ident) = (&derive.vis, &derive.ident);
         Ok(quote! {
             #[repr(transparent)]
-            #[derive(Copy, Clone)]
             #visibility struct #register_ident(#type_ident);
 
             impl #register_ident {
@@ -71,6 +69,12 @@ impl<T> RegisterDefinitionGenerator<T>
                 pub const FIELD_1_MSB: #type_ident = 31;
                 pub const FIELD_1_LSB: #type_ident = 31;
                 pub const FIELD_1_WIDTH: #type_ident = 1;
+
+                pub const IS_READABLE: bool = true; // TODO
+                pub const IS_WRITABLE: bool = false; // TODO
+
+                pub const IS_READONLY: bool = Self::IS_READABLE && !Self::IS_WRITABLE;
+                pub const IS_WRITEONLY: bool = !Self::IS_READABLE && Self::IS_WRITABLE;
             }
 
     //        impl<'mem> #accessor_name<'mem> {
