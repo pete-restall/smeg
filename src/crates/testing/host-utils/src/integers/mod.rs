@@ -13,12 +13,12 @@ fn any_within<T: SampleUniform, R: SampleRange<T>>(bounds: R) -> T {
 pub fn any_u8() -> u8 { any_within(0..=u8::MAX) }
 
 pub fn any_u8_except(except: u8) -> u8 {
-    any_except(except, any_u8)
+    any_except(|x| x == except, any_u8)
 }
 
-fn any_except<T: SampleUniform + PartialEq>(except: T, any_value: fn() -> T) -> T {
+fn any_except<F: Fn(T) -> bool, T: Copy + PartialEq + SampleUniform>(except: F, any_value: fn() -> T) -> T {
     let value = any_value();
-    if value != except {
+    if !except(value) {
         value
     } else {
         any_except(except, any_value)
@@ -55,5 +55,9 @@ pub fn any_usize_within<R: SampleRange<usize>>(bounds: R) -> usize {
 }
 
 pub fn any_usize_except(except: usize) -> usize {
-    any_except(except, any_usize)
+    any_except(|x| x == except, any_usize)
+}
+
+pub fn any_usize_except_in(except: &[usize]) -> usize {
+    any_except(|x| except.contains(&x), any_usize)
 }

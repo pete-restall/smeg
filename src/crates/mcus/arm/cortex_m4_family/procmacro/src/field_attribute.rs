@@ -8,7 +8,8 @@ use syn::parse::{Parse, ParseStream};
 
 #[derive(Clone, Debug)]
 pub struct RegisterFieldAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
-    field_name: String,
+    name_uppercase: String,
+    name_lowercase: String,
     mask: T,
     reserved: Option<ReservedRegisterField>,
     is_readable: bool,
@@ -23,6 +24,12 @@ pub enum ReservedRegisterField {
     ShouldBeZeroOrPreserved,
     ShouldBeOne,
     ShouldBeOneOrPreserved
+}
+
+impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterFieldAttribute<T> {
+    pub fn name_uppercase(&self) -> &str { &self.name_uppercase }
+
+    pub fn name_lowercase(&self) -> &str { &self.name_lowercase }
 }
 
 impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
@@ -42,26 +49,23 @@ impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
             parsed.no_extra_tokens {
 
             if is_not_zero(mask) {
-                let mut field_name = parsed.field_name.to_string();
-                let reserved = if ident == "xx" {
-                    field_name = field_name.to_uppercase();
-                    match field_name.as_str() {
-                        "UNK_SBZP" => Ok(Some(ReservedRegisterField::UnknownShouldBeZeroOrPreserved)),
-                        "UNK_SBOP" => Ok(Some(ReservedRegisterField::UnknownShouldBeOneOrPreserved)),
-                        "SBZ" => Ok(Some(ReservedRegisterField::ShouldBeZero)),
-                        "SBZP" => Ok(Some(ReservedRegisterField::ShouldBeZeroOrPreserved)),
-                        "SBO" => Ok(Some(ReservedRegisterField::ShouldBeOne)),
-                        "SBOP" => Ok(Some(ReservedRegisterField::ShouldBeOneOrPreserved)),
-                        _ => Err(format!("Register's field definition is malformed due to an unknown reserved field name; name={}", field_name))
-                    }?
-                } else {
-                    None
-                };
-
+                let field_name = parsed.field_name.to_string();
+                let name_uppercase = field_name.to_uppercase();
+                let name_lowercase = field_name.to_lowercase();
                 Ok(Self {
-                    field_name,
+                    reserved: match (ident == "xx", name_uppercase.as_str()) {
+                        (true, "UNK_SBZP") => Ok(Some(ReservedRegisterField::UnknownShouldBeZeroOrPreserved)),
+                        (true, "UNK_SBOP") => Ok(Some(ReservedRegisterField::UnknownShouldBeOneOrPreserved)),
+                        (true, "SBZ") => Ok(Some(ReservedRegisterField::ShouldBeZero)),
+                        (true, "SBZP") => Ok(Some(ReservedRegisterField::ShouldBeZeroOrPreserved)),
+                        (true, "SBO") => Ok(Some(ReservedRegisterField::ShouldBeOne)),
+                        (true, "SBOP") => Ok(Some(ReservedRegisterField::ShouldBeOneOrPreserved)),
+                        (true, _) => Err(format!("Register's field definition is malformed due to an unknown reserved field name; name={}", field_name)),
+                        _ => Ok(None)
+                    }?,
+                    name_uppercase,
+                    name_lowercase,
                     mask,
-                    reserved,
                     is_readable: ident == "ro" || ident == "rw",
                     is_writable: ident == "wo" || ident == "rw"
                 })
@@ -106,10 +110,34 @@ mod tests {
 
     use fluent_test::prelude::*;
 
-    use smeg_testing_host_utils::integers::any_usize_except;
-    use smeg_testing_host_utils::strings::{AnyCase, ascii};
+    use smeg_testing_host_utils::booleans::any_bool;
+    use smeg_testing_host_utils::integers::{any_usize, any_usize_except};
+    use smeg_testing_host_utils::strings::{ascii, utf8, AnyCase};
 
     use super::*;
+
+    #[test]
+    fn name_uppercase__called__expect_slice_of_name_uppercase_field() {
+        let attribute = stub_attribute_struct();
+        expect!(attribute.name_uppercase()).to_equal(&attribute.name_uppercase);
+    }
+
+    fn stub_attribute_struct() -> RegisterFieldAttribute<usize> {
+        RegisterFieldAttribute {
+            name_uppercase: utf8::any(),
+            name_lowercase: utf8::any(),
+            mask: any_usize(),
+            reserved: None,
+            is_readable: any_bool(),
+            is_writable: any_bool()
+        }
+    }
+
+    #[test]
+    fn name_lowercase__called__expect_slice_of_name_lowercase_field() {
+        let attribute = stub_attribute_struct();
+        expect!(attribute.name_lowercase()).to_equal(&attribute.name_lowercase);
+    }
 
     #[test]
     fn try_from__called_with_unknown_attribute__expect_err() {
@@ -226,16 +254,18 @@ mod tests {
     }
 
     #[test]
-    fn try_from__called_with_ro_attribute__expect_field_name_is_first_argument() {
+    fn try_from__called_with_ro_attribute__expect_name_uppercase_is_uppercased_first_argument() {
         try_from__called_with_ro_attribute__expect(|actual, expected|
-            expect!(actual.field_name).to_equal(expected.field_name));
+            expect!(actual.name_uppercase).to_equal(expected.name_uppercase));
     }
 
     fn try_from__called_with_ro_attribute__expect<A, F>(assertion: F)
         where F: FnOnce(RegisterFieldAttribute<usize>, RegisterFieldAttribute<usize>) -> A {
 
+        let field_name = ascii::any_rust_identifier();
         let expected = RegisterFieldAttribute {
-            field_name: ascii::any_rust_identifier(),
+            name_uppercase: field_name.to_uppercase(),
+            name_lowercase: field_name.to_lowercase(),
             mask: any_usize_except(0),
             reserved: None,
             is_readable: true,
@@ -252,10 +282,16 @@ mod tests {
             RegisterFieldAttribute<T>: for<'a> TryFrom<&'a Attribute, Error = String> {
 
         let attribute_ident = Ident::new(attribute_name, Span::call_site());
-        let (field_name, mask) = (Ident::new(&expected.field_name, Span::call_site()), expected.mask);
+        let (field_name, mask) = (Ident::new(&expected.name_lowercase.any_case(), Span::call_site()), expected.mask);
         let attribute = parse_quote! { #[#attribute_ident(#field_name, #mask)] };
         let actual = RegisterFieldAttribute::<T>::try_from(&attribute).expect("must be parsed successfully");
         assertion(actual, expected);
+    }
+
+    #[test]
+    fn try_from__called_with_ro_attribute__expect_name_lowercase_is_lowercased_first_argument() {
+        try_from__called_with_ro_attribute__expect(|actual, expected|
+            expect!(actual.name_lowercase).to_equal(expected.name_lowercase));
     }
 
     #[test]
@@ -280,16 +316,18 @@ mod tests {
     }
 
     #[test]
-    fn try_from__called_with_wo_attribute__expect_field_name_is_first_argument() {
+    fn try_from__called_with_wo_attribute__expect_name_uppercase_is_uppercased_first_argument() {
         try_from__called_with_wo_attribute__expect(|actual, expected|
-            expect!(actual.field_name).to_equal(expected.field_name));
+            expect!(actual.name_uppercase).to_equal(expected.name_uppercase));
     }
 
     fn try_from__called_with_wo_attribute__expect<A, F>(assertion: F)
         where F: FnOnce(RegisterFieldAttribute<usize>, RegisterFieldAttribute<usize>) -> A {
 
+        let field_name = ascii::any_rust_identifier();
         let expected = RegisterFieldAttribute {
-            field_name: ascii::any_rust_identifier(),
+            name_uppercase: field_name.to_uppercase(),
+            name_lowercase: field_name.to_lowercase(),
             mask: any_usize_except(0),
             reserved: None,
             is_readable: false,
@@ -297,6 +335,12 @@ mod tests {
         };
 
         try_from__called_with_attribute__expect("wo", expected, assertion);
+    }
+
+    #[test]
+    fn try_from__called_with_wo_attribute__expect_name_lowercase_is_lowercased_first_argument() {
+        try_from__called_with_wo_attribute__expect(|actual, expected|
+            expect!(actual.name_lowercase).to_equal(expected.name_lowercase));
     }
 
     #[test]
@@ -321,16 +365,18 @@ mod tests {
     }
 
     #[test]
-    fn try_from__called_with_rw_attribute__expect_field_name_is_first_argument() {
+    fn try_from__called_with_rw_attribute__expect_name_uppercase_is_uppercased_first_argument() {
         try_from__called_with_rw_attribute__expect(|actual, expected|
-            expect!(actual.field_name).to_equal(expected.field_name));
+            expect!(actual.name_uppercase).to_equal(expected.name_uppercase));
     }
 
     fn try_from__called_with_rw_attribute__expect<A, F>(assertion: F)
         where F: FnOnce(RegisterFieldAttribute<usize>, RegisterFieldAttribute<usize>) -> A {
 
+        let field_name = ascii::any_rust_identifier();
         let expected = RegisterFieldAttribute {
-            field_name: ascii::any_rust_identifier(),
+            name_uppercase: field_name.to_uppercase(),
+            name_lowercase: field_name.to_lowercase(),
             mask: any_usize_except(0),
             reserved: None,
             is_readable: true,
@@ -338,6 +384,12 @@ mod tests {
         };
 
         try_from__called_with_attribute__expect("rw", expected, assertion);
+    }
+
+    #[test]
+    fn try_from__called_with_rw_attribute__expect_name_lowercase_is_lowercased_first_argument() {
+        try_from__called_with_rw_attribute__expect(|actual, expected|
+            expect!(actual.name_lowercase).to_equal(expected.name_lowercase));
     }
 
     #[test]
@@ -364,23 +416,21 @@ mod tests {
     static KNOWN_RESERVED_FIELD_NAMES: [&str; 6] = ["UNK_SBZP", "UNK_SBOP", "SBZ", "SBZP", "SBO", "SBOP"];
 
     #[test]
-    fn try_from__called_with_xx_attribute_and_known_field_name__expect_uppercased_field_name_is_first_argument() {
+    fn try_from__called_with_xx_attribute_and_known_field_name__expect_name_uppercase_is_uppercased_first_argument() {
         for field_name in KNOWN_RESERVED_FIELD_NAMES {
             let field_name = field_name.any_case();
             try_from__called_with_xx_attribute__expect(
                 field_name,
-                |actual, expected| expect!(actual.field_name).to_equal(expected.field_name.to_uppercase()));
+                |actual, expected| expect!(actual.name_uppercase).to_equal(expected.name_uppercase));
         }
     }
 
     fn try_from__called_with_xx_attribute__expect<A, F>(field_name: String, assertion: F)
         where F: FnOnce(RegisterFieldAttribute<usize>, RegisterFieldAttribute<usize>) -> A {
 
-        let normalised_field_name = field_name.to_uppercase();
+        let name_uppercase = field_name.to_uppercase();
         let expected = RegisterFieldAttribute {
-            field_name,
-            mask: any_usize_except(0),
-            reserved: Some(match normalised_field_name.as_str() {
+            reserved: Some(match name_uppercase.as_str() {
                 "UNK_SBZP" => ReservedRegisterField::UnknownShouldBeZeroOrPreserved,
                 "UNK_SBOP" => ReservedRegisterField::UnknownShouldBeOneOrPreserved,
                 "SBZ" => ReservedRegisterField::ShouldBeZero,
@@ -389,11 +439,24 @@ mod tests {
                 "SBOP" => ReservedRegisterField::ShouldBeOneOrPreserved,
                 _ => panic!("Unknown reserved field name passed to stub")
             }),
+            name_uppercase,
+            name_lowercase: field_name.to_lowercase(),
+            mask: any_usize_except(0),
             is_readable: false,
             is_writable: false
         };
 
         try_from__called_with_attribute__expect("xx", expected, assertion);
+    }
+
+    #[test]
+    fn try_from__called_with_xx_attribute_and_known_field_name__expect_name_lowercase_is_lowercased_first_argument() {
+        for field_name in KNOWN_RESERVED_FIELD_NAMES {
+            let field_name = field_name.any_case();
+            try_from__called_with_xx_attribute__expect(
+                field_name,
+                |actual, expected| expect!(actual.name_lowercase).to_equal(expected.name_lowercase));
+        }
     }
 
     #[test]

@@ -9,7 +9,12 @@ mod field_attribute;
 use field_attribute::*;
 
 mod register_attribute;
+use register_attribute::*;
+
 mod register_definition;
+
+mod single;
+use single::*;
 
 #[proc_macro_attribute]
 pub fn arm_register(args: TokenStream, input: TokenStream) -> TokenStream {

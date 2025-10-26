@@ -8,7 +8,7 @@ use syn::Attribute;
 use super::{RegisterDatasheetAttribute, RegisterFieldAttribute};
 
 #[derive(Clone, Debug)]
-enum RegisterAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
+pub enum RegisterAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
     Field(RegisterFieldAttribute<T>),
     Datasheet(RegisterDatasheetAttribute)
 }

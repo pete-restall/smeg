@@ -1,6 +1,6 @@
 use std::str::Chars;
 
-use rand::RngCore;
+use crate::booleans::any_bool;
 
 pub trait AnyCase {
     fn any_case(&self) -> String;
@@ -14,9 +14,8 @@ impl AnyCase for String {
 }
 
 fn funky_case(mut dest: String, src: Chars<'_>) -> String {
-    let mut rng = rand::rng();
     for ch in src {
-        if (rng.next_u32() & 1) != 0 {
+        if any_bool() {
             dest.push(ch.to_uppercase().next().unwrap());
         } else {
             dest.push(ch.to_lowercase().next().unwrap());
