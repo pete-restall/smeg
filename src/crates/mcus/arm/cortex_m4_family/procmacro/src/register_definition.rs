@@ -10,7 +10,7 @@ use syn::{DeriveInput, Ident};
 
 use super::{RegisterAttribute, RegisterDatasheetAttribute, RegisterFieldAttribute, Single};
 
-pub struct RegisterDefinitionGenerator<T>
+pub struct RegisterDefinition<T>
     where
         T:
             BitAnd<Output = T> +
@@ -28,7 +28,7 @@ pub struct RegisterDefinitionGenerator<T>
     _type: PhantomData<T>
 }
 
-impl<T> RegisterDefinitionGenerator<T>
+impl<T> RegisterDefinition<T>
     where
         T:
             BitAnd<Output = T> +
@@ -145,7 +145,7 @@ mod tests {
             struct DummyRegister(u8);
         };
 
-        let result = RegisterDefinitionGenerator::<u8>::generate(
+        let result = RegisterDefinition::<u8>::generate(
             &too_many_datasheets,
             &Ident::new("u8", Span::call_site()));
 
@@ -204,7 +204,7 @@ mod tests {
         ];
 
         for malformed_attribute in malformed_attributes {
-            let result = RegisterDefinitionGenerator::<usize>::generate(
+            let result = RegisterDefinition::<usize>::generate(
                 &malformed_attribute,
                 &Ident::new("usize", Span::call_site()));
 
@@ -305,7 +305,7 @@ mod tests {
         ];
 
         for malformed_attribute in malformed_attributes {
-            let result = RegisterDefinitionGenerator::<u32>::generate(
+            let result = RegisterDefinition::<u32>::generate(
                 &malformed_attribute,
                 &Ident::new("u32", Span::call_site()));
 
@@ -316,7 +316,7 @@ mod tests {
     #[test]
     fn generate__called_when_field_masks_are_zero__expect_err() {
         let no_field_masks: DeriveInput = parse_quote! { struct DummyRegister(u32); };
-        let result = RegisterDefinitionGenerator::<u32>::generate(
+        let result = RegisterDefinition::<u32>::generate(
             &no_field_masks,
             &Ident::new("u32", Span::call_site()));
 
@@ -337,7 +337,7 @@ mod tests {
         }
 
         for incomplete_mask in incomplete_masks {
-            let result = RegisterDefinitionGenerator::<u16>::generate(
+            let result = RegisterDefinition::<u16>::generate(
                 &incomplete_mask,
                 &Ident::new("u16", Span::call_site()));
 
