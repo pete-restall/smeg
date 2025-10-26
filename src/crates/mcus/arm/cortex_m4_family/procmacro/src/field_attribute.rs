@@ -30,6 +30,8 @@ impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterFieldAttribute<T>
     pub fn name_uppercase(&self) -> &str { &self.name_uppercase }
 
     pub fn name_lowercase(&self) -> &str { &self.name_lowercase }
+
+    pub fn mask(&self) -> T { self.mask }
 }
 
 impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
@@ -137,6 +139,12 @@ mod tests {
     fn name_lowercase__called__expect_slice_of_name_lowercase_field() {
         let attribute = stub_attribute_struct();
         expect!(attribute.name_lowercase()).to_equal(&attribute.name_lowercase);
+    }
+
+    #[test]
+    fn mask__called__expect_mask_field_is_returned() {
+        let attribute = stub_attribute_struct();
+        expect!(attribute.mask()).to_equal(attribute.mask);
     }
 
     #[test]

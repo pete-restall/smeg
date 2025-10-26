@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 use std::marker::PhantomData;
-use std::ops::BitXor;
+use std::ops::{BitAnd, BitOr, BitXor, Not};
 use std::str::FromStr;
 
 use proc_macro2::TokenStream;
@@ -12,7 +12,17 @@ use super::{RegisterAttribute, RegisterDatasheetAttribute, RegisterFieldAttribut
 
 pub struct RegisterDefinitionGenerator<T>
     where
-        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+        T:
+            BitAnd<Output = T> +
+            BitOr<Output = T> +
+            BitXor<Output = T> +
+            Copy +
+            Debug +
+            Default +
+            Display +
+            FromStr +
+            Not<Output = T> +
+            PartialEq,
         T::Err: Display {
 
     _type: PhantomData<T>
@@ -20,7 +30,17 @@ pub struct RegisterDefinitionGenerator<T>
 
 impl<T> RegisterDefinitionGenerator<T>
     where
-        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+        T:
+            BitAnd<Output = T> +
+            BitOr<Output = T> +
+            BitXor<Output = T> +
+            Copy +
+            Debug +
+            Default +
+            Display +
+            FromStr +
+            Not<Output = T> +
+            PartialEq,
         T::Err: Display {
 
     pub fn generate(derive: &DeriveInput, type_ident: &Ident) -> Result<TokenStream, String> {
@@ -29,8 +49,12 @@ impl<T> RegisterDefinitionGenerator<T>
         let datasheet = Self::parse_datasheet_from(&attributes)?;
         let fields = Self::parse_fields_from(&attributes)?;
 
-        //test all fields for overlapping bits; else panic
-        //test or'd fields to ensure all bits set; else panic
+        let all_bits_set = !T::default();
+        let mask = Self::mask_for(fields.into_values())?;
+        if mask != all_bits_set {
+            return Err("Register definition has incomplete field mask; every bit needs to be defined".to_string())
+        }
+
         //group all reserved fields by their type and or them
         //iterate fields below and build up consts, etc.
         //figure out if the register is readable (any ro|rw) and writable (any wo|wr)
@@ -81,6 +105,17 @@ impl<T> RegisterDefinitionGenerator<T>
             Err("Register definition has duplicate field names")
         }
     }
+
+    fn mask_for<'a, I: Iterator<Item = &'a RegisterFieldAttribute<T>>>(mut fields: I) -> Result<T, &'a str>
+        where T: 'a {
+
+        let zero = T::default();
+        fields.try_fold(zero, |mask, field| if (mask & field.mask()) == zero {
+            Ok(mask | field.mask())
+        } else {
+            Err("Register definition has overlapping field masks")
+        })
+    }
 }
 
 #[cfg(test)]
@@ -91,14 +126,14 @@ mod tests {
 
     use fluent_test::prelude::*;
 
-    use smeg_testing_host_utils::integers::any_usize_except_in;
+    use smeg_testing_host_utils::integers::*;
     use smeg_testing_host_utils::strings::AnyCase;
     use smeg_testing_host_utils::strings::ascii::any_rust_identifier;
 
     use super::*;
 
     #[test]
-    fn generate__called_with_multiple_datasheet_attributes__expect_err() {
+    fn generate__called_when_multiple_datasheets_given__expect_err() {
         let too_many_datasheets: DeriveInput = parse_quote! {
             #[datasheet("somewhere", "section", 123)]
             #[datasheet("elsewhere", "another", 456)]
@@ -114,7 +149,7 @@ mod tests {
     }
 
     #[test]
-    fn generate__called_when_attributes_have_duplicate_case_insensitive_field_names__expect_err() {
+    fn generate__called_when_field_names_are_not_case_insentitively_unique__expect_err() {
         let (field_a_name, mask_a) = (any_rust_identifier(), any_usize_except_in(&[0, !0]));
         let (field_b_name, mask_b) = (field_a_name.any_case(), !mask_a);
         let field_a_ident = Ident::new(&field_a_name, Span::call_site());
@@ -170,6 +205,139 @@ mod tests {
                 &Ident::new("usize", Span::call_site()));
 
             expect!(result.unwrap_err()).to_contain("duplicate field");
+        }
+    }
+
+    #[test]
+    fn generate__called_when_field_have_overlapping_masks__expect_err() {
+        let overlapping_bit = 1 << any_u32_within(0..u32::BITS);
+        let mask_a = any_u32_except(0) | overlapping_bit;
+        let mask_b = !mask_a | overlapping_bit;
+
+        let field_name = any_rust_identifier();
+        let field_a_ident = Ident::new(&format!("{field_name}a"), Span::call_site());
+        let field_b_ident = Ident::new(&format!("{field_name}b"), Span::call_site());
+
+        let malformed_attributes: Vec<DeriveInput> = vec![
+            parse_quote! {
+                #[ro(#field_a_ident, #mask_a)]
+                #[ro(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[ro(#field_a_ident, #mask_a)]
+                #[wo(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[wo(#field_a_ident, #mask_a)]
+                #[ro(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[ro(#field_a_ident, #mask_a)]
+                #[rw(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[ro(#field_a_ident, #mask_a)]
+                #[xx(SBZP, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[wo(#field_a_ident, #mask_a)]
+                #[rw(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[wo(#field_a_ident, #mask_a)]
+                #[wo(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[wo(#field_a_ident, #mask_a)]
+                #[xx(SBOP, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[rw(#field_a_ident, #mask_a)]
+                #[rw(#field_b_ident, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[rw(#field_a_ident, #mask_a)]
+                #[xx(SBO, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[xx(SBZ, #mask_a)]
+                #[xx(UNK_SBOP, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[ro(RO_FIELD, #mask_a)]
+                #[rw(RW_FIELD, #mask_b)]
+                #[xx(SBZ, #mask_b)]
+                struct DummyRegister(u32);
+            },
+
+            parse_quote! {
+                #[ro(RO_FIELD, #mask_a)]
+                #[wo(WO_FIELD, #mask_b)]
+                #[xx(SBZ, #mask_a)]
+                struct DummyRegister(u32);
+            }
+        ];
+
+        for malformed_attribute in malformed_attributes {
+            let result = RegisterDefinitionGenerator::<u32>::generate(
+                &malformed_attribute,
+                &Ident::new("u32", Span::call_site()));
+
+            expect!(result.unwrap_err()).to_contain("overlapping field masks");
+        }
+    }
+
+    #[test]
+    fn generate__called_when_field_masks_are_zero__expect_err() {
+        let no_field_masks: DeriveInput = parse_quote! { struct DummyRegister(u32); };
+        let result = RegisterDefinitionGenerator::<u32>::generate(
+            &no_field_masks,
+            &Ident::new("u32", Span::call_site()));
+
+        expect!(result.unwrap_err()).to_contain("incomplete field mask");
+    }
+
+    #[test]
+    fn generate__called_when_field_masks_do_not_cover_every_bit__expect_err() {
+        let mut incomplete_masks: Vec<DeriveInput> = Vec::with_capacity(4 * 16);
+        for i in 0..16 {
+            let mask_missing_bit: u16 = !(1 << i);
+            incomplete_masks.extend_from_slice(&[
+                parse_quote! { #[ro(FIELD, #mask_missing_bit)] struct DummyRegister(u16); },
+                parse_quote! { #[wo(FIELD, #mask_missing_bit)] struct DummyRegister(u16); },
+                parse_quote! { #[rw(FIELD, #mask_missing_bit)] struct DummyRegister(u16); },
+                parse_quote! { #[xx(SBOP, #mask_missing_bit)] struct DummyRegister(u16); }
+            ]);
+        }
+
+        for incomplete_mask in incomplete_masks {
+            let result = RegisterDefinitionGenerator::<u16>::generate(
+                &incomplete_mask,
+                &Ident::new("u16", Span::call_site()));
+
+            expect!(result.unwrap_err()).to_contain("incomplete field mask");
         }
     }
 }
