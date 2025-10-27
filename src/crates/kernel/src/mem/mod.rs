@@ -10,8 +10,11 @@ pub unsafe trait Addressable { type MemoryAttributes: MemoryAttributes; }
 #[doc = docs::side_by_side_md!("Bank")]
 pub unsafe trait Bank: Addressable { }
 
+#[doc = docs::side_by_side_md!("CellPrimitive")]
+pub unsafe trait CellPrimitive { type Type: Copy; }
+
 #[doc = docs::side_by_side_md!("Cell")]
-pub unsafe trait Cell: Addressable { type Type: Copy; }
+pub unsafe trait Cell: Addressable { type Primitive: CellPrimitive; }
 
 #[doc = docs::side_by_side_md!("Readable")]
 pub unsafe trait Readable { }
@@ -37,5 +40,7 @@ pub mod test_doubles {
 
     unsafe impl Bank for Dummy { }
 
-    unsafe impl Cell for Dummy { type Type = usize; }
+    unsafe impl Cell for Dummy { type Primitive = Dummy; }
+
+    unsafe impl CellPrimitive for Dummy { type Type = usize; }
 }

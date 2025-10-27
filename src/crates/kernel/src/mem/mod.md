@@ -80,6 +80,16 @@ Trait for a Memory Bank, ie. a collection of [`Cell`]s.
 Trait for an individually addressable unit of memory.
 <!-- ANCHOR_END: Cell -->
 
+<!-- ANCHOR: CellPrimitive -->
+Trait that marks a primitive type, ie. that which can be stored in a [`Cell`].
+
+What we really wish to constrain is that the primitive has [`Copy`] semantics but unfortunately [`Copy`] is based on [`Clone`], which in turn has a
+[`Clone::clone`] method which takes `&self`.  Due to the reasons discussed above concerning reference semantics, invoking this method would produce
+_Undefined Behaviour_.  By wrapping [`Copy`]able primitives in a newtype we reduce one more potential cause of such _Undefined Behaviour_, although
+clearly we cannot eliminate it - if some code wishes to take an explicit reference to the encapsulating newtype then there is nothing stopping that,
+but at least the surface area for unintentional references is slightly reduced.
+<!-- ANCHOR_END: CellPrimitive -->
+
 <!-- ANCHOR: Readable -->
 Marker trait for memory that can be read from.
 <!-- ANCHOR_END: Readable -->

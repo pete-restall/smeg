@@ -30,8 +30,13 @@ impl<'mem> SystemControlSpaceAccessor<'mem> {
 #[repr(C)]
 //#[derive(ArmRegisterBank(StronglyOrderedMemory, NotShareable)]
 struct SystemControlSpace {
-    _test: ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>,
-    _x: [u8; 4092]
+// TODO: The way this struct is defined at the moment doesn't really make sense, since the dependency arrows will end up pointing from here into the more
+// nested namespaces, rather than the other way around.  What we probably want is a linker symbol for each bank (eg. SCB) and this namespace just defines
+// the memory attributes of the region, etc.  Potentially also some traits that can be applied by the inner modules to the SystemControlSpaceAccessor so
+// they can extend it and keep the arrows pointing in the right direction.
+//
+//    _test: ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>,
+    _x: [u8; 4096]
 //	#[Rw] x: usize // --> ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>
 }
 
@@ -45,7 +50,7 @@ unsafe impl MemoryShareability for SystemControlSpaceMemoryAttributes { type Sha
 
 #[cfg(target_arch = "arm")]
 const _: () = assert!(size_of::<SystemControlSpace>() == 4096, "[DDI0403E.e, B3.2] System Control Space Register Bank must be 4KiB");
-
+/*
 pub fn xxx<T>(x: &T) where T: SpecialArmRead {
     _ = x.special_read();
 
@@ -71,7 +76,6 @@ pub fn xxx<T>(x: &T) where T: SpecialArmRead {
     // needs to see the SCS side-effect immediately is updating, say, the SCR register and then executing WFI; eg. STR to SCR -> DSB -> WFI
 }
 
-
 trait SpecialArmRead {
     fn special_read(&self) -> usize;
 }
@@ -89,9 +93,7 @@ impl<'mem, C, M> SpecialArmRead for smeg_kernel::mem::CellAccessor<'mem, C> wher
         12345
     }
 }
-
-
-
+*/
 /*
 use crate::{NoSideEffects, NotShareable};
 

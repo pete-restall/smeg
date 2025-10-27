@@ -1,5 +1,5 @@
 use smeg_kernel::ConstUsize;
-use smeg_kernel::mem::{Cell, CellAccessor, Readable};
+use smeg_kernel::mem::{Cell, CellAccessor, CellPrimitive, Readable};
 
 use super::{MemoryShareability, MemorySideEffects, MemoryType, NoSideEffects, NotShareable, StronglyOrderedMemory};
 
@@ -57,7 +57,8 @@ unsafe impl<T> MmioReadMasked<usize> for T where T: MmioRead<usize> {
 
 #[cfg(not(any(test, feature = "test_doubles")))]
 unsafe impl<'mem, C, M> MmioRead<usize> for CellAccessor<'mem, C> where
-    C: Readable + Cell<MemoryAttributes = M, Type = usize>,
+    C: Readable + Cell<MemoryAttributes = M>,
+    C::Primitive: CellPrimitive<Type = usize>,
     M:
         MemoryType<Type = StronglyOrderedMemory> +
         MemoryShareability<Shareability = NotShareable> +
@@ -86,7 +87,7 @@ unsafe impl<'mem, C, M> MmioRead<usize> for CellAccessor<'mem, C> where
 }
 
 #[cfg(any(test, feature = "test_doubles"))] // TODO: make this into a test double, etc.
-unsafe impl<'mem, C> MmioRead<usize> for CellAccessor<'mem, C> where C: Readable + Cell<Type = usize> {
+unsafe impl<'mem, C> MmioRead<usize> for CellAccessor<'mem, C> where C: Readable + Cell, C::Primitive: CellPrimitive<Type = usize> {
     unsafe fn mmio_read(&self) -> usize {
         0
     }

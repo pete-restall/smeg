@@ -3,85 +3,97 @@ use core::ops::{Deref, DerefMut};
 
 use crate::docs;
 
-use super::{Addressable, Cell, MemoryAttributes, Readable, Writable};
+use super::{Addressable, Cell, CellPrimitive, MemoryAttributes, Readable, Writable};
 
 macro_rules! impl_cell_traits_for {
     ($name:ident) => {
-        unsafe impl<M: MemoryAttributes, T: Copy> Cell for $name<M, T> { type Type = T; }
-        unsafe impl<M: MemoryAttributes, T: Copy> Addressable for $name<M, T> { type MemoryAttributes = M; }
-        impl<M, T> !Send for $name<M, T> { }
-        impl<M, T> !Sync for $name<M, T> { }
-        impl<M, T> !Deref for $name<M, T> { }
-        impl<M, T> !DerefMut for $name<M, T> { }
+        unsafe impl<M: MemoryAttributes, P: CellPrimitive> Cell for $name<M, P> { type Primitive = P; }
+        unsafe impl<M: MemoryAttributes, P: CellPrimitive> Addressable for $name<M, P> { type MemoryAttributes = M; }
+        impl<M, P> !Send for $name<M, P> { }
+        impl<M, P> !Sync for $name<M, P> { }
+        impl<M, P> !Deref for $name<M, P> { }
+        impl<M, P> !DerefMut for $name<M, P> { }
     };
 }
 
 #[repr(transparent)]
 #[doc = docs::side_by_side_md!("ReadWriteCell")]
-pub struct ReadWriteCell<M: MemoryAttributes, T: Copy> {
-    value: T,
+pub struct ReadWriteCell<M: MemoryAttributes, P: CellPrimitive> {
+    value: P,
     _attributes: PhantomData<M>
 }
 
-impl<M: MemoryAttributes, T: Copy> ReadWriteCell<M, T> {
+impl<M: MemoryAttributes, P: CellPrimitive> ReadWriteCell<M, P> {
     const _ENSURE_LAYOUT_OF_UNDERLYING_TYPE: () = {
-        assert!(size_of::<ReadWriteCell<M, T>>() == size_of::<T>(), "Size of ReadWriteCell<M, T> must be the same size as T");
-        assert!(align_of::<ReadWriteCell<M, T>>() == align_of::<T>(), "Alignment of ReadWriteCell<M, T> must be the same as T");
+        assert!(size_of::<ReadWriteCell<M, P>>() == size_of::<P>(), "Size of ReadWriteCell<M, P> must be the same size as P");
+        assert!(align_of::<ReadWriteCell<M, P>>() == align_of::<P>(), "Alignment of ReadWriteCell<M, P> must be the same as P");
+
+        assert!(size_of::<P>() == size_of::<P::Type>(), "Size of P (a CellPrimitive) must be the same size as its encapsulated Type");
+        assert!(align_of::<P>() == align_of::<P::Type>(), "Alignment of P (a CellPrimitive) must be the same as its encapsulated Type");
     };
 }
 
-unsafe impl<M: MemoryAttributes, T: Copy> Readable for ReadWriteCell<M, T> { }
-unsafe impl<M: MemoryAttributes, T: Copy> Writable for ReadWriteCell<M, T> { }
+unsafe impl<M: MemoryAttributes, P: CellPrimitive> Readable for ReadWriteCell<M, P> { }
+unsafe impl<M: MemoryAttributes, P: CellPrimitive> Writable for ReadWriteCell<M, P> { }
 impl_cell_traits_for!(ReadWriteCell);
 
 #[repr(transparent)]
 #[doc = docs::side_by_side_md!("ReadonlyCell")]
-pub struct ReadonlyCell<M: MemoryAttributes, T: Copy> {
-    value: T,
+pub struct ReadonlyCell<M: MemoryAttributes, P: CellPrimitive> {
+    value: P,
     _attributes: PhantomData<M>
 }
 
-impl<M: MemoryAttributes, T: Copy> ReadonlyCell<M, T> {
+impl<M: MemoryAttributes, P: CellPrimitive> ReadonlyCell<M, P> {
     const _ENSURE_LAYOUT_OF_UNDERLYING_TYPE: () = {
-        assert!(size_of::<ReadonlyCell<M, T>>() == size_of::<T>(), "Size of ReadonlyCell<M, T> must be the same size as T");
-        assert!(align_of::<ReadonlyCell<M, T>>() == align_of::<T>(), "Alignment of ReadonlyCell<M, T> must be the same as T");
+        assert!(size_of::<ReadonlyCell<M, P>>() == size_of::<P>(), "Size of ReadonlyCell<M, P> must be the same size as P");
+        assert!(align_of::<ReadonlyCell<M, P>>() == align_of::<P>(), "Alignment of ReadonlyCell<M, P> must be the same as P");
+
+        assert!(size_of::<P>() == size_of::<P::Type>(), "Size of P (a CellPrimitive) must be the same size as its encapsulated Type");
+        assert!(align_of::<P>() == align_of::<P::Type>(), "Alignment of P (a CellPrimitive) must be the same as its encapsulated Type");
     };
 }
 
-unsafe impl<M: MemoryAttributes, T: Copy> Readable for ReadonlyCell<M, T> { }
+unsafe impl<M: MemoryAttributes, P: CellPrimitive> Readable for ReadonlyCell<M, P> { }
 impl_cell_traits_for!(ReadonlyCell);
 
 #[repr(transparent)]
 #[doc = docs::side_by_side_md!("WriteonlyCell")]
-pub struct WriteonlyCell<M: MemoryAttributes, T: Copy> {
-    value: T,
+pub struct WriteonlyCell<M: MemoryAttributes, P: CellPrimitive> {
+    value: P,
     _attributes: PhantomData<M>
 }
 
-impl<M: MemoryAttributes, T: Copy> WriteonlyCell<M, T> {
+impl<M: MemoryAttributes, P: CellPrimitive> WriteonlyCell<M, P> {
     const _ENSURE_LAYOUT_OF_UNDERLYING_TYPE: () = {
-        assert!(size_of::<WriteonlyCell<M, T>>() == size_of::<T>(), "Size of WriteonlyCell<M, T> must be the same size as T");
-        assert!(align_of::<WriteonlyCell<M, T>>() == align_of::<T>(), "Alignment of WriteonlyCell<M, T> must be the same as T");
+        assert!(size_of::<WriteonlyCell<M, P>>() == size_of::<P>(), "Size of WriteonlyCell<M, P> must be the same size as P");
+        assert!(align_of::<WriteonlyCell<M, P>>() == align_of::<P>(), "Alignment of WriteonlyCell<M, P> must be the same as P");
+
+        assert!(size_of::<P>() == size_of::<P::Type>(), "Size of P (a CellPrimitive) must be the same size as its encapsulated Type");
+        assert!(align_of::<P>() == align_of::<P::Type>(), "Alignment of P (a CellPrimitive) must be the same as its encapsulated Type");
     };
 }
 
-unsafe impl<M: MemoryAttributes, T: Copy> Writable for WriteonlyCell<M, T> { }
+unsafe impl<M: MemoryAttributes, P: CellPrimitive> Writable for WriteonlyCell<M, P> { }
 impl_cell_traits_for!(WriteonlyCell);
 
 #[doc = docs::side_by_side_md!("CellAccessor")]
 pub struct CellAccessor<'mem, C: Cell> {
-    cell_ptr: *mut C,
+    cell_ptr: *mut <C::Primitive as CellPrimitive>::Type,
     _memory_lifetime: PhantomData<&'mem C>
 }
 
 impl<'mem, C: Cell> CellAccessor<'mem, C> {
     #[doc = docs::side_by_side_md!("CellAccessor.new")]
-    pub const unsafe fn new(cell_ptr: *mut C) -> Self {
-        Self { cell_ptr, _memory_lifetime: PhantomData }
+    pub const unsafe fn new(cell_ptr: *mut C) -> Self where C: Cell {
+        Self {
+            cell_ptr: cell_ptr as *mut <C::Primitive as CellPrimitive>::Type,
+            _memory_lifetime: PhantomData
+        }
     }
 
     #[doc = docs::side_by_side_md!("CellAccessor.get")]
-    pub const unsafe fn get(&self) -> *mut C::Type { self.cell_ptr as *mut C::Type }
+    pub const unsafe fn get(&self) -> *mut <C::Primitive as CellPrimitive>::Type { self.cell_ptr }
 }
 
 pub mod prelude {
@@ -106,7 +118,7 @@ mod tests {
     fn cell_ptr__get__expect_same_value_passed_to_constructor() {
         let mut cell = Dummy;
         let accessor = unsafe { CellAccessor::new(&raw mut cell) };
-        expect!(accessor.cell_ptr).to_equal(&raw mut cell);
+        expect!(accessor.cell_ptr).to_equal(&raw mut cell as *mut usize);
     }
 
     #[test]

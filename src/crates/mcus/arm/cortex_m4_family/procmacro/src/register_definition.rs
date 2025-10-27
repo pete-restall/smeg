@@ -63,6 +63,10 @@ impl<T> RegisterDefinition<T>
             #[repr(transparent)]
             #visibility struct #register_ident(#type_ident);
 
+            unsafe impl ::smeg_kernel::mem::CellPrimitive for #register_ident {
+                type Type = #type_ident;
+            }
+
             impl #register_ident {
                 // also want some other const booleans - IS_READABLE, IS_WRITABLE, IS_READONLY, IS_WRITEONLY - but put these on a trait
                 pub const FIELD_1_MASK: #type_ident = 1 << 31;
