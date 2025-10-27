@@ -28,6 +28,8 @@ pub use banks::prelude::*;
 mod cells;
 pub use cells::prelude::*;
 
+pub use smeg_kernel_procmacro::mmio_register;
+
 #[cfg(feature = "test_doubles")]
 pub mod test_doubles {
     use crate::test_doubles::Dummy;

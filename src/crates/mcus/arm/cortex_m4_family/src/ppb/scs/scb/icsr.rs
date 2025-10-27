@@ -1,6 +1,5 @@
 use smeg_kernel::mem::*;
 
-use crate::arm_register;
 use crate::mem::*;
 
 use super::SystemControlBlockMemoryAttributes;
@@ -10,7 +9,7 @@ pub struct IcsrAccessor<'mem> {
     accessor: CellAccessor<'mem, ReadonlyCell<SystemControlBlockMemoryAttributes, Icsr>>
 }
 
-#[arm_register]
+#[mmio_register]
 #[datasheet("DDI0403E.e", "B3.2.4", 599)]
 #[rw(NMIPENDSET,  0b1_00_0_0_0_0_0_0_0_0_000000000_0_00_000000000)]
 #[rw(PENDSVSET,   0b0_00_1_0_0_0_0_0_0_0_000000000_0_00_000000000)]

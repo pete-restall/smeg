@@ -1,6 +1,5 @@
 use smeg_kernel::mem::*;
 
-use crate::arm_register;
 use crate::mem::*;
 
 use super::SystemControlBlockMemoryAttributes;
@@ -10,7 +9,7 @@ pub struct CpuidAccessor<'mem> {
     accessor: CellAccessor<'mem, ReadonlyCell<SystemControlBlockMemoryAttributes, Cpuid>>
 }
 
-#[arm_register]
+#[mmio_register]
 #[datasheet("DDI0403E.e", "B3.2.3", 598)]
 #[ro(IMPLEMENTER,  0b11111111_0000_0000_000000000000_0000)]
 #[ro(VARIANT,      0b00000000_1111_0000_000000000000_0000)]

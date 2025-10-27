@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 
-use smeg_mcu_arm_cortex_m4_family_procmacro::arm_register;
+use smeg_kernel::mem::mmio_register;
 
 use fluent_test::prelude::*;
 
 use smeg_testing_host_utils::integers::any_u32;
 
-#[arm_register]
+#[mmio_register]
 #[datasheet("Document ID", "Section", 123)]
 #[ro(FIELD_1,   0b1_00_000000000_00000000000000000000)]
 #[ro(FIELD_2,   0b0_11_000000000_00000000000000000000)]

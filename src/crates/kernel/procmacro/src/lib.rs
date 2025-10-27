@@ -9,6 +9,13 @@ pub fn error_tag(items: TokenStream) -> TokenStream {
     error_tag::error_tag(items)
 }
 
+mod mmio;
+
+#[proc_macro_attribute]
+pub fn mmio_register(args: TokenStream, input: TokenStream) -> TokenStream {
+    mmio::mmio_register(args, input)
+}
+
 mod replace_file_suffix;
 
 #[proc_macro]
