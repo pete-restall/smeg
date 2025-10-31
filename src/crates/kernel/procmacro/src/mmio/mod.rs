@@ -4,6 +4,9 @@ use datasheet_attribute::*;
 mod field_attribute;
 use field_attribute::*;
 
+mod field_definition;
+use field_definition::*;
+
 mod mmio_register;
 pub use mmio_register::mmio_register;
 

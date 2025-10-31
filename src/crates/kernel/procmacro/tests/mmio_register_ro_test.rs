@@ -42,23 +42,43 @@ fn IS_WRITABLE__get__expect_false() {
 }
 
 #[test]
-fn FIELD_1_MASK__get__expect_correct_mask() {
+fn FIELD_1_MASK__get__expect_same_as_defined_mask() {
     expect!(ReadonlyU32WithoutReservedBits::FIELD_1_MASK).to_equal(1 << 31);
 }
 
 #[test]
-fn FIELD_1_MSB__get__expect_correct_bit_number() {
+fn FIELD_1_MSB__get__expect_most_significant_bit_number_of_mask() {
     expect!(ReadonlyU32WithoutReservedBits::FIELD_1_MSB).to_equal(31);
 }
 
 #[test]
-fn FIELD_1_LSB__get__expect_correct_bit_number() {
+fn FIELD_1_LSB__get__expect_least_significant_bit_number_of_mask() {
     expect!(ReadonlyU32WithoutReservedBits::FIELD_1_LSB).to_equal(31);
 }
 
 #[test]
-fn FIELD_1_WIDTH__get__expect_correct_number_of_bits() {
+fn FIELD_1_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
     expect!(ReadonlyU32WithoutReservedBits::FIELD_1_WIDTH).to_equal(1);
+}
+
+#[test]
+fn FIELD_2_MASK__get__expect_same_as_defined_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_2_MASK).to_equal(3 << 30);
+}
+
+#[test]
+fn FIELD_2_MSB__get__expect_most_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_2_MSB).to_equal(30);
+}
+
+#[test]
+fn FIELD_2_LSB__get__expect_least_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_2_LSB).to_equal(29);
+}
+
+#[test]
+fn FIELD_2_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_2_WIDTH).to_equal(2);
 }
 
 // TODO...and the rest of the fields...
