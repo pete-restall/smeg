@@ -6,11 +6,13 @@ use std::str::FromStr;
 use syn::{Attribute, Ident, LitInt, Token};
 use syn::parse::{Parse, ParseStream};
 
-#[derive(Clone, Debug)]
+use super::RegisterFieldMask;
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct RegisterFieldAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
     name_uppercase: String,
     name_lowercase: String,
-    mask: T,
+    mask: RegisterFieldMask<T>,
     reserved: Option<ReservedRegisterField>,
     is_readable: bool,
     is_writable: bool
@@ -31,12 +33,12 @@ impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterFieldAttribute<T>
 
     pub fn name_lowercase(&self) -> &str { &self.name_lowercase }
 
-    pub fn mask(&self) -> T { self.mask }
+    pub fn mask(&self) -> RegisterFieldMask<T> { self.mask }
 }
 
 impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
     where
-        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq + Into<RegisterFieldMask<T>>,
         T::Err: Display {
 
     type Error = String;
@@ -67,7 +69,7 @@ impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
                     }?,
                     name_uppercase,
                     name_lowercase,
-                    mask,
+                    mask: mask.into(),
                     is_readable: ident == "ro" || ident == "rw",
                     is_writable: ident == "wo" || ident == "rw"
                 })
@@ -116,6 +118,7 @@ mod tests {
     use smeg_testing_host_utils::integers::{any_usize, any_usize_except};
     use smeg_testing_host_utils::strings::{ascii, utf8, AnyCase};
 
+    use super::super::RegisterFieldMaskProperties;
     use super::*;
 
     #[test]
@@ -128,7 +131,7 @@ mod tests {
         RegisterFieldAttribute {
             name_uppercase: utf8::any(),
             name_lowercase: utf8::any(),
-            mask: any_usize(),
+            mask: any_usize().into(),
             reserved: None,
             is_readable: any_bool(),
             is_writable: any_bool()
@@ -205,7 +208,8 @@ mod tests {
 
     fn try_from__called_with_malformed_field_attribute__expect_err<T>(malformed_attributes: Vec<syn::Attribute>)
         where
-            T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+            T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq + Into<RegisterFieldMask<T>>,
+            RegisterFieldMask<T>: RegisterFieldMaskProperties<MaskType = T>,
             T::Err: Display {
 
         for malformed_attribute in malformed_attributes {
@@ -274,7 +278,7 @@ mod tests {
         let expected = RegisterFieldAttribute {
             name_uppercase: field_name.to_uppercase(),
             name_lowercase: field_name.to_lowercase(),
-            mask: any_usize_except(0),
+            mask: any_usize_except(0).into(),
             reserved: None,
             is_readable: true,
             is_writable: false
@@ -286,11 +290,12 @@ mod tests {
     fn try_from__called_with_attribute__expect<A, F, T>(attribute_name: &str, expected: RegisterFieldAttribute<T>, assertion: F)
         where
             F: FnOnce(RegisterFieldAttribute<T>, RegisterFieldAttribute<T>) -> A,
-            T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq + ToTokens,
+            T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq + ToTokens + Into<RegisterFieldMask<T>>,
+            RegisterFieldMask<T>: RegisterFieldMaskProperties<MaskType = T>,
             RegisterFieldAttribute<T>: for<'a> TryFrom<&'a Attribute, Error = String> {
 
         let attribute_ident = Ident::new(attribute_name, Span::call_site());
-        let (field_name, mask) = (Ident::new(&expected.name_lowercase.any_case(), Span::call_site()), expected.mask);
+        let (field_name, mask) = (Ident::new(&expected.name_lowercase.any_case(), Span::call_site()), expected.mask.value());
         let attribute = parse_quote! { #[#attribute_ident(#field_name, #mask)] };
         let actual = RegisterFieldAttribute::<T>::try_from(&attribute).expect("must be parsed successfully");
         assertion(actual, expected);
@@ -336,7 +341,7 @@ mod tests {
         let expected = RegisterFieldAttribute {
             name_uppercase: field_name.to_uppercase(),
             name_lowercase: field_name.to_lowercase(),
-            mask: any_usize_except(0),
+            mask: any_usize_except(0).into(),
             reserved: None,
             is_readable: false,
             is_writable: true
@@ -385,7 +390,7 @@ mod tests {
         let expected = RegisterFieldAttribute {
             name_uppercase: field_name.to_uppercase(),
             name_lowercase: field_name.to_lowercase(),
-            mask: any_usize_except(0),
+            mask: any_usize_except(0).into(),
             reserved: None,
             is_readable: true,
             is_writable: true
@@ -449,7 +454,7 @@ mod tests {
             }),
             name_uppercase,
             name_lowercase: field_name.to_lowercase(),
-            mask: any_usize_except(0),
+            mask: any_usize_except(0).into(),
             is_readable: false,
             is_writable: false
         };

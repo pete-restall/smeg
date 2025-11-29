@@ -46,6 +46,8 @@ pub fn any_isize() -> isize {
     }
 }
 
+pub fn any_isize_except(except: isize) -> isize { any_except(|x| x as isize == except, any_usize) as isize }
+
 pub fn any_usize() -> usize { any_within(0..=usize::MAX) }
 
 pub fn any_usize_within<R: SampleRange<usize>>(bounds: R) -> usize { any_within(bounds) }

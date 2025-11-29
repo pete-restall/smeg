@@ -4,12 +4,12 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 use std::str::FromStr;
 
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{DeriveInput, Ident, Visibility};
 
 use super::*;
 
-pub struct RegisterDefinition<'a, T>
+pub struct RegisterDefinition<T>
     where
         T:
             BitAnd<Output = T> +
@@ -24,16 +24,16 @@ pub struct RegisterDefinition<'a, T>
             PartialEq,
         T::Err: Display {
 
-    type_ident: &'a Ident,
-    struct_visibility: &'a Visibility,
-    struct_ident: &'a Ident,
+    type_ident: Ident,
+    struct_visibility: Visibility,
+    struct_ident: Ident,
     all_bits_set: T,
-    fields: Vec<RegisterFieldDefinition<'a, T>>
+    fields: Vec<RegisterFieldDefinition<T>>
 }
 
-impl<'a, T> RegisterDefinition<'a, T>
+impl<T> RegisterDefinition<T>
     where
-        T: 'a +
+        T:
             BitAnd<Output = T> +
             BitOr<Output = T> +
             BitXor<Output = T> +
@@ -43,11 +43,14 @@ impl<'a, T> RegisterDefinition<'a, T>
             Display +
             FromStr +
             Not<Output = T> +
-            PartialEq,
-        T::Err: Display {
+            PartialEq +
+            Into<RegisterFieldMask<T>> +
+            ToTokens,
+        T::Err: Display,
+        RegisterFieldMask<T>: RegisterFieldMaskProperties<MaskType = T> {
 
-    pub fn parse(derive: &'a DeriveInput, type_ident: &'a Ident) -> Result<Self, String> {
-        let attributes = derive.attrs.iter().map(RegisterAttribute::<T>::parse).collect::<Result<Vec<_>, _>>()?;
+    pub fn try_parse(derive: &DeriveInput, type_ident: Ident) -> Result<Self, String> {
+        let attributes = derive.attrs.iter().map(RegisterAttribute::<T>::try_parse).collect::<Result<Vec<_>, _>>()?;
 
         let datasheet = Self::parse_datasheet_from(&attributes)?;
         let fields = Self::parse_fields_from(&attributes)?;
@@ -59,11 +62,11 @@ impl<'a, T> RegisterDefinition<'a, T>
         }
 
         Ok(Self {
-            type_ident,
-            struct_visibility: &derive.vis,
-            struct_ident: &derive.ident,
+            struct_visibility: derive.vis.clone(),
+            struct_ident: derive.ident.clone(),
             all_bits_set,
-            fields: fields.into_iter().map(RegisterFieldDefinition::parse).collect::<Result<Vec<_>, _>>()?
+            fields: fields.iter().map(|f| RegisterFieldDefinition::try_parse((*f).clone(), type_ident.clone())).collect::<Result<Vec<_>, _>>()?,
+            type_ident
         })
     }
 
@@ -91,18 +94,18 @@ impl<'a, T> RegisterDefinition<'a, T>
         }
     }
 
-    fn mask_for(fields: &[&RegisterFieldAttribute<T>]) -> Result<T, &'a str> {
+    fn mask_for(fields: &[&RegisterFieldAttribute<T>]) -> Result<T, &'static str> {
         let zero = T::default();
-        fields.iter().try_fold(zero, |mask, field| if (mask & field.mask()) == zero {
-            Ok(mask | field.mask())
+        fields.iter().try_fold(zero, |mask, field| if (mask & field.mask().value()) == zero {
+            Ok(mask | field.mask().value())
         } else {
             Err("Register definition has overlapping field masks")
         })
     }
 
     pub fn generate(&self) -> TokenStream {
-        let (type_ident, visibility, register_ident) = (self.type_ident, self.struct_visibility, self.struct_ident);
-        let field_definitions = self.fields.iter().map(RegisterFieldDefinition::generate);
+        let (type_ident, visibility, register_ident) = (&self.type_ident, &self.struct_visibility, &self.struct_ident);
+        let field_definitions = &self.fields;
         quote! {
             #[repr(transparent)]
             #visibility struct #register_ident(#type_ident);
@@ -111,21 +114,12 @@ impl<'a, T> RegisterDefinition<'a, T>
                 type Type = #type_ident;
             }
 
-//            #field_definitions
-
             impl #register_ident {
-                pub const FIELD_1_MASK: #type_ident = 1 << 31;
-                pub const FIELD_1_MSB: #type_ident = 31;
-                pub const FIELD_1_LSB: #type_ident = 31;
-                pub const FIELD_1_WIDTH: #type_ident = 1;
-
-                pub const FIELD_2_MASK: #type_ident = 3 << 30;
-                pub const FIELD_2_MSB: #type_ident = 30;
-                pub const FIELD_2_LSB: #type_ident = 29;
-                pub const FIELD_2_WIDTH: #type_ident = 2;
+                #(#field_definitions)*
 
                 // also want some other const booleans - IS_READABLE, IS_WRITABLE, IS_READONLY, IS_WRITEONLY - but put these on a trait
                 pub const IS_READABLE: bool = true; // TODO
+
                 pub const IS_WRITABLE: bool = false; // TODO
 
                 pub const IS_READONLY: bool = Self::IS_READABLE && !Self::IS_WRITABLE;
@@ -158,7 +152,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse__called_when_multiple_datasheets_given__expect_err() {
+    fn try_parse__called_when_multiple_datasheets_given__expect_err() {
         let too_many_datasheets: DeriveInput = parse_quote! {
             #[datasheet("somewhere", "section", 123)]
             #[datasheet("elsewhere", "another", 456)]
@@ -167,14 +161,14 @@ mod tests {
         };
 
         let u8_ident = Ident::new("u8", Span::call_site());
-        let result = RegisterDefinition::<u8>::parse(&too_many_datasheets, &u8_ident);
+        let result = RegisterDefinition::<u8>::try_parse(&too_many_datasheets, u8_ident);
 
         let error = result.map(|_| ()).unwrap_err();
         expect!(error).to_contain("multiple datasheet");
     }
 
     #[test]
-    fn parse__called_when_field_names_are_not_case_insentitively_unique__expect_err() {
+    fn try_parse__called_when_field_names_are_not_case_insentitively_unique__expect_err() {
         let (field_a_name, mask_a) = (any_rust_identifier(), any_usize_except_in(&[0, !0]));
         let (field_b_name, mask_b) = (field_a_name.any_case(), !mask_a);
         let field_a_ident = Ident::new(&field_a_name, Span::call_site());
@@ -226,7 +220,7 @@ mod tests {
 
         for malformed_attribute in malformed_attributes {
             let usize_ident = Ident::new("usize", Span::call_site());
-            let result = RegisterDefinition::<usize>::parse(&malformed_attribute, &usize_ident);
+            let result = RegisterDefinition::<usize>::try_parse(&malformed_attribute, usize_ident);
 
             let error = result.map(|_| ()).unwrap_err();
             expect!(error).to_contain("duplicate field");
@@ -234,7 +228,7 @@ mod tests {
     }
 
     #[test]
-    fn parse__called_when_field_have_overlapping_masks__expect_err() {
+    fn try_parse__called_when_field_have_overlapping_masks__expect_err() {
         let overlapping_bit = 1 << any_u32_within(0..u32::BITS);
         let mask_a = any_u32_except(0) | overlapping_bit;
         let mask_b = !mask_a | overlapping_bit;
@@ -327,7 +321,7 @@ mod tests {
 
         for malformed_attribute in malformed_attributes {
             let u32_ident = Ident::new("u32", Span::call_site());
-            let result = RegisterDefinition::<u32>::parse(&malformed_attribute, &u32_ident);
+            let result = RegisterDefinition::<u32>::try_parse(&malformed_attribute, u32_ident);
 
             let error = result.map(|_| ()).unwrap_err();
             expect!(error).to_contain("overlapping field masks");
@@ -335,17 +329,17 @@ mod tests {
     }
 
     #[test]
-    fn parse__called_when_field_masks_are_zero__expect_err() {
+    fn try_parse__called_when_field_masks_are_zero__expect_err() {
         let no_field_masks: DeriveInput = parse_quote! { struct DummyRegister(u32); };
         let u32_ident = Ident::new("u32", Span::call_site());
-        let result = RegisterDefinition::<u32>::parse(&no_field_masks, &u32_ident);
+        let result = RegisterDefinition::<u32>::try_parse(&no_field_masks, u32_ident);
 
         let error = result.map(|_| ()).unwrap_err();
         expect!(error).to_contain("incomplete field mask");
     }
 
     #[test]
-    fn parse__called_when_field_masks_do_not_cover_every_bit__expect_err() {
+    fn try_parse__called_when_field_masks_do_not_cover_every_bit__expect_err() {
         let mut incomplete_masks: Vec<DeriveInput> = Vec::with_capacity(4 * 16);
         for i in 0..16 {
             let mask_missing_bit: u16 = !(1 << i);
@@ -359,7 +353,7 @@ mod tests {
 
         for incomplete_mask in incomplete_masks {
             let u16_ident = Ident::new("u16", Span::call_site());
-            let result = RegisterDefinition::<u16>::parse(&incomplete_mask, &u16_ident);
+            let result = RegisterDefinition::<u16>::try_parse(&incomplete_mask, u16_ident);
 
             let error = result.map(|_| ()).unwrap_err();
             expect!(error).to_contain("incomplete field mask");

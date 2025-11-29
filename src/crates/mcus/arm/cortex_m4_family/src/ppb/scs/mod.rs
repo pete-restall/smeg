@@ -37,7 +37,7 @@ struct SystemControlSpace {
 //
 //    _test: ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>,
     _x: [u8; 4096]
-//	#[Rw] x: usize // --> ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>
+// #[Rw] x: usize // --> ReadWriteCell<SystemControlSpaceMemoryAttributes, usize>
 }
 
 unsafe impl Bank for SystemControlSpace { }

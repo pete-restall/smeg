@@ -8,7 +8,7 @@ macro_rules! generate_token_stream_for {
         match register_type_name_from(&$derive.data) {
             $(
                 Some((stringify!($types), type_ident)) =>
-                    RegisterDefinition::<$types>::parse(&$derive, &type_ident).map(|x| x.generate()),
+                    RegisterDefinition::<$types>::try_parse(&$derive, type_ident.clone()).map(|x| x.generate()),
             )+
 
             _ => Err(concat!("A register can only be defined as struct(", stringify!($($types)|+), ")").to_string())

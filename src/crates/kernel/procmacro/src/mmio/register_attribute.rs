@@ -5,7 +5,7 @@ use std::str::FromStr;
 use quote::ToTokens;
 use syn::Attribute;
 
-use super::{RegisterDatasheetAttribute, RegisterFieldAttribute};
+use super::{RegisterFieldAttribute, RegisterFieldMask, RegisterDatasheetAttribute};
 
 #[derive(Clone, Debug)]
 pub enum RegisterAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
@@ -15,17 +15,17 @@ pub enum RegisterAttribute<T: BitXor<Output = T> + Copy + Debug + PartialEq> {
 
 impl<T> RegisterAttribute<T>
     where
-        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq,
+        T: BitXor<Output = T> + Copy + Debug + Display + FromStr + PartialEq + Into<RegisterFieldMask<T>>,
         T::Err: Display {
 
-    pub fn parse(attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
+    pub fn try_parse(attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
         match attr.path().get_ident() {
-            Some(ident) => Self::parse_named(&ident.to_string(), attr),
+            Some(ident) => Self::try_parse_named(&ident.to_string(), attr),
             _ => Err(format!("Register definition contains an unknown attribute; name={}", attr.path().to_token_stream()))
         }
     }
 
-    fn parse_named(name: &str, attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
+    fn try_parse_named(name: &str, attr: &Attribute) -> Result<RegisterAttribute<T>, String> {
         match name {
             "datasheet" => Ok(RegisterAttribute::Datasheet(RegisterDatasheetAttribute::try_from(attr)?)),
             "ro" | "wo" | "rw" | "xx" => Ok(RegisterAttribute::Field(RegisterFieldAttribute::try_from(attr)?)),
@@ -44,7 +44,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse__called_with_unknown_attribute__expect_err() {
+    fn try_parse__called_with_unknown_attribute__expect_err() {
         let unknown_attributes: Vec<syn::Attribute> = vec![
             parse_quote! { #[whatever] },
 
@@ -83,22 +83,22 @@ mod tests {
         ];
 
         for unknown_attribute in unknown_attributes {
-            let result = RegisterAttribute::<u32>::parse(&unknown_attribute);
+            let result = RegisterAttribute::<u32>::try_parse(&unknown_attribute);
             expect!(&result).to_be_err();
             expect!(result.unwrap_err().to_string()).to_contain("unknown attribute");
         }
     }
 
     #[test]
-    fn parse__called_with_datasheet_attribute__expect_datasheet_variant() {
+    fn try_parse__called_with_datasheet_attribute__expect_datasheet_variant() {
         let datasheet_attribute = parse_quote! { #[datasheet("id", "section", 123)] };
-        let result = RegisterAttribute::<u32>::parse(&datasheet_attribute).expect("must be ok");
+        let result = RegisterAttribute::<u32>::try_parse(&datasheet_attribute).expect("must be ok");
         let is_datasheet = match result { RegisterAttribute::<u32>::Datasheet(_) => true, _ => false };
         expect!(is_datasheet).to_be_true();
     }
 
     #[test]
-    fn parse__called_with_field_attributes__expect_field_variants() {
+    fn try_parse__called_with_field_attributes__expect_field_variants() {
         let field_attributes: Vec<syn::Attribute> = vec![
             parse_quote! { #[ro(FIELD_1, 0b0000_0001)] },
             parse_quote! { #[wo(FIELD_2, 0x23)] },
@@ -107,7 +107,7 @@ mod tests {
         ];
 
         for field_attribute in field_attributes {
-            let result = RegisterAttribute::<u32>::parse(&field_attribute).expect("must be ok");
+            let result = RegisterAttribute::<u32>::try_parse(&field_attribute).expect("must be ok");
             let is_field = match result { RegisterAttribute::<u32>::Field(_) => true, _ => false };
             expect!(is_field).to_be_true();
         }
