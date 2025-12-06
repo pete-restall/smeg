@@ -125,6 +125,21 @@ impl<T> RegisterDefinition<T>
                 pub const IS_READONLY: bool = Self::IS_READABLE && !Self::IS_WRITABLE;
 
                 pub const IS_WRITEONLY: bool = !Self::IS_READABLE && Self::IS_WRITABLE;
+
+                pub const HAS_RESERVED_BITS: bool = false;
+                pub const RESERVED_MASK: #type_ident = 0;
+                pub const RESERVED_UNK_SBZ_MASK: #type_ident = 0;
+                pub const RESERVED_UNK_SBZP_MASK: #type_ident = 0;
+                pub const RESERVED_UNK_SBO_MASK: #type_ident = 0;
+                pub const RESERVED_UNK_SBOP_MASK: #type_ident = 0;
+                pub const RESERVED_UNK_SBP_MASK: #type_ident = 0;
+                pub const RESERVED_SBZ_MASK: #type_ident = 0;
+                pub const RESERVED_SBZP_MASK: #type_ident = 0;
+                pub const RESERVED_SBO_MASK: #type_ident = 0;
+                pub const RESERVED_SBOP_MASK: #type_ident = 0;
+                pub const RESERVED_SBP_MASK: #type_ident = 0;
+                pub const RESERVED_WI_MASK: #type_ident = 0;
+
             }
 
     //        impl<'mem> #accessor_name<'mem> {

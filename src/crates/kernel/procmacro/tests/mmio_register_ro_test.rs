@@ -81,8 +81,141 @@ fn FIELD_2_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
     expect!(ReadonlyU32WithoutReservedBits::FIELD_2_WIDTH).to_equal(2);
 }
 
-// TODO...and the rest of the fields...
-//TODO: TEST FOR RESERVED BITS, TOO#[xx(UNK_SBZP,     0b00000000_0000_0000_000000000000_0000)]
+#[test]
+fn OVERLAP_1_MASK__get__expect_same_as_defined_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_1_MASK).to_equal(0b111011010 << 20);
+}
+
+#[test]
+fn OVERLAP_1_MSB__get__expect_most_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_1_MSB).to_equal(Some(28));
+}
+
+#[test]
+fn OVERLAP_1_LSB__get__expect_least_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_1_LSB).to_equal(Some(21));
+}
+
+#[test]
+fn OVERLAP_1_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_1_WIDTH).to_equal(8);
+}
+
+#[test]
+fn OVERLAP_2_MASK__get__expect_same_as_defined_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_2_MASK).to_equal(0b000100101 << 20);
+}
+
+#[test]
+fn OVERLAP_2_MSB__get__expect_most_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_2_MSB).to_equal(Some(25));
+}
+
+#[test]
+fn OVERLAP_2_LSB__get__expect_least_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_2_LSB).to_equal(Some(20));
+}
+
+#[test]
+fn OVERLAP_2_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
+    expect!(ReadonlyU32WithoutReservedBits::OVERLAP_2_WIDTH).to_equal(6);
+}
+
+#[test]
+fn FIELD_3_MASK__get__expect_same_as_defined_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_3_MASK).to_equal((1 << 20) - 1);
+}
+
+#[test]
+fn FIELD_3_MSB__get__expect_most_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_3_MSB).to_equal(Some(19));
+}
+
+#[test]
+fn FIELD_3_LSB__get__expect_least_significant_bit_number_of_mask() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_3_LSB).to_equal(Some(0));
+}
+
+#[test]
+fn FIELD_3_WIDTH__get__expect_number_of_bits_between_msb_and_lsb() {
+    expect!(ReadonlyU32WithoutReservedBits::FIELD_3_WIDTH).to_equal(20);
+}
+
+#[test]
+fn HAS_RESERVED_BITS__get__expect_false() {
+    expect!(ReadonlyU32WithoutReservedBits::HAS_RESERVED_BITS).to_be_false();
+}
+
+#[test]
+fn RESERVED_MASK__get__expect_or_of_individual_reserved_masks() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_MASK).to_equal(
+        ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZ_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBO_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBOP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_SBZ_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_SBZP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_SBO_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_SBOP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_SBP_MASK |
+        ReadonlyU32WithoutReservedBits::RESERVED_WI_MASK);
+}
+
+#[test]
+fn RESERVED_UNK_SBZ_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZ_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_UNK_SBZP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_UNK_SBO_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBO_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_UNK_SBOP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBOP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_UNK_SBP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_SBZ_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_SBZ_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_SBZP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_SBZP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_SBO_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_SBO_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_SBOP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_SBOP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_SBP_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_SBP_MASK).to_equal(0);
+}
+
+#[test]
+fn RESERVED_WI_MASK__get__expect_zero() {
+    expect!(ReadonlyU32WithoutReservedBits::RESERVED_WI_MASK).to_equal(0);
+}
 
 // TODO: another suite of tests for write-only, read-write and testing fields defined 'sOmE_WEIrd_CasING' -> 'SOME_WEIRD_CASING'
 
