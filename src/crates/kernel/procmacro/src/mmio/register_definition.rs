@@ -53,7 +53,19 @@ impl<T> RegisterDefinition<T>
         let attributes = derive.attrs.iter().map(RegisterAttribute::<T>::try_parse).collect::<Result<Vec<_>, _>>()?;
 
         let datasheet = Self::parse_datasheet_from(&attributes)?;
-        let fields = Self::parse_fields_from(&attributes)?;
+        let mut fields = Self::parse_fields_from(&attributes)?;
+
+        let explicit_reserved_fields = fields
+            .iter()
+            .filter_map(|field| field.reserved())
+            .collect::<Vec<_>>();
+
+        let default_reserved_fields = default_reserved_register_fields();
+        let default_reserved_fields = default_reserved_fields
+            .iter()
+            .filter(|field| !explicit_reserved_fields.iter().any(|x| *x == field.reserved().unwrap()));
+
+        fields.extend(default_reserved_fields);
 
         let all_bits_set = !T::default();
         let mask = Self::mask_for(&fields)?;
@@ -106,6 +118,10 @@ impl<T> RegisterDefinition<T>
     pub fn generate(&self) -> TokenStream {
         let (type_ident, visibility, register_ident) = (&self.type_ident, &self.struct_visibility, &self.struct_ident);
         let field_definitions = &self.fields;
+
+        let is_any_field_readable = field_definitions.iter().any(|field| field.is_readable());
+        let is_any_field_writable = field_definitions.iter().any(|field| field.is_writable());
+
         quote! {
             #[repr(transparent)]
             #visibility struct #register_ident(#type_ident);
@@ -117,29 +133,29 @@ impl<T> RegisterDefinition<T>
             impl #register_ident {
                 #(#field_definitions)*
 
-                // also want some other const booleans - IS_READABLE, IS_WRITABLE, IS_READONLY, IS_WRITEONLY - but put these on a trait
-                pub const IS_READABLE: bool = true; // TODO
+                // TODO: we can split the fields below into traits
+                pub const IS_READABLE: bool = #is_any_field_readable;
 
-                pub const IS_WRITABLE: bool = false; // TODO
+                pub const IS_WRITABLE: bool = #is_any_field_writable;
 
                 pub const IS_READONLY: bool = Self::IS_READABLE && !Self::IS_WRITABLE;
 
                 pub const IS_WRITEONLY: bool = !Self::IS_READABLE && Self::IS_WRITABLE;
 
-                pub const HAS_RESERVED_BITS: bool = false;
-                pub const RESERVED_MASK: #type_ident = 0;
-                pub const RESERVED_UNK_SBZ_MASK: #type_ident = 0;
-                pub const RESERVED_UNK_SBZP_MASK: #type_ident = 0;
-                pub const RESERVED_UNK_SBO_MASK: #type_ident = 0;
-                pub const RESERVED_UNK_SBOP_MASK: #type_ident = 0;
-                pub const RESERVED_UNK_SBP_MASK: #type_ident = 0;
-                pub const RESERVED_SBZ_MASK: #type_ident = 0;
-                pub const RESERVED_SBZP_MASK: #type_ident = 0;
-                pub const RESERVED_SBO_MASK: #type_ident = 0;
-                pub const RESERVED_SBOP_MASK: #type_ident = 0;
-                pub const RESERVED_SBP_MASK: #type_ident = 0;
-                pub const RESERVED_WI_MASK: #type_ident = 0;
+                pub const HAS_RESERVED_BITS: bool = Self::RESERVED_MASK != 0;
 
+                pub const RESERVED_MASK: #type_ident =
+                    Self::RESERVED_UNK_SBZ_MASK |
+                    Self::RESERVED_UNK_SBZP_MASK |
+                    Self::RESERVED_UNK_SBO_MASK |
+                    Self::RESERVED_UNK_SBOP_MASK |
+                    Self::RESERVED_UNK_SBP_MASK |
+                    Self::RESERVED_SBZ_MASK |
+                    Self::RESERVED_SBZP_MASK |
+                    Self::RESERVED_SBO_MASK |
+                    Self::RESERVED_SBOP_MASK |
+                    Self::RESERVED_SBP_MASK |
+                    Self::RESERVED_WI_MASK;
             }
 
     //        impl<'mem> #accessor_name<'mem> {

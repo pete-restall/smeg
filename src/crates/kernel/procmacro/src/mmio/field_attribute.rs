@@ -20,12 +20,17 @@ pub struct RegisterFieldAttribute<T: BitXor<Output = T> + Copy + Debug + Partial
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ReservedRegisterField {
+    UnknownShouldBeZero,
     UnknownShouldBeZeroOrPreserved,
+    UnknownShouldBeOne,
     UnknownShouldBeOneOrPreserved,
+    UnknownShouldBePreserved,
     ShouldBeZero,
     ShouldBeZeroOrPreserved,
     ShouldBeOne,
-    ShouldBeOneOrPreserved
+    ShouldBeOneOrPreserved,
+    ShouldBePreserved,
+    WriteIgnored
 }
 
 impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterFieldAttribute<T> {
@@ -34,6 +39,12 @@ impl<T: BitXor<Output = T> + Copy + Debug + PartialEq> RegisterFieldAttribute<T>
     pub fn name_lowercase(&self) -> &str { &self.name_lowercase }
 
     pub fn mask(&self) -> RegisterFieldMask<T> { self.mask }
+
+    pub fn reserved(&self) -> Option<ReservedRegisterField> { self.reserved }
+
+    pub fn is_readable(&self) -> bool { self.is_readable }
+
+    pub fn is_writable(&self) -> bool { self.is_writable }
 }
 
 impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
@@ -58,12 +69,17 @@ impl<T> TryFrom<&Attribute> for RegisterFieldAttribute<T>
                 let name_lowercase = field_name.to_lowercase();
                 Ok(Self {
                     reserved: match (ident == "xx", name_uppercase.as_str()) {
+                        (true, "UNK_SBZ") => Ok(Some(ReservedRegisterField::UnknownShouldBeZero)),
                         (true, "UNK_SBZP") => Ok(Some(ReservedRegisterField::UnknownShouldBeZeroOrPreserved)),
+                        (true, "UNK_SBO") => Ok(Some(ReservedRegisterField::UnknownShouldBeOne)),
                         (true, "UNK_SBOP") => Ok(Some(ReservedRegisterField::UnknownShouldBeOneOrPreserved)),
+                        (true, "UNK_SBP") => Ok(Some(ReservedRegisterField::UnknownShouldBePreserved)),
                         (true, "SBZ") => Ok(Some(ReservedRegisterField::ShouldBeZero)),
                         (true, "SBZP") => Ok(Some(ReservedRegisterField::ShouldBeZeroOrPreserved)),
                         (true, "SBO") => Ok(Some(ReservedRegisterField::ShouldBeOne)),
                         (true, "SBOP") => Ok(Some(ReservedRegisterField::ShouldBeOneOrPreserved)),
+                        (true, "SBP") => Ok(Some(ReservedRegisterField::ShouldBePreserved)),
+                        (true, "WI") => Ok(Some(ReservedRegisterField::WriteIgnored)),
                         (true, _) => Err(format!("Register's field definition is malformed due to an unknown reserved field name; name={}", field_name)),
                         _ => Ok(None)
                     }?,
@@ -102,6 +118,37 @@ impl Parse for RegisterFieldTokens {
             mask: input.parse()?,
             no_extra_tokens: input.is_empty()
         })
+    }
+}
+
+pub(crate) fn default_reserved_register_fields<T>() -> [RegisterFieldAttribute<T>; 11]
+    where T: BitXor<Output = T> + Copy + Debug + Default + Into<RegisterFieldMask<T>> + PartialEq {
+
+    [
+        default_reserved_register_field(ReservedRegisterField::UnknownShouldBeZero, "UNK_SBZ"),
+        default_reserved_register_field(ReservedRegisterField::UnknownShouldBeZeroOrPreserved, "UNK_SBZP"),
+        default_reserved_register_field(ReservedRegisterField::UnknownShouldBeOne, "UNK_SBO"),
+        default_reserved_register_field(ReservedRegisterField::UnknownShouldBeOneOrPreserved, "UNK_SBOP"),
+        default_reserved_register_field(ReservedRegisterField::UnknownShouldBePreserved, "UNK_SBP"),
+        default_reserved_register_field(ReservedRegisterField::ShouldBeZero, "SBZ"),
+        default_reserved_register_field(ReservedRegisterField::ShouldBeZeroOrPreserved, "SBZP"),
+        default_reserved_register_field(ReservedRegisterField::ShouldBeOne, "SBO"),
+        default_reserved_register_field(ReservedRegisterField::ShouldBeOneOrPreserved, "SBOP"),
+        default_reserved_register_field(ReservedRegisterField::ShouldBePreserved, "SBP"),
+        default_reserved_register_field(ReservedRegisterField::WriteIgnored, "WI")
+    ]
+}
+
+fn default_reserved_register_field<T>(reserved: ReservedRegisterField, name: &str) -> RegisterFieldAttribute<T>
+    where T: BitXor<Output = T> + Copy + Debug + Default + Into<RegisterFieldMask<T>> + PartialEq {
+
+    RegisterFieldAttribute {
+        name_uppercase: name.to_uppercase(),
+        name_lowercase: name.to_lowercase(),
+        mask: (T::default() ^ T::default()).into(),
+        reserved: Some(reserved),
+        is_readable: false,
+        is_writable: false
     }
 }
 
@@ -148,6 +195,63 @@ mod tests {
     fn mask__called__expect_mask_field_is_returned() {
         let attribute = stub_attribute_struct();
         expect!(attribute.mask()).to_equal(attribute.mask);
+    }
+
+    #[test]
+    fn reserved__called_when_field_is_none__expect_none_is_returned() {
+        let attribute = stub_attribute_struct_for_reserved(None);
+        expect!(attribute.reserved().is_none()).to_be_true();
+    }
+
+    fn stub_attribute_struct_for_reserved(reserved: Option<ReservedRegisterField>) -> RegisterFieldAttribute<usize> {
+        let mut attribute = stub_attribute_struct();
+        attribute.reserved = reserved;
+        attribute
+    }
+
+    #[test]
+    fn reserved__called_when_field_is_some__expect_same_value_is_returned() {
+        for reserved in KNOWN_RESERVED_FIELD_TYPES {
+            let attribute = stub_attribute_struct_for_reserved(Some(reserved));
+            expect!(attribute.reserved().unwrap()).to_equal(reserved);
+        }
+    }
+
+    static KNOWN_RESERVED_FIELD_TYPES: [ReservedRegisterField; 11] = [
+        ReservedRegisterField::UnknownShouldBeZero,
+        ReservedRegisterField::UnknownShouldBeZeroOrPreserved,
+        ReservedRegisterField::UnknownShouldBeOne,
+        ReservedRegisterField::UnknownShouldBeOneOrPreserved,
+        ReservedRegisterField::UnknownShouldBePreserved,
+        ReservedRegisterField::ShouldBeZero,
+        ReservedRegisterField::ShouldBeZeroOrPreserved,
+        ReservedRegisterField::ShouldBeOne,
+        ReservedRegisterField::ShouldBeOneOrPreserved,
+        ReservedRegisterField::ShouldBePreserved,
+        ReservedRegisterField::WriteIgnored];
+
+    #[test]
+    fn is_readable__called__expect_same_value_as_field_is_returned() {
+        for is_readable in [true, false] {
+            let mut attribute = stub_attribute_struct();
+            attribute.is_readable = is_readable;
+            {
+                let attribute = attribute;
+                expect!(attribute.is_readable()).to_equal(is_readable);
+            }
+        }
+    }
+
+    #[test]
+    fn is_writable__called__expect_same_value_as_field_is_returned() {
+        for is_writable in [true, false] {
+            let mut attribute = stub_attribute_struct();
+            attribute.is_writable = is_writable;
+            {
+                let attribute = attribute;
+                expect!(attribute.is_writable()).to_equal(is_writable);
+            }
+        }
     }
 
     #[test]
@@ -426,7 +530,18 @@ mod tests {
         try_from__called_with_rw_attribute__expect(|actual, _| expect!(actual.is_writable).to_be_true());
     }
 
-    static KNOWN_RESERVED_FIELD_NAMES: [&str; 6] = ["UNK_SBZP", "UNK_SBOP", "SBZ", "SBZP", "SBO", "SBOP"];
+    static KNOWN_RESERVED_FIELD_NAMES: [&str; 11] = [
+        "UNK_SBZ",
+        "UNK_SBZP",
+        "UNK_SBO",
+        "UNK_SBOP",
+        "UNK_SBP",
+        "SBZ",
+        "SBZP",
+        "SBO",
+        "SBOP",
+        "SBP",
+        "WI"];
 
     #[test]
     fn try_from__called_with_xx_attribute_and_known_field_name__expect_name_uppercase_is_uppercased_first_argument() {
@@ -444,12 +559,17 @@ mod tests {
         let name_uppercase = field_name.to_uppercase();
         let expected = RegisterFieldAttribute {
             reserved: Some(match name_uppercase.as_str() {
+                "UNK_SBZ" => ReservedRegisterField::UnknownShouldBeZero,
                 "UNK_SBZP" => ReservedRegisterField::UnknownShouldBeZeroOrPreserved,
+                "UNK_SBO" => ReservedRegisterField::UnknownShouldBeOne,
                 "UNK_SBOP" => ReservedRegisterField::UnknownShouldBeOneOrPreserved,
+                "UNK_SBP" => ReservedRegisterField::UnknownShouldBePreserved,
                 "SBZ" => ReservedRegisterField::ShouldBeZero,
                 "SBZP" => ReservedRegisterField::ShouldBeZeroOrPreserved,
                 "SBO" => ReservedRegisterField::ShouldBeOne,
                 "SBOP" => ReservedRegisterField::ShouldBeOneOrPreserved,
+                "SBP" => ReservedRegisterField::ShouldBePreserved,
+                "WI" => ReservedRegisterField::WriteIgnored,
                 _ => panic!("Unknown reserved field name passed to stub")
             }),
             name_uppercase,

@@ -4,8 +4,6 @@ use smeg_kernel::mem::mmio_register;
 
 use fluent_test::prelude::*;
 
-use smeg_testing_host_utils::integers::any_u32;
-
 #[mmio_register]
 #[datasheet("Document ID", "Section", 123)]
 #[ro(FIELD_1,   0b1_00_000000000_00000000000000000000)]
