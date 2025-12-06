@@ -217,29 +217,7 @@ fn RESERVED_WI_MASK__get__expect_zero() {
 
 // TODO: another suite of tests for write-only, read-write and testing fields defined 'sOmE_WEIrd_CasING' -> 'SOME_WEIRD_CASING'
 
-
-
-// TODO: These are the tests we'll want...
-//
-// expect ReadonlyU32WithoutReservedBits::MSB_FIELD_MASK == 0x80000000
-// expect ReadonlyU32WithoutReservedBits::MSB_FIELD_MSB == 31
-// expect ReadonlyU32WithoutReservedBits::MSB_FIELD_LSB == 31
-// expect ReadonlyU32WithoutReservedBits::MSB_FIELD_WIDTH == 1
-// ... repeat for the other fields
-
-// expect ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZ == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBZP == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBO == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBOP == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_UNK_SBP == 0
-
-// expect ReadonlyU32WithoutReservedBits::RESERVED_SBZ == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_SBZP == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_SBO == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_SBOP == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_SBP == 0
-// expect ReadonlyU32WithoutReservedBits::RESERVED_WI == 0
-
+// TODO: accessor tests and functionality are also in need of implementation
 // expect method ReadonlyU32WithoutReservedBitsAccessor.get() to return the entire value
 
 // expect method ReadonlyU32WithoutReservedBitsAccessor.msb_field() to return unshifted value
