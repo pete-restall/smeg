@@ -130,19 +130,15 @@ impl<T> RegisterDefinition<T>
 
             unsafe impl ::smeg_kernel::mem::CellPrimitive for #register_ident {
                 type Type = #type_ident;
+
+                const IS_READABLE: bool = #is_any_field_readable;
+                const IS_WRITABLE: bool = #is_any_field_writable;
             }
 
             impl #register_ident {
                 #(#field_definitions)*
 
                 // TODO: we can split the fields below into traits
-                pub const IS_READABLE: bool = #is_any_field_readable;
-
-                pub const IS_WRITABLE: bool = #is_any_field_writable;
-
-                pub const IS_READONLY: bool = Self::IS_READABLE && !Self::IS_WRITABLE;
-
-                pub const IS_WRITEONLY: bool = !Self::IS_READABLE && Self::IS_WRITABLE;
 
                 pub const HAS_RESERVED_BITS: bool = Self::RESERVED_MASK != 0;
 

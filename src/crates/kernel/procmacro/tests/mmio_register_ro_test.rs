@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use smeg_kernel::mem::mmio_register;
+use smeg_kernel::mem::{CellPrimitive, mmio_register};
 
 use fluent_test::prelude::*;
 

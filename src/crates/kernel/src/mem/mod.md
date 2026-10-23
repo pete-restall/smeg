@@ -88,6 +88,9 @@ What we really wish to constrain is that the primitive has [`Copy`] semantics bu
 _Undefined Behaviour_.  By wrapping [`Copy`]able primitives in a newtype we reduce one more potential cause of such _Undefined Behaviour_, although
 clearly we cannot eliminate it - if some code wishes to take an explicit reference to the encapsulating newtype then there is nothing stopping that,
 but at least the surface area for unintentional references is slightly reduced.
+
+In addition to `Type`, this trait also provides the flags `IS_READABLE` and `IS_WRITABLE` to indicate whether the cell can be read from or written to,
+respectively.  Default values for `IS_READONLY` and `IS_WRITEONLY` are also derived for convenience.
 <!-- ANCHOR_END: CellPrimitive -->
 
 <!-- ANCHOR: Readable -->
