@@ -24,115 +24,115 @@ struct RegisterFieldsWithNonRustCasing(u32);
 
 #[test]
 fn RO_FIELD_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_MASK).to_equal(1 << 31);
+    expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_MASK).to_equal(1 << 31);
 }
 
 #[test]
 fn RO_FIELD_MSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_MSB).to_equal(Some(31));
+    expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_MSB).to_equal(Some(31));
 }
 
 #[test]
 fn RO_FIELD_LSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_LSB).to_equal(Some(31));
+    expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_LSB).to_equal(Some(31));
 }
 
 #[test]
 fn RO_FIELD_WIDTH__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_WIDTH).to_equal(1);
+    expect!(RegisterFieldsWithNonRustCasing::RO_FIELD_WIDTH).to_equal(1);
 }
 
 #[test]
 fn WO_FIELD_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_MASK).to_equal(1 << 30);
+    expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_MASK).to_equal(1 << 30);
 }
 
 #[test]
 fn WO_FIELD_MSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_MSB).to_equal(Some(30));
+    expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_MSB).to_equal(Some(30));
 }
 
 #[test]
 fn WO_FIELD_LSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_LSB).to_equal(Some(30));
+    expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_LSB).to_equal(Some(30));
 }
 
 #[test]
 fn WO_FIELD_WIDTH__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_WIDTH).to_equal(1);
+    expect!(RegisterFieldsWithNonRustCasing::WO_FIELD_WIDTH).to_equal(1);
 }
 
 #[test]
 fn RW_FIELD_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_MASK).to_equal(1 << 29);
+    expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_MASK).to_equal(1 << 29);
 }
 
 #[test]
 fn RW_FIELD_MSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_MSB).to_equal(Some(29));
+    expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_MSB).to_equal(Some(29));
 }
 
 #[test]
 fn RW_FIELD_LSB__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_LSB).to_equal(Some(29));
+    expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_LSB).to_equal(Some(29));
 }
 
 #[test]
 fn RW_FIELD_WIDTH__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_WIDTH).to_equal(1);
+    expect!(RegisterFieldsWithNonRustCasing::RW_FIELD_WIDTH).to_equal(1);
 }
 
 #[test]
 fn RESERVED_UNK_SBZ_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBZ_MASK).to_equal(1 << 28);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBZ_MASK).to_equal(1 << 28);
 }
 
 #[test]
 fn RESERVED_UNK_SBZP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBZP_MASK).to_equal(1 << 27);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBZP_MASK).to_equal(1 << 27);
 }
 
 #[test]
 fn RESERVED_UNK_SBO_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBO_MASK).to_equal(1 << 26);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBO_MASK).to_equal(1 << 26);
 }
 
 #[test]
 fn RESERVED_UNK_SBOP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBOP_MASK).to_equal(1 << 25);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBOP_MASK).to_equal(1 << 25);
 }
 
 #[test]
 fn RESERVED_UNK_SBP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBP_MASK).to_equal(1 << 24);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_UNK_SBP_MASK).to_equal(1 << 24);
 }
 
 #[test]
 fn RESERVED_SBZ_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBZ_MASK).to_equal(1 << 23);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBZ_MASK).to_equal(1 << 23);
 }
 
 #[test]
 fn RESERVED_SBZP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBZP_MASK).to_equal(1 << 22);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBZP_MASK).to_equal(1 << 22);
 }
 
 #[test]
 fn RESERVED_SBO_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBO_MASK).to_equal(1 << 21);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBO_MASK).to_equal(1 << 21);
 }
 
 #[test]
 fn RESERVED_SBOP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBOP_MASK).to_equal(1 << 20);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBOP_MASK).to_equal(1 << 20);
 }
 
 #[test]
 fn RESERVED_SBP_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBP_MASK).to_equal(1 << 19);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_SBP_MASK).to_equal(1 << 19);
 }
 
 #[test]
 fn RESERVED_WI_MASK__get__expect_uppercase_rust_const_name() {
-	expect!(RegisterFieldsWithNonRustCasing::RESERVED_WI_MASK).to_equal(0b1111111111111111111);
+    expect!(RegisterFieldsWithNonRustCasing::RESERVED_WI_MASK).to_equal(0b1111111111111111111);
 }
