@@ -122,6 +122,8 @@ impl<T> RegisterDefinition<T>
         let is_any_field_readable = field_definitions.iter().any(|field| field.is_readable());
         let is_any_field_writable = field_definitions.iter().any(|field| field.is_writable());
 
+        // TODO: we need to make sure that all bits in a register have been masked - it is invalid to have undefined bits
+
         quote! {
             #[repr(transparent)]
             #visibility struct #register_ident(#type_ident);
