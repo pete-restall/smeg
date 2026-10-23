@@ -7,6 +7,7 @@ echo "Working directory: $(pwd)";
 arg_board="${1}";
 arg_build_action="${2}";
 arg_build_profile="${3}";
+extra_args="${@:4}";
 
 build_action=${arg_build_action:-build} #"llvm-cov --workspace --codecov --output-path lcov.info"; # TODO: we want a command-line argument for this at some point
 
@@ -29,8 +30,10 @@ has_target_json=true;
 link_with_libc=false;
 
 if [ $# -lt 1 ] || [ "x${board_manufacturer}" == "x" ] || [ "x${board_name}" == "x" ]; then
-    echo "Usage: $0 <manufacturer>-<board>[-configuration]";
-    echo "Example: $0 st-nucleo_l432kc-default";
+    echo "Usage: $0 <manufacturer>-<board>[-configuration] build|test [profile [args]]";
+    echo "Example - build for the STM32L432KC Nucleo board: $0 st-nucleo_l432kc-default";
+    echo "Example - run all tests: $0 host-rust_std test";
+    echo "Example - run all tests matching a pattern: $0 host-rust_std test release replace_suffix__";
     exit 1;
 fi
 
@@ -102,7 +105,8 @@ cargo +${RUSTUP_TOOLCHAIN} ${build_action} -v \
     ${target_args} \
     ${cfg_args} \
     --features smeg-board-${board_manufacturer}-${board_name}-${board_configuration} \
-    ${linker_args} || exit 3;
+    ${linker_args} \
+	${extra_args} || exit 3;
 
 if ${has_flash_image}; then
     flash_sections="-j .text -j .text.* -j .rodata -j .rodata.*";
