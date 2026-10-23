@@ -215,9 +215,7 @@ fn RESERVED_WI_MASK__get__expect_zero() {
     expect!(ReadonlyU32WithoutReservedBits::RESERVED_WI_MASK).to_equal(0);
 }
 
-// TODO: another suite of tests for write-only, read-write and testing fields defined 'sOmE_WEIrd_CasING' -> 'SOME_WEIRD_CASING'
-
-// TODO: test read-write fields, eg. mmio_register_rw_test.rs
+// TODO: test mix of read-only, write-only and read-write fields, for properties such as IS_READABLE, IS_READONLY, etc.
 
 // TODO: accessor tests and functionality are also in need of implementation
 // expect method ReadonlyU32WithoutReservedBitsAccessor.get() to return the entire value
