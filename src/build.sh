@@ -106,7 +106,7 @@ cargo +${RUSTUP_TOOLCHAIN} ${build_action} -v \
     ${cfg_args} \
     --features smeg-board-${board_manufacturer}-${board_name}-${board_configuration} \
     ${linker_args} \
-	${extra_args} || exit 3;
+    ${extra_args} || exit 3;
 
 if ${has_flash_image}; then
     flash_sections="-j .text -j .text.* -j .rodata -j .rodata.*";
