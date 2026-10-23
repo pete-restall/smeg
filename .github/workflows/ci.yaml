@@ -1,6 +1,6 @@
 name: CI for smeg
 
-on: [pull_request, push]
+on: [] # TODO: disabled until a proper CI pipeline is written, which will trigger on: [pull_request, push]
 
 jobs:
   coverage:
