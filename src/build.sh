@@ -81,7 +81,7 @@ if ${has_target_json}; then
     target_json=${target_path_prefix}.json;
     cp ${mcu_dir}/rust-target.json ${target_json};
     cp ${mcu_dir}/openocd.cfg ${target_dir}/;
-    target_args+=" --target ${target_json}";
+    target_args+=" --target ${target_json} -Zjson-target-spec";
 else
     target_args+=" --target-dir ${target_triplet_dir}";
 fi

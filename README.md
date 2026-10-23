@@ -16,7 +16,7 @@ Target naming convention - `<manufacturer>-<board>-<variant>`, eg. `st-nucleo_l4
 
 Microcontroller naming convention - `<manufacturer>-<microcontroller>`, eg. `st-stm32l432kc`.
 
-Requires nightly (currently unstable) because of `feature(linkage, naked_functions)` and also to build the cross-toolchain for custom targets, which in turn requires the rust source:
+Requires nightly (currently unstable) because of `feature(linkage)`, `-Zjson-target-spec` and also to build the cross-toolchain for custom targets, which in turn requires the rust source:
 ```
 $ rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 ```

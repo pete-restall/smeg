@@ -1,8 +1,9 @@
 [package]
 name = "smeg-drivers-kernel-task_scheduler"
 version = "0.1.0"
-edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
+edition = "2024"
+rust-version = "1.101"
 
 [dependencies]
 cfg-if = "1.0.0"

@@ -1,8 +1,9 @@
 [package]
 name = "smeg-os"
 version = "0.1.0"
-edition = "2024"
 authors = ["Pete Restall <pete@restall.net>"]
+edition = "2024"
+rust-version = "1.101"
 
 [dependencies]
 smeg-board-host-rust_std = { path = "../boards/host/rust_std", optional = true, features = ["std"] }

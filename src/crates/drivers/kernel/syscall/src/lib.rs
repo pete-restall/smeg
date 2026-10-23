@@ -1,7 +1,5 @@
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 
-#![feature(naked_functions)]
-
 use core::convert::AsMut;
 use core::marker::PhantomData;
 

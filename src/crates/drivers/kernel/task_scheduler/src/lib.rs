@@ -1,7 +1,5 @@
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 
-#![feature(naked_functions)]
-
 #![doc = smeg_kernel::docs::side_by_side_md!()]
 use smeg_kernel::docs;
 
